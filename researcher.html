@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Researcher · Pre-Call Research Agent | Marklinea</title>
+<meta name="description" content="Marklinea's AI Researcher briefs your team on every contact and company before any sales call. News, funding, role, CRM history, and talking points.">
+<link rel="canonical" href="https://marklinea.com/researcher.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F0E8;--charcoal:#2A2A2A;--terracotta:#E8985A;--tdeep:#D9843F;--muted:#6B6259;--mutedl:#B8AE9F;--line:#2A2A2A;--lined:rgba(245,240,232,.16);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--charcoal);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.02em;line-height:1.08}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.nav{border-bottom:2px solid var(--line);background:var(--cream);position:sticky;top:0;z-index:100}
+.nav-in{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.nav-in img{height:38px}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{text-decoration:none;font-size:15px;font-weight:500;color:var(--charcoal)}
+.nav-links a:hover{color:var(--tdeep)}
+.btn{font-family:'Sora',sans-serif;font-weight:600;font-size:14px;text-decoration:none;padding:11px 24px;border:2px solid var(--charcoal);background:var(--terracotta);color:var(--charcoal);transition:transform .15s;display:inline-block}
+.btn:hover{transform:translateY(-2px);background:var(--tdeep)}
+@media(max-width:760px){.nav-links li.lnk{display:none}}
+
+.frame{border:2px solid var(--line);border-top:none}
+.row{display:grid;border-bottom:2px solid var(--line)}
+.row:last-child{border-bottom:none}
+
+.r-head{grid-template-columns:1fr}
+.head-cell{padding:72px 48px}
+.idx{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--tdeep);margin-bottom:22px}
+h1{font-size:clamp(38px,5.4vw,68px);font-weight:800;max-width:880px;margin-bottom:20px}
+h1 span{background:var(--terracotta);padding:0 .1em}
+.head-cell .sub{font-size:18px;color:var(--muted);max-width:640px}
+
+.r-spec{grid-template-columns:repeat(4,1fr)}
+.cell{padding:30px 28px;border-right:2px solid var(--line)}
+.cell:last-child{border-right:none}
+.cell .k{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.cell .v{font-family:'Sora',sans-serif;font-size:clamp(22px,2.4vw,32px);font-weight:800}
+.cell .v small{font-size:.5em;font-weight:600;color:var(--muted)}
+.cell.t{background:var(--terracotta)}
+.cell.t .k{color:rgba(42,42,42,.6)}
+
+.r-io{grid-template-columns:1fr 1fr}
+.io{padding:44px 48px}
+.io+.io{border-left:2px solid var(--line)}
+.io h3{font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:24px;color:var(--tdeep)}
+.io ul{list-style:none}
+.io li{font-size:16px;font-weight:500;padding:12px 0 12px 24px;border-top:1px solid rgba(42,42,42,.16);position:relative}
+.io li::before{content:"";position:absolute;left:0;top:20px;width:9px;height:9px;background:var(--terracotta)}
+.io.dark{background:var(--charcoal);color:var(--cream)}
+.io.dark li{border-color:var(--lined)}
+.io.dark h3{color:var(--terracotta)}
+
+.r-team{grid-template-columns:1fr}
+.team-cell{padding:44px 48px}
+.team-cell h3{font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;color:var(--tdeep)}
+.team-cell p{font-size:17px;max-width:760px;margin-bottom:20px}
+.team-links{display:flex;gap:28px;flex-wrap:wrap}
+.team-links a{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--charcoal);text-decoration:none;border-bottom:2px solid var(--terracotta);padding-bottom:2px}
+.team-links a:hover{color:var(--tdeep)}
+
+.r-cta{grid-template-columns:1fr auto;align-items:center}
+.cta-cell{padding:34px 48px}
+.cta-cell p{font-family:'Sora',sans-serif;font-size:20px;font-weight:600}
+.cta-cell small{display:block;font-family:'Inter',sans-serif;font-size:14px;font-weight:400;color:var(--muted);margin-top:4px}
+.cta-btn{padding:0 48px}
+.btn-lg{font-size:16px;padding:16px 34px}
+
+footer{background:var(--charcoal);color:var(--cream);padding:40px 0;margin-top:96px}
+.foot-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner img{height:34px}
+.foot-inner p{font-size:13px;color:var(--mutedl)}
+.foot-links{display:flex;gap:24px;font-size:13px}
+.foot-links a{color:var(--mutedl);text-decoration:none}
+.foot-links a:hover{color:var(--terracotta)}
+@media(max-width:900px){.r-spec{grid-template-columns:1fr 1fr}.cell:nth-child(2){border-right:none}.cell:nth-child(1),.cell:nth-child(2){border-bottom:2px solid var(--line)}.r-io{grid-template-columns:1fr}.io+.io{border-left:none;border-top:2px solid var(--line)}.r-cta{grid-template-columns:1fr}.cta-btn{padding:0 48px 34px}.head-cell,.io,.team-cell,.cta-cell{padding-left:28px;padding-right:28px}.cta-btn{padding-left:28px}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap nav-in">
+  <a href="index.html"><img src="https://www.marklinea.com/Black%20logo%20-%20no%20background.png" alt="Marklinea"></a>
+  <ul class="nav-links">
+    <li class="lnk"><a href="index.html#agents">All agents</a></li>
+    <li class="lnk"><a href="discovery.html">Discovery Agent</a></li>
+    <li class="lnk"><a href="summariser.html">Summariser</a></li>
+    <li><a class="btn" href="index.html#book-demo">Book a Demo</a></li>
+  </ul>
+</div></nav>
+
+<div class="wrap" style="padding-top:64px">
+<div class="frame">
+
+  <div class="row r-head"><div class="head-cell">
+    <p class="idx">Marklinea / Agent 01 / AI Researcher / Runs before the call</p>
+    <h1>I know your prospect <span>before the phone rings.</span></h1>
+    <p class="sub">I am Marklinea's AI Researcher. Give me a contact and a company. I hand your team a full brief before any sales call. Your conversation starts with context, not questions.</p>
+  </div></div>
+
+  <div class="row r-spec">
+    <div class="cell t"><div class="k">Trigger</div><div class="v">Any<small> new lead</small></div></div>
+    <div class="cell"><div class="k">Research time</div><div class="v">Seconds<small> not hours</small></div></div>
+    <div class="cell"><div class="k">Sources</div><div class="v">Web<small> + your CRM</small></div></div>
+    <div class="cell"><div class="k">Availability</div><div class="v">24/7<small> always on</small></div></div>
+  </div>
+
+  <div class="row r-io">
+    <div class="io">
+      <h3>What I take in</h3>
+      <ul>
+        <li>A contact name and company. That is all I need.</li>
+        <li>Your CRM history and past interactions.</li>
+        <li>Public data. News, funding, hiring, industry moves.</li>
+      </ul>
+    </div>
+    <div class="io dark">
+      <h3>What I hand over</h3>
+      <ul>
+        <li>Company snapshot. News, funding rounds, org size.</li>
+        <li>Contact profile. Role, seniority, likely priorities.</li>
+        <li>Context and talking points, ready before the call.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row r-team"><div class="team-cell">
+    <h3>Who I work with</h3>
+    <p>I brief the Discovery Agent before it dials, so the conversation is personal from the first sentence. I brief your human reps the same way. Nobody on your team walks into a call cold.</p>
+    <div class="team-links">
+      <a href="discovery.html">Meet the Discovery Agent →</a>
+      <a href="summariser.html">Meet the Post Call Summariser →</a>
+    </div>
+  </div></div>
+
+  <div class="row r-cta">
+    <div class="cta-cell">
+      <p>Put me on your next call.</p>
+      <small>Running in production at RocketPay. Every lead researched, every day.</small>
+    </div>
+    <div class="cta-btn"><a class="btn btn-lg" href="index.html#book-demo">Book a Demo</a></div>
+  </div>
+
+</div>
+</div>
+
+<footer><div class="wrap foot-inner">
+  <img src="https://www.marklinea.com/Color%20logo%20with%20background.png" alt="Marklinea">
+  <p>© 2026 Marklinea Software Pvt. Ltd.</p>
+  <div class="foot-links">
+    <a href="mailto:ashish.aman@marklinea.com">Contact</a>
+    <a href="https://www.marklinea.com">marklinea.com</a>
+  </div>
+</div></footer>
+</body>
+</html>

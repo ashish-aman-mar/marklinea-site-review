@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Call Summariser · Deal-Ready Briefs | Marklinea</title>
+<meta name="description" content="Marklinea's Post Call Summariser turns every sales conversation into a deal-ready brief. Transcript, scorecard, next steps, and CRM updates, done automatically.">
+<link rel="canonical" href="https://marklinea.com/summariser.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F0E8;--charcoal:#2A2A2A;--terracotta:#E8985A;--tdeep:#D9843F;--muted:#6B6259;--mutedl:#B8AE9F;--lined:rgba(245,240,232,.16);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--terracotta);color:var(--charcoal);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.025em;line-height:1.04}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+.nav{border-bottom:2px solid var(--charcoal);background:var(--terracotta);position:sticky;top:0;z-index:100}
+.nav-in{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.nav-in img{height:38px}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{text-decoration:none;font-size:15px;font-weight:500;color:var(--charcoal)}
+.nav-links a:hover{color:var(--cream)}
+.btn{font-family:'Sora',sans-serif;font-weight:600;font-size:14px;text-decoration:none;padding:11px 24px;border:2px solid var(--charcoal);background:var(--charcoal);color:var(--cream);transition:transform .15s;display:inline-block}
+.btn:hover{transform:translateY(-2px)}
+@media(max-width:760px){.nav-links li.lnk{display:none}}
+
+.hero{padding:96px 0 100px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+.badge{display:inline-block;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--charcoal);color:var(--terracotta);padding:8px 14px;margin-bottom:30px}
+h1{font-size:clamp(44px,6.4vw,84px);font-weight:800;margin-bottom:26px}
+h1 .flip{display:inline-block;background:var(--cream);padding:0 .12em;box-shadow:6px 6px 0 var(--charcoal)}
+.sub{font-size:19px;max-width:540px;margin-bottom:40px;font-weight:500}
+.ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px}
+.btn-lg{font-size:16px;padding:16px 34px}
+.btn-ghost{background:transparent;color:var(--charcoal)}
+.btn-ghost:hover{background:var(--cream)}
+.tick{font-size:14px;font-weight:600;display:flex;gap:22px;flex-wrap:wrap}
+.tick span::before{content:"✓ ";font-weight:800}
+
+.poster{background:var(--cream);border:2px solid var(--charcoal);box-shadow:12px 12px 0 var(--charcoal);padding:34px 30px}
+.poster .top{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--charcoal);padding-bottom:16px;margin-bottom:20px}
+.poster .top .t{font-family:'Sora',sans-serif;font-weight:800;font-size:15px}
+.done{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tdeep)}
+.hrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;font-size:14px;border-bottom:1px solid rgba(42,42,42,.16)}
+.hrow .k{color:var(--muted)}
+.hrow .v{font-weight:600;text-align:right}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:2px solid var(--charcoal);margin-top:20px}
+.stats div{padding:14px 10px;text-align:center;border-right:2px solid var(--charcoal)}
+.stats div:last-child{border-right:none}
+.stats .n{font-family:'Sora',sans-serif;font-weight:800;font-size:24px}
+.stats .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.booked{margin-top:18px;background:var(--charcoal);color:var(--cream);font-weight:600;font-size:14px;padding:13px 16px;display:flex;justify-content:space-between}
+.booked span:last-child{color:var(--terracotta)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.poster{box-shadow:8px 8px 0 var(--charcoal)}}
+
+.deliver{background:var(--charcoal);color:var(--cream);padding:96px 0}
+.deliver .eyebrow{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--terracotta);margin-bottom:20px}
+.deliver h2{font-size:clamp(30px,4.2vw,48px);font-weight:700;margin-bottom:16px}
+.deliver .lede{font-size:18px;color:var(--mutedl);max-width:620px;margin-bottom:48px}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.dcard{border:1px solid var(--lined);padding:30px 26px}
+.dcard h3{font-size:18px;margin-bottom:10px}
+.dcard h3 span{color:var(--terracotta);margin-right:8px}
+.dcard p{font-size:14px;color:var(--mutedl)}
+@media(max-width:820px){.dgrid{grid-template-columns:1fr}}
+
+.relay{background:var(--cream);border-bottom:2px solid var(--charcoal);padding:26px 0}
+.relay .wrap{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;font-family:'Sora',sans-serif;font-weight:600;font-size:15px;text-align:center}
+.relay a{color:var(--charcoal);text-decoration:none;border-bottom:2px solid var(--terracotta);padding-bottom:2px}
+.relay a:hover{color:var(--tdeep)}
+
+.cta{padding:90px 0;text-align:center}
+.cta h2{font-size:clamp(30px,4.2vw,48px);font-weight:700;margin-bottom:14px}
+.cta p{font-size:18px;font-weight:500;margin-bottom:36px}
+
+footer{background:var(--charcoal);color:var(--cream);padding:40px 0}
+.foot-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner img{height:34px}
+.foot-inner p{font-size:13px;color:var(--mutedl)}
+.foot-links{display:flex;gap:24px;font-size:13px}
+.foot-links a{color:var(--mutedl);text-decoration:none}
+.foot-links a:hover{color:var(--terracotta)}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap nav-in">
+  <a href="index.html"><img src="https://www.marklinea.com/Black%20logo%20-%20no%20background.png" alt="Marklinea"></a>
+  <ul class="nav-links">
+    <li class="lnk"><a href="index.html#agents">All agents</a></li>
+    <li class="lnk"><a href="researcher.html">AI Researcher</a></li>
+    <li class="lnk"><a href="discovery.html">Discovery Agent</a></li>
+    <li><a class="btn" href="index.html#book-demo">Book a Demo</a></li>
+  </ul>
+</div></nav>
+
+<section class="hero"><div class="wrap grid">
+  <div>
+    <span class="badge">Marklinea · Agent 03 · Post Call Summariser</span>
+    <h1>The call ends. <span class="flip">My work starts.</span></h1>
+    <p class="sub">I turn every sales conversation into a deal-ready brief. Transcript, scorecard, next steps, and CRM updates. All done before your AE opens their laptop. Nobody types notes. Nothing gets lost.</p>
+    <div class="ctas">
+      <a class="btn btn-lg" href="index.html#book-demo">See my briefs</a>
+      <a class="btn btn-lg btn-ghost" href="#deliver">What I deliver</a>
+    </div>
+    <p class="tick"><span>No manual notes</span><span>Works with your CRM</span><span>Live at RocketPay</span></p>
+  </div>
+
+  <div class="poster">
+    <div class="top"><span class="t">AE Handover · Sarah Mitchell</span><span class="done">Ready in seconds</span></div>
+    <div class="hrow"><span class="k">Lead score</span><span class="v">92 / 100</span></div>
+    <div class="hrow"><span class="k">Authority</span><span class="v">VP Sales, decision maker</span></div>
+    <div class="hrow"><span class="k">Budget</span><span class="v">Approved for Q2</span></div>
+    <div class="hrow"><span class="k">Pain</span><span class="v">42h lead response, $2M at risk</span></div>
+    <div class="stats">
+      <div><div class="n">1:42</div><div class="l">Call time</div></div>
+      <div><div class="n">100%</div><div class="l">Synced</div></div>
+      <div><div class="n">0</div><div class="l">Notes typed</div></div>
+    </div>
+    <div class="booked"><span>Transcript in CRM · Meeting booked</span><span>✓</span></div>
+  </div>
+</div></section>
+
+<section class="deliver" id="deliver"><div class="wrap">
+  <p class="eyebrow">After every call</p>
+  <h2>What lands in your CRM.</h2>
+  <p class="lede">Minutes of conversation become structured data your team can act on. Automatically, after every single call.</p>
+  <div class="dgrid">
+    <div class="dcard"><h3><span>01</span>The full story</h3><p>Complete call transcript, key moments, and the prospect's own words. No he-said-she-said. The record is right there.</p></div>
+    <div class="dcard"><h3><span>02</span>The scorecard</h3><p>Lead score, BANT breakdown, pain severity, and fit. Your team knows which deals deserve attention first.</p></div>
+    <div class="dcard"><h3><span>03</span>The next step</h3><p>Meeting booked, owner assigned, follow-up drafted. The deal keeps moving while it is still warm.</p></div>
+  </div>
+</div></section>
+
+<div class="relay"><div class="wrap">
+  <span>I am the last leg of the relay.</span>
+  <a href="researcher.html">The Researcher starts it →</a>
+  <a href="discovery.html">The Discovery Agent runs it →</a>
+</div></div>
+
+<section class="cta"><div class="wrap">
+  <h2>Never type call notes again.</h2>
+  <p>One demo. That is all it takes.</p>
+  <a class="btn btn-lg" href="index.html#book-demo">Book a Demo</a>
+</div></section>
+
+<footer><div class="wrap foot-inner">
+  <img src="https://www.marklinea.com/Color%20logo%20with%20background.png" alt="Marklinea">
+  <p>© 2026 Marklinea Software Pvt. Ltd.</p>
+  <div class="foot-links">
+    <a href="mailto:ashish.aman@marklinea.com">Contact</a>
+    <a href="https://www.marklinea.com">marklinea.com</a>
+  </div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marklinea · The Next 30 Seconds Decide the Deal</title>
+  <meta name="description" content="A prospect just filled your demo form. Watch what Marklinea's AI agents do in the next 30 seconds. Research, live discovery, and a deal-ready handover.">
+  <meta name="theme-color" content="#F5F0E8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --cream:#F5F0E8; --cream2:#EFE8DC; --charcoal:#2A2A2A; --ink:#1E1E1E;
+      --terracotta:#E8985A; --tdeep:#D9843F;
+      --muted:#6B6259; --mutedl:#B8AE9F;
+      --line:rgba(42,42,42,.14); --lined:rgba(245,240,232,.16);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Inter',sans-serif;background:var(--cream);color:var(--charcoal);
+      line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+    }
+    ::selection{background:var(--terracotta);color:var(--charcoal)}
+    h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.03em;line-height:1.05}
+    img{max-width:100%;display:block}
+    a{color:inherit}
+    .wrap{max-width:1150px;margin:0 auto;padding:0 24px}
+
+    /* ---------- Chrome ---------- */
+    .chrome{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 32px;pointer-events:none;
+      transition:background .3s ease, box-shadow .3s ease;
+    }
+    .chrome.solid{background:rgba(245,240,232,.92);backdrop-filter:blur(8px);box-shadow:0 1px 0 var(--line)}
+    .chrome a{pointer-events:auto}
+    .chrome .logo img{height:30px}
+    .chrome .demo{
+      font-family:'Sora',sans-serif;font-size:13px;font-weight:700;text-decoration:none;
+      background:var(--charcoal);color:var(--cream);padding:10px 20px;
+      transition:background .15s ease, transform .15s ease;
+    }
+    .chrome .demo:hover{background:var(--tdeep);transform:translateY(-1px)}
+
+    /* Timecode */
+    .timecode{
+      position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:100;
+      display:flex;align-items:center;gap:10px;
+      font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;
+      background:var(--charcoal);color:var(--cream);padding:10px 20px;
+      opacity:0;transition:opacity .5s ease;pointer-events:none;
+    }
+    .timecode.on{opacity:1}
+    .timecode .dot{width:8px;height:8px;background:var(--terracotta);animation:pulse 1.6s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* Dot navigation */
+    .dots{
+      position:fixed;right:26px;top:50%;transform:translateY(-50%);z-index:100;
+      display:flex;flex-direction:column;gap:14px;
+    }
+    .dots a{
+      width:10px;height:10px;border:2px solid var(--charcoal);background:transparent;
+      display:block;transition:background .2s ease, transform .2s ease;
+    }
+    .dots a:hover{transform:scale(1.3)}
+    .dots a.on{background:var(--terracotta);border-color:var(--charcoal)}
+    .dark-scene .dots a{border-color:var(--cream)}
+    @media(max-width:860px){.dots{display:none}}
+
+    /* ---------- Scenes ---------- */
+    .scene{min-height:100svh;display:flex;align-items:center;padding:130px 0 110px;position:relative}
+    .scene-label{
+      font-family:'Sora',sans-serif;font-size:12px;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;color:var(--tdeep);margin-bottom:24px;
+      display:flex;align-items:center;gap:12px;
+    }
+    .scene-label::before{content:"";width:34px;height:2px;background:var(--terracotta)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;width:100%}
+    .big{font-size:clamp(36px,4.8vw,64px);font-weight:800}
+    .quiet{font-size:17px;color:var(--muted);max-width:46ch;margin-top:22px}
+    .quiet b{color:var(--charcoal);font-weight:600}
+    .reveal{opacity:0;transform:translateY(28px)}
+    @media(max-width:900px){.split{grid-template-columns:1fr;gap:44px}}
+
+    /* Shared device card */
+    .device{
+      border:2px solid var(--charcoal);background:#FCFAF6;
+      box-shadow:12px 12px 0 var(--terracotta);
+    }
+    .device-bar{
+      display:flex;align-items:center;gap:10px;padding:12px 16px;
+      border-bottom:2px solid var(--charcoal);background:var(--cream2);
+    }
+    .device-bar .dots3{display:flex;gap:6px}
+    .device-bar .dots3 i{width:10px;height:10px;border:1.5px solid var(--charcoal);display:block}
+    .device-bar .dots3 i:first-child{background:var(--terracotta)}
+    .device-bar .url{
+      flex:1;font-size:12px;font-weight:600;color:var(--muted);
+      background:#fff;border:1px solid var(--line);padding:6px 12px;text-align:center;
+    }
+    .device-body{padding:26px}
+    @media(max-width:900px){.device{box-shadow:8px 8px 0 var(--terracotta)}}
+
+    /* ---------- Scene 0: the form ---------- */
+    .s0 .whisper{
+      font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:var(--muted);
+      margin-bottom:26px;display:flex;align-items:center;gap:10px;
+    }
+    .s0 .whisper .dot{width:8px;height:8px;background:var(--terracotta);animation:pulse 1.6s infinite}
+    .s0 .big{font-size:clamp(40px,5.4vw,74px)}
+    .s0 .decide{margin-top:26px;font-family:'Sora',sans-serif;font-size:clamp(18px,2vw,24px);font-weight:600}
+    .s0 .decide span{border-bottom:3px solid var(--terracotta)}
+    .s0 .cue{margin-top:44px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+    .s0 .cue::after{content:"";width:44px;height:2px;background:var(--charcoal);animation:nudge 1.8s ease-in-out infinite}
+    @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+
+    .form-field{margin-bottom:14px}
+    .form-field label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .form-field .fbox{
+      border:1.5px solid var(--charcoal);background:#fff;padding:12px 14px;
+      font-size:15px;font-weight:500;min-height:44px;display:flex;align-items:center;
+    }
+    .fbox .caret{display:inline-block;width:2px;height:1.1em;background:var(--tdeep);margin-left:2px;animation:pulse 1s infinite}
+    .submit{
+      width:100%;margin-top:6px;font-family:'Sora',sans-serif;font-weight:700;font-size:15px;
+      background:var(--charcoal);color:var(--cream);border:2px solid var(--charcoal);
+      padding:14px;text-align:center;transition:transform .12s ease, background .12s ease;
+    }
+    .submit.pressed{transform:scale(.97);background:var(--tdeep);border-color:var(--tdeep)}
+    .trigger-banner{
+      margin-top:14px;background:var(--terracotta);border:2px solid var(--charcoal);
+      font-family:'Sora',sans-serif;font-size:13px;font-weight:700;padding:12px 16px;
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      opacity:0;transform:translateY(10px);
+    }
+
+    /* ---------- Scene 1: dossier ---------- */
+    .dossier-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .dossier-head .t{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+    .dossier-head .st{font-size:12px;font-weight:600;color:var(--tdeep)}
+    .scanbar{height:6px;border:1.5px solid var(--charcoal);margin-bottom:20px;overflow:hidden}
+    .scanbar i{display:block;height:100%;width:0;background:var(--terracotta)}
+    .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .dcard{border:1.5px solid var(--charcoal);background:#fff;padding:16px;opacity:0;transform:translateY(12px)}
+    .dcard .dk{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tdeep);margin-bottom:8px;font-family:'Sora',sans-serif}
+    .dcard .dv{font-size:14px;font-weight:600;line-height:1.45}
+    .dcard .dv small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+    .dfoot{margin-top:12px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;opacity:0}
+    @media(max-width:520px){.dgrid{grid-template-columns:1fr}}
+
+    /* ---------- Scene 2: the call ---------- */
+    .dark-band{background:var(--charcoal);color:var(--cream)}
+    .dark-band .quiet{color:var(--mutedl)}
+    .dark-band .quiet b{color:var(--cream)}
+    .dark-band .scene-label{color:var(--terracotta)}
+    .dark-band .scene-label::before{background:var(--terracotta)}
+    .call-ui{border:2px solid var(--cream);background:#333130;box-shadow:12px 12px 0 var(--terracotta)}
+    .call-top{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 18px;border-bottom:1px solid var(--lined);
+    }
+    .call-top .who{display:flex;align-items:center;gap:12px}
+    .call-avatar{
+      width:38px;height:38px;background:var(--terracotta);color:var(--charcoal);
+      font-family:'Sora',sans-serif;font-weight:800;font-size:17px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .call-top .nm{font-family:'Sora',sans-serif;font-weight:600;font-size:14px}
+    .call-top .sb{font-size:11px;color:var(--mutedl)}
+    .call-timer{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--terracotta);display:flex;align-items:center;gap:8px}
+    .call-timer .rec{width:8px;height:8px;background:var(--terracotta);animation:pulse 1.2s infinite}
+    .call-body{display:grid;grid-template-columns:1.25fr .75fr}
+    .captions{padding:20px;border-right:1px solid var(--lined);min-height:280px}
+    .cap{margin-bottom:16px;opacity:0;transform:translateY(10px)}
+    .cap .cwho{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;font-family:'Sora',sans-serif;color:var(--terracotta)}
+    .cap.them .cwho{color:var(--mutedl)}
+    .cap .ctext{font-size:14px;line-height:1.55;max-width:38ch}
+    .cap.them .ctext{color:var(--mutedl)}
+    .minwave{display:flex;align-items:center;gap:4px;height:26px;margin-top:6px}
+    .minwave span{width:4px;background:var(--terracotta);height:8px;animation:wv 1s ease-in-out infinite}
+    .minwave span:nth-child(2n){animation-delay:.12s}
+    .minwave span:nth-child(3n){animation-delay:.24s}
+    @keyframes wv{0%,100%{height:6px}50%{height:22px}}
+    .bant{padding:20px}
+    .bant .bt{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mutedl);margin-bottom:16px;font-family:'Sora',sans-serif}
+    .brow{margin-bottom:16px}
+    .brow .bl{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px}
+    .brow .bl span:last-child{color:var(--terracotta);opacity:0}
+    .bbar{height:8px;border:1px solid var(--lined);overflow:hidden}
+    .bbar i{display:block;height:100%;width:0;background:var(--terracotta)}
+    @media(max-width:760px){.call-body{grid-template-columns:1fr}.captions{border-right:none;border-bottom:1px solid var(--lined);min-height:0}}
+
+    /* ---------- Scene 3: CRM ---------- */
+    .crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .crm-head .t{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+    .crm-head .auto{font-size:11px;font-weight:700;background:var(--terracotta);border:1.5px solid var(--charcoal);padding:4px 10px;font-family:'Sora',sans-serif}
+    .crm-grid{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start}
+    .gauge{position:relative;width:132px;height:132px}
+    .gauge svg{transform:rotate(-90deg)}
+    .gauge .gnum{
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      font-family:'Sora',sans-serif;font-weight:800;font-size:34px;line-height:1;
+    }
+    .gauge .gnum small{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted);margin-top:4px}
+    .crm-rows{border:1.5px solid var(--charcoal)}
+    .crow{
+      display:flex;justify-content:space-between;gap:14px;padding:11px 14px;
+      border-bottom:1px solid var(--line);font-size:13.5px;background:#fff;
+      opacity:0;transform:translateX(-10px);
+    }
+    .crow:last-child{border-bottom:none}
+    .crow .k{color:var(--muted)}
+    .crow .v{font-weight:600;text-align:right}
+    .crow .v .ok{color:var(--tdeep);font-weight:800;margin-left:6px}
+    .cal{
+      margin-top:14px;border:2px solid var(--charcoal);background:var(--charcoal);color:var(--cream);
+      padding:13px 16px;display:flex;justify-content:space-between;align-items:center;
+      font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);
+    }
+    .cal b{color:var(--terracotta)}
+    @media(max-width:560px){.crm-grid{grid-template-columns:1fr}.gauge{margin:0 auto}}
+
+    /* ---------- Scene 4: trio ---------- */
+    .s4 .wrap{text-align:center;display:flex;flex-direction:column;align-items:center}
+    .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;width:100%;max-width:960px}
+    .tcard{
+      border:2px solid var(--charcoal);background:var(--cream);padding:30px 24px;text-align:left;
+      text-decoration:none;position:relative;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .tcard:hover{transform:translate(-4px,-4px);box-shadow:8px 8px 0 var(--terracotta)}
+    .tcard .when{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--tdeep);margin-bottom:12px;font-family:'Sora',sans-serif}
+    .tcard .who{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;margin-bottom:8px}
+    .tcard .what{font-size:13.5px;color:var(--muted);margin-bottom:18px}
+    .tcard .go{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;border-bottom:2px solid var(--terracotta);padding-bottom:2px}
+    @media(max-width:820px){.trio{grid-template-columns:1fr}}
+
+    /* ---------- Scene 5: the race ---------- */
+    .s5 .giant{font-family:'Sora',sans-serif;font-size:clamp(90px,15vw,200px);font-weight:800;line-height:.95;color:var(--terracotta)}
+    .s5 .big5{font-family:'Sora',sans-serif;font-size:clamp(20px,2.6vw,30px);font-weight:600;max-width:26ch;margin-top:16px}
+    .race{margin-top:52px;max-width:760px}
+    .rrow{margin-bottom:26px}
+    .rrow .rl{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px}
+    .rrow .rl b{font-family:'Sora',sans-serif}
+    .rrow .rl .rt{color:var(--terracotta);opacity:0}
+    .rbar{height:34px;border:1.5px solid var(--lined);position:relative;overflow:hidden}
+    .rbar i{display:block;height:100%;width:0;background:var(--terracotta)}
+    .rbar.slow i{background:#4A4744}
+    .rnote{font-size:13px;color:var(--mutedl);margin-top:6px}
+
+    /* ---------- Scene 6: ticker ---------- */
+    .s6 .wrap{text-align:center;display:flex;flex-direction:column;align-items:center}
+    .s6 .tag{
+      font-family:'Sora',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;
+      text-transform:uppercase;background:var(--charcoal);color:var(--cream);
+      padding:6px 14px;margin-bottom:28px;
+    }
+    .ticker{
+      margin-top:44px;border:2px solid var(--charcoal);background:#fff;
+      display:flex;align-items:center;gap:0;max-width:760px;width:100%;overflow:hidden;
+    }
+    .ticker .tk-label{
+      background:var(--charcoal);color:var(--cream);font-family:'Sora',sans-serif;
+      font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+      padding:14px 16px;white-space:nowrap;display:flex;align-items:center;gap:8px;
+    }
+    .ticker .tk-label i{width:7px;height:7px;background:var(--terracotta);animation:pulse 1.4s infinite}
+    .ticker .tk-view{flex:1;padding:14px 18px;text-align:left;font-size:14px;font-weight:500;min-height:50px;display:flex;align-items:center}
+    .ticker .tk-view span{opacity:0}
+
+    /* ---------- Scene 7: CTA ---------- */
+    .s7 .wrap{text-align:center;display:flex;flex-direction:column;align-items:center}
+    .s7 .big{font-size:clamp(38px,5.6vw,72px)}
+    .btn{
+      display:inline-block;font-family:'Sora',sans-serif;font-weight:700;font-size:17px;
+      text-decoration:none;padding:20px 46px;margin-top:40px;
+      background:var(--terracotta);color:var(--charcoal);border:2px solid var(--cream);
+      transition:transform .15s ease,background .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--cream);background:var(--tdeep)}
+    .s7 .under{margin-top:18px;font-size:13px;color:var(--mutedl)}
+
+    footer{
+      background:var(--charcoal);color:var(--mutedl);border-top:1px solid var(--lined);
+      padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+      font-size:13px;
+    }
+    footer img{height:28px}
+    footer a{color:var(--mutedl);text-decoration:none}
+    footer a:hover{color:var(--terracotta)}
+    .foot-links{display:flex;gap:22px}
+
+    @media(prefers-reduced-motion:reduce){
+      .reveal,.dcard,.cap,.crow,.cal,.trigger-banner,.dfoot{opacity:1 !important;transform:none !important}
+      .minwave span,.timecode .dot,.s0 .whisper .dot,.s0 .cue::after,.call-timer .rec,.ticker .tk-label i,.fbox .caret{animation:none}
+      html{scroll-behavior:auto}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chrome" id="chrome">
+    <a class="logo" href="index.html" aria-label="Marklinea home">
+      <img src="https://www.marklinea.com/Black%20logo%20-%20no%20background.png" alt="Marklinea">
+    </a>
+    <a class="demo" href="#book-demo">Book a Demo</a>
+  </div>
+
+  <div class="timecode" id="timecode" aria-hidden="true"><span class="dot"></span><span id="tc-text">T +0:00</span></div>
+
+  <nav class="dots" id="dots" aria-label="Sections">
+    <a href="#sc0" data-for="sc0" aria-label="The form fill"></a>
+    <a href="#sc1" data-for="sc1" aria-label="The Researcher"></a>
+    <a href="#sc2" data-for="sc2" aria-label="The call"></a>
+    <a href="#sc3" data-for="sc3" aria-label="The handover"></a>
+    <a href="#sc4" data-for="sc4" aria-label="The agents"></a>
+    <a href="#sc5" data-for="sc5" aria-label="Why speed"></a>
+    <a href="#sc6" data-for="sc6" aria-label="In production"></a>
+    <a href="#book-demo" data-for="book-demo" aria-label="Book a demo"></a>
+  </nav>
+
+  <main>
+
+    <!-- SCENE 0 · The form fill -->
+    <section class="scene s0" id="sc0" data-tc="T +0:00">
+      <div class="wrap split">
+        <div>
+          <p class="whisper reveal"><span class="dot"></span> Somewhere on your website, right now</p>
+          <h1 class="big reveal">A prospect just hit submit.</h1>
+          <p class="decide reveal">The next <span>30 seconds</span> decide the deal.</p>
+          <p class="cue reveal">Keep watching</p>
+        </div>
+
+        <div class="device reveal" aria-hidden="true">
+          <div class="device-bar">
+            <span class="dots3"><i></i><i></i><i></i></span>
+            <span class="url">yourcompany.com/demo</span>
+          </div>
+          <div class="device-body">
+            <div class="form-field"><label>Name</label><div class="fbox" data-type="Sarah Mitchell">Sarah Mitchell</div></div>
+            <div class="form-field"><label>Work email</label><div class="fbox" data-type="sarah@northwind.com">sarah@northwind.com</div></div>
+            <div class="form-field"><label>Company</label><div class="fbox" data-type="Northwind">Northwind</div></div>
+            <div class="form-field"><label>Role</label><div class="fbox" data-type="VP Sales">VP Sales</div></div>
+            <div class="submit" id="submitBtn">Request a demo</div>
+            <div class="trigger-banner" id="triggerBanner"><span>Marklinea triggered</span><span>T +0:00</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 1 · The Researcher -->
+    <section class="scene" id="sc1" data-tc="T +0:03">
+      <div class="wrap split">
+        <div>
+          <p class="scene-label reveal">Agent 01 · AI Researcher</p>
+          <h2 class="big reveal">I already know who they are.</h2>
+          <p class="quiet reveal">Web, CRM, and public data. Read, structured, and briefed <b>before the call starts.</b> Your conversation opens with context, not questions.</p>
+        </div>
+
+        <div class="device reveal" aria-hidden="true">
+          <div class="device-body">
+            <div class="dossier-head">
+              <span class="t">Research brief</span>
+              <span class="st" id="scanStatus">Researching…</span>
+            </div>
+            <div class="scanbar"><i id="scanFill"></i></div>
+            <div class="dgrid">
+              <div class="dcard"><div class="dk">Contact</div><div class="dv">Sarah Mitchell<small>VP Sales · likely decision maker</small></div></div>
+              <div class="dcard"><div class="dk">Company</div><div class="dv">Northwind<small>B2B SaaS · 200 people · Series B</small></div></div>
+              <div class="dcard"><div class="dk">Your CRM</div><div class="dv">3 past touches<small>Last: pricing page, webinar signup</small></div></div>
+              <div class="dcard"><div class="dk">Signals</div><div class="dv">Hiring SDRs<small>New CRO joined last quarter</small></div></div>
+            </div>
+            <div class="dfoot" id="dfoot"><span>Brief ready</span><span>0.9 seconds</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 2 · The call -->
+    <section class="scene dark-band" id="sc2" data-tc="T +0:28">
+      <div class="wrap split">
+        <div>
+          <p class="scene-label reveal">Agent 02 · Discovery Agent</p>
+          <h2 class="big reveal">Then I speak.</h2>
+          <p class="quiet reveal">Not a chatbot. Not a callback. A real voice conversation in the browser that covers <b>process, pain, and full BANT.</b> While their interest is still warm.</p>
+        </div>
+
+        <div class="call-ui reveal" aria-hidden="true">
+          <div class="call-top">
+            <div class="who">
+              <div class="call-avatar">M</div>
+              <div>
+                <div class="nm">Chloe · Marklinea</div>
+                <div class="sb">Live discovery call</div>
+              </div>
+            </div>
+            <div class="call-timer"><span class="rec"></span><span id="callTimer">0:00</span></div>
+          </div>
+          <div class="call-body">
+            <div class="captions" id="captions">
+              <div class="cap">
+                <div class="cwho">Chloe</div>
+                <div class="ctext">Hi Sarah. I saw you just asked for a demo. What is slowing your pipeline down right now?</div>
+                <div class="minwave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <div class="cap them">
+                <div class="cwho">Sarah</div>
+                <div class="ctext">Honestly, leads sit for two days before anyone calls them back.</div>
+              </div>
+              <div class="cap">
+                <div class="cwho">Chloe</div>
+                <div class="ctext">That gap costs deals. What does it cost you in pipeline each quarter?</div>
+              </div>
+              <div class="cap them">
+                <div class="cwho">Sarah</div>
+                <div class="ctext">Around $2M. And yes, this budget is mine.</div>
+              </div>
+            </div>
+            <div class="bant">
+              <div class="bt">Qualifying live</div>
+              <div class="brow"><div class="bl"><span>Budget</span><span>Q2 approved</span></div><div class="bbar"><i data-w="86"></i></div></div>
+              <div class="brow"><div class="bl"><span>Authority</span><span>Decision maker</span></div><div class="bbar"><i data-w="95"></i></div></div>
+              <div class="brow"><div class="bl"><span>Need</span><span>$2M at risk</span></div><div class="bbar"><i data-w="90"></i></div></div>
+              <div class="brow"><div class="bl"><span>Timeline</span><span>This quarter</span></div><div class="bbar"><i data-w="72"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 3 · The handover -->
+    <section class="scene" id="sc3" data-tc="T +2:10">
+      <div class="wrap split">
+        <div>
+          <p class="scene-label reveal">Agent 03 · Post Call Summariser</p>
+          <h2 class="big reveal">Your CRM already knows everything.</h2>
+          <p class="quiet reveal">Nobody typed a note. Nobody chased a follow-up. Transcript, scorecard, and next step land automatically. <b>Your AE walks in briefed.</b></p>
+        </div>
+
+        <div class="device reveal" aria-hidden="true">
+          <div class="device-body">
+            <div class="crm-head">
+              <span class="t">CRM · New opportunity</span>
+              <span class="auto">Auto-created</span>
+            </div>
+            <div class="crm-grid">
+              <div class="gauge">
+                <svg width="132" height="132" viewBox="0 0 132 132">
+                  <circle cx="66" cy="66" r="56" fill="none" stroke="rgba(42,42,42,.12)" stroke-width="10"/>
+                  <circle id="gaugeArc" cx="66" cy="66" r="56" fill="none" stroke="#E8985A" stroke-width="10" stroke-linecap="butt" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                </svg>
+                <div class="gnum"><span id="gaugeNum">0</span><small>Lead score</small></div>
+              </div>
+              <div>
+                <div class="crm-rows">
+                  <div class="crow"><span class="k">Authority</span><span class="v">VP Sales, decision maker<span class="ok">✓</span></span></div>
+                  <div class="crow"><span class="k">Budget</span><span class="v">Approved for Q2<span class="ok">✓</span></span></div>
+                  <div class="crow"><span class="k">Pain</span><span class="v">42h response, $2M at risk<span class="ok">✓</span></span></div>
+                  <div class="crow"><span class="k">Transcript</span><span class="v">Attached, full call<span class="ok">✓</span></span></div>
+                </div>
+                <div class="cal" id="calChip"><span>Meeting booked</span><b>Tomorrow · 2:00 PM</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 4 · The reveal -->
+    <section class="scene s4" id="sc4" data-tc="One relay">
+      <div class="wrap">
+        <h2 class="big reveal" style="max-width:none">You just watched three agents work one lead.</h2>
+        <p class="quiet reveal" style="margin-left:auto;margin-right:auto">On every inbound call. Across industries. <b>No code changes.</b></p>
+        <div class="trio">
+          <a class="tcard reveal" href="researcher.html">
+            <p class="when">Before the call</p>
+            <p class="who">AI Researcher</p>
+            <p class="what">Knows the prospect before the phone rings.</p>
+            <span class="go">Meet the Researcher →</span>
+          </a>
+          <a class="tcard reveal" href="discovery.html">
+            <p class="when">On the call</p>
+            <p class="who">Discovery Agent</p>
+            <p class="what">Runs the conversation your best AE would.</p>
+            <span class="go">Meet the Discovery Agent →</span>
+          </a>
+          <a class="tcard reveal" href="summariser.html">
+            <p class="when">After the call</p>
+            <p class="who">Post Call Summariser</p>
+            <p class="what">The call ends. Your CRM is already updated.</p>
+            <span class="go">Meet the Summariser →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 5 · The race -->
+    <section class="scene dark-band" id="sc5" data-tc="Why it matters">
+      <div class="wrap">
+        <p class="giant reveal" id="giant" data-count="78">78%</p>
+        <p class="big5 reveal">of buyers purchase from the first vendor to respond.</p>
+        <div class="race">
+          <div class="rrow reveal">
+            <div class="rl"><b>Marklinea</b><span class="rt" id="rtFast">30 seconds</span></div>
+            <div class="rbar"><i id="barFast" data-w="4"></i></div>
+          </div>
+          <div class="rrow reveal">
+            <div class="rl"><b>Average B2B team</b><span class="rt" id="rtSlow">42 hours</span></div>
+            <div class="rbar slow"><i id="barSlow" data-w="100"></i></div>
+            <p class="rnote">That is 5,040 times slower. The deal rarely waits.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 6 · Proof -->
+    <section class="scene s6" id="sc6" data-tc="In production">
+      <div class="wrap">
+        <p class="tag reveal">Not a concept</p>
+        <h2 class="big reveal" style="max-width:none">RocketPay runs this on every demo request. Today.</h2>
+        <p class="quiet reveal" style="margin-left:auto;margin-right:auto">Live calls, scored leads, and briefed AEs. In production, around the clock.</p>
+        <div class="ticker reveal" aria-hidden="true">
+          <span class="tk-label"><i></i> Live feed</span>
+          <span class="tk-view"><span id="tkText">Form fill received · rocketpay.com/demo</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 7 · CTA -->
+    <section class="scene dark-band s7" id="book-demo" data-tc="Your website">
+      <div class="wrap">
+        <h2 class="big reveal">See it happen on your website.</h2>
+        <p class="quiet reveal" style="margin-left:auto;margin-right:auto">One demo. Thirty minutes. No slides.</p>
+        <!-- Wire this CTA to the Marklinea demo-call widget / booking flow. -->
+        <a class="btn reveal" href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request">Book a Demo</a>
+        <p class="under reveal">The next prospect who fills your form could be talking to us.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <img src="https://www.marklinea.com/Color%20logo%20with%20background.png" alt="Marklinea">
+    <p>© 2026 Marklinea Software Pvt. Ltd.</p>
+    <div class="foot-links">
+      <a href="index.html#agents">Agents</a>
+      <a href="mailto:ashish.aman@marklinea.com">Contact</a>
+      <a href="https://www.marklinea.com">marklinea.com</a>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    (function () {
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var noGsap = (typeof gsap === 'undefined');
+
+      // Static fallback: show everything as-is
+      if (reduced || noGsap) {
+        document.querySelectorAll('.reveal,.dcard,.cap,.crow,.cal,.trigger-banner,.dfoot').forEach(function (el) {
+          el.style.opacity = 1; el.style.transform = 'none';
+        });
+        document.querySelectorAll('.bbar i,#barFast,#barSlow').forEach(function (el) {
+          el.style.width = (el.getAttribute('data-w') || 100) + '%';
+        });
+        document.querySelectorAll('.bl span:last-child,.rt').forEach(function (el) { el.style.opacity = 1; });
+        var sf = document.getElementById('scanFill'); if (sf) sf.style.width = '100%';
+        var ss = document.getElementById('scanStatus'); if (ss) ss.textContent = 'Brief ready';
+        var ga = document.getElementById('gaugeArc'); if (ga) ga.style.strokeDashoffset = 351.86 * (1 - .92);
+        var gn = document.getElementById('gaugeNum'); if (gn) gn.textContent = '92';
+        var tk = document.getElementById('tkText'); if (tk) tk.parentNode.style.opacity = 1;
+        return;
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+      var tc = document.getElementById('timecode');
+      var tcText = document.getElementById('tc-text');
+      var chrome = document.getElementById('chrome');
+
+      // Solid chrome after first scene
+      ScrollTrigger.create({
+        trigger: '#sc1', start: 'top 80%',
+        onEnter: function () { chrome.classList.add('solid'); },
+        onLeaveBack: function () { chrome.classList.remove('solid'); }
+      });
+
+      // Per-scene: reveals + timecode + dot nav
+      var dots = document.querySelectorAll('.dots a');
+      function setDot(id) {
+        dots.forEach(function (d) { d.classList.toggle('on', d.getAttribute('data-for') === id); });
+      }
+      document.querySelectorAll('.scene').forEach(function (scene) {
+        var items = scene.querySelectorAll('.reveal');
+        if (items.length) {
+          gsap.to(items, {
+            opacity: 1, y: 0, duration: 0.85, ease: 'power3.out', stagger: 0.12,
+            scrollTrigger: { trigger: scene, start: 'top 62%' }
+          });
+        }
+        ScrollTrigger.create({
+          trigger: scene, start: 'top 55%', end: 'bottom 55%',
+          onEnter: function () { tcText.textContent = scene.getAttribute('data-tc'); tc.classList.add('on'); setDot(scene.id); },
+          onEnterBack: function () { tcText.textContent = scene.getAttribute('data-tc'); setDot(scene.id); }
+        });
+      });
+      ScrollTrigger.create({
+        trigger: 'footer', start: 'top 92%',
+        onEnter: function () { tc.classList.remove('on'); },
+        onLeaveBack: function () { tc.classList.add('on'); }
+      });
+
+      // Typing helper
+      function typeInto(el, text, speed, done) {
+        el.textContent = '';
+        var caret = document.createElement('span');
+        caret.className = 'caret';
+        el.appendChild(caret);
+        var i = 0;
+        (function step() {
+          if (i <= text.length) {
+            el.textContent = text.slice(0, i);
+            el.appendChild(caret);
+            i++;
+            setTimeout(step, speed);
+          } else {
+            caret.remove();
+            if (done) done();
+          }
+        })();
+      }
+
+      // SCENE 0: form fills itself, submits, triggers
+      var s0played = false;
+      ScrollTrigger.create({
+        trigger: '#sc0', start: 'top 60%',
+        onEnter: function () {
+          if (s0played) return; s0played = true;
+          var boxes = Array.prototype.slice.call(document.querySelectorAll('#sc0 .fbox'));
+          boxes.forEach(function (b) { b.textContent = ''; });
+          var idx = 0;
+          function next() {
+            if (idx < boxes.length) {
+              var b = boxes[idx++];
+              typeInto(b, b.getAttribute('data-type'), 34, next);
+            } else {
+              var btn = document.getElementById('submitBtn');
+              setTimeout(function () {
+                btn.classList.add('pressed');
+                btn.textContent = 'Submitted ✓';
+                gsap.to('#triggerBanner', { opacity: 1, y: 0, duration: .5, delay: .35, ease: 'power2.out' });
+              }, 420);
+            }
+          }
+          setTimeout(next, 500);
+        }
+      });
+
+      // SCENE 1: scanbar + dossier cards
+      var s1played = false;
+      ScrollTrigger.create({
+        trigger: '#sc1', start: 'top 55%',
+        onEnter: function () {
+          if (s1played) return; s1played = true;
+          gsap.to('#scanFill', { width: '100%', duration: 1.1, ease: 'power2.inOut',
+            onComplete: function () { document.getElementById('scanStatus').textContent = 'Brief ready'; } });
+          gsap.to('#sc1 .dcard', { opacity: 1, y: 0, duration: .55, stagger: .22, delay: .5, ease: 'power2.out' });
+          gsap.to('#dfoot', { opacity: 1, duration: .5, delay: 1.6 });
+        }
+      });
+
+      // SCENE 2: captions sequence + BANT bars + call timer
+      var s2played = false;
+      ScrollTrigger.create({
+        trigger: '#sc2', start: 'top 55%',
+        onEnter: function () {
+          if (s2played) return; s2played = true;
+          gsap.to('#sc2 .cap', { opacity: 1, y: 0, duration: .6, stagger: 1.05, ease: 'power2.out' });
+          document.querySelectorAll('#sc2 .bbar i').forEach(function (bar, i) {
+            gsap.to(bar, { width: bar.getAttribute('data-w') + '%', duration: .9, delay: 1 + i * .85, ease: 'power2.out' });
+          });
+          document.querySelectorAll('#sc2 .bl span:last-child').forEach(function (lbl, i) {
+            gsap.to(lbl, { opacity: 1, duration: .4, delay: 1.5 + i * .85 });
+          });
+          // live call timer
+          var t = 0, timerEl = document.getElementById('callTimer');
+          setInterval(function () {
+            t++;
+            var m = Math.floor(t / 60), s = ('0' + (t % 60)).slice(-2);
+            timerEl.textContent = m + ':' + s;
+          }, 1000);
+        }
+      });
+
+      // SCENE 3: gauge + rows + calendar
+      var s3played = false;
+      ScrollTrigger.create({
+        trigger: '#sc3', start: 'top 55%',
+        onEnter: function () {
+          if (s3played) return; s3played = true;
+          var C = 351.86, target = .92;
+          var obj = { p: 0 };
+          gsap.to(obj, {
+            p: target, duration: 1.5, ease: 'power2.out',
+            onUpdate: function () {
+              document.getElementById('gaugeArc').style.strokeDashoffset = C * (1 - obj.p);
+              document.getElementById('gaugeNum').textContent = Math.round(obj.p * 100);
+            }
+          });
+          gsap.to('#sc3 .crow', { opacity: 1, x: 0, duration: .5, stagger: .3, delay: .4, ease: 'power2.out' });
+          gsap.to('#calChip', { opacity: 1, y: 0, duration: .55, delay: 1.8, ease: 'power2.out' });
+        }
+      });
+
+      // SCENE 5: giant counter + race bars
+      var s5played = false;
+      ScrollTrigger.create({
+        trigger: '#sc5', start: 'top 55%',
+        onEnter: function () {
+          if (s5played) return; s5played = true;
+          var el = document.getElementById('giant');
+          var obj = { n: 0 };
+          gsap.to(obj, { n: 78, duration: 1.3, ease: 'power2.out',
+            onUpdate: function () { el.textContent = Math.round(obj.n) + '%'; } });
+          gsap.to('#barFast', { width: '4%', duration: .5, delay: .7, ease: 'power2.out' });
+          gsap.to('#rtFast', { opacity: 1, duration: .4, delay: 1.1 });
+          gsap.to('#barSlow', { width: '100%', duration: 2.4, delay: 1.2, ease: 'power1.inOut' });
+          gsap.to('#rtSlow', { opacity: 1, duration: .4, delay: 3.2 });
+        }
+      });
+
+      // SCENE 6: live feed ticker
+      var events = [
+        'Form fill received · rocketpay.com/demo',
+        'Research brief ready · 0.9 seconds',
+        'Voice call started · T +26 seconds',
+        'Lead scored 88 · decision maker confirmed',
+        'Meeting booked · CRM updated'
+      ];
+      var tkEl = document.getElementById('tkText');
+      var tkWrap = tkEl.parentNode;
+      var ei = 0;
+      var s6played = false;
+      ScrollTrigger.create({
+        trigger: '#sc6', start: 'top 60%',
+        onEnter: function () {
+          if (s6played) return; s6played = true;
+          gsap.to(tkWrap, { opacity: 1, duration: .5 });
+          setInterval(function () {
+            gsap.to(tkWrap, { opacity: 0, duration: .35, onComplete: function () {
+              ei = (ei + 1) % events.length;
+              tkEl.textContent = events[ei];
+              gsap.to(tkWrap, { opacity: 1, duration: .35 });
+            }});
+          }, 2600);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

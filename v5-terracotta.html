@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V5 · The Terracotta Block | Marklinea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F0E8;--charcoal:#2A2A2A;--terracotta:#E8985A;--tdeep:#D9843F;--muted:#6B6259;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--terracotta);color:var(--charcoal);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:'Sora',sans-serif;letter-spacing:-.025em;line-height:1.04}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+.nav{border-bottom:2px solid var(--charcoal)}
+.nav-in{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.nav-in img{height:38px}
+.btn{font-family:'Sora',sans-serif;font-weight:600;font-size:14px;text-decoration:none;padding:11px 24px;border:2px solid var(--charcoal);background:var(--charcoal);color:var(--cream);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+
+.hero{padding:96px 0 100px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+.badge{display:inline-block;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--charcoal);color:var(--terracotta);padding:8px 14px;margin-bottom:30px}
+h1{font-size:clamp(44px,6.4vw,84px);font-weight:800;margin-bottom:26px}
+h1 .flip{display:inline-block;background:var(--cream);padding:0 .12em;box-shadow:6px 6px 0 var(--charcoal)}
+.sub{font-size:19px;max-width:540px;margin-bottom:40px;font-weight:500}
+.ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px}
+.btn-lg{font-size:16px;padding:16px 34px}
+.btn-ghost{background:transparent;color:var(--charcoal)}
+.btn-ghost:hover{background:var(--cream)}
+.tick{font-size:14px;font-weight:600;display:flex;gap:22px;flex-wrap:wrap}
+.tick span::before{content:"✓ ";font-weight:800}
+
+/* Poster card */
+.poster{background:var(--cream);border:2px solid var(--charcoal);box-shadow:12px 12px 0 var(--charcoal);padding:34px 30px}
+.poster .top{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--charcoal);padding-bottom:16px;margin-bottom:22px}
+.poster .top .t{font-family:'Sora',sans-serif;font-weight:800;font-size:15px}
+.live{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tdeep);display:flex;align-items:center;gap:8px}
+.live i{width:8px;height:8px;background:var(--tdeep);display:inline-block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.say{font-family:'Sora',sans-serif;font-size:21px;font-weight:600;line-height:1.35;margin-bottom:24px}
+.say b{background:var(--terracotta);padding:0 .1em}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:2px solid var(--charcoal)}
+.stats div{padding:14px 10px;text-align:center;border-right:2px solid var(--charcoal)}
+.stats div:last-child{border-right:none}
+.stats .n{font-family:'Sora',sans-serif;font-weight:800;font-size:24px}
+.stats .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.booked{margin-top:18px;background:var(--charcoal);color:var(--cream);font-weight:600;font-size:14px;padding:13px 16px;display:flex;justify-content:space-between}
+.booked span:last-child{color:var(--terracotta)}
+
+.band{background:var(--charcoal);color:var(--cream);padding:26px 0}
+.band .wrap{display:flex;justify-content:center;gap:14px;align-items:center;flex-wrap:wrap;font-family:'Sora',sans-serif;font-weight:600;font-size:15px;text-align:center}
+.band .chip{background:var(--terracotta);color:var(--charcoal);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 10px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.poster{box-shadow:8px 8px 0 var(--charcoal)}}
+@media(prefers-reduced-motion:reduce){.live i{animation:none}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap nav-in">
+  <img src="https://www.marklinea.com/Black%20logo%20-%20no%20background.png" alt="Marklinea">
+  <a class="btn" href="#">Book a Demo</a>
+</div></nav>
+
+<section class="hero"><div class="wrap grid">
+  <div>
+    <span class="badge">I'm Chloe · I never miss a form fill</span>
+    <h1>Your fastest AE <span class="flip">never sleeps.</span></h1>
+    <p class="sub">I pick up every demo request in 30 seconds. I run the discovery call, score the lead, book the meeting, and brief your team. You just show up and close.</p>
+    <div class="ctas">
+      <a class="btn btn-lg" href="#">Put me on your form</a>
+      <a class="btn btn-lg btn-ghost" href="#">Watch me work</a>
+    </div>
+    <p class="tick"><span>No code changes</span><span>Works with your CRM</span><span>Live at RocketPay</span></p>
+  </div>
+
+  <div class="poster">
+    <div class="top"><span class="t">Discovery call · live</span><span class="live"><i></i> On call</span></div>
+    <p class="say">"Two days of silence costs you <b>$2M a quarter.</b> Let's make sure that stops today. Does tomorrow at 2 PM work for a deeper look?"</p>
+    <div class="stats">
+      <div><div class="n">92</div><div class="l">Score</div></div>
+      <div><div class="n">1:42</div><div class="l">Call time</div></div>
+      <div><div class="n">100%</div><div class="l">Answered</div></div>
+    </div>
+    <div class="booked"><span>Meeting booked · CRM synced</span><span>✓</span></div>
+  </div>
+</div></section>
+
+<div class="band"><div class="wrap">
+  <span class="chip">In production</span>
+  <span>I take every inbound demo call at RocketPay. Your site could be next.</span>
+</div></div>
+</body>
+</html>

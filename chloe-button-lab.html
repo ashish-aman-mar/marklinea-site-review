@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talk to Chloe — Button Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --cream-soft: #EFE8DC;
+    --charcoal: #2A2A2A;
+    --terracotta: #E8985A;
+    --terracotta-deep: #D9843F;
+    --muted: #6B6259;
+    --muted-light: #B8AE9F;
+    --line: rgba(42, 42, 42, 0.16);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif; background: var(--cream); color: var(--charcoal);
+    padding: 56px 24px 80px; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--terracotta-deep); margin-bottom: 12px; }
+  h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
+  .sub { color: var(--muted); font-size: 15px; margin-bottom: 44px; max-width: 560px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    border: 2px solid var(--charcoal); background: #FCFAF6; padding: 40px 28px 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 26px; text-align: center;
+  }
+  .stage { min-height: 96px; display: flex; align-items: center; justify-content: center; }
+  .card h2 { font-size: 17px; font-weight: 800; }
+  .card h2 span { color: var(--terracotta-deep); margin-right: 8px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.55; max-width: 380px; }
+  .tagline { margin-top: 48px; text-align: center; font-size: 13px; color: var(--muted); }
+
+  /* shared waveform */
+  @keyframes wv { 0%,100% { height: 5px; } 50% { height: 20px; } }
+  .wave { display: inline-flex; align-items: center; gap: 3px; height: 20px; }
+  .wave i { width: 3px; height: 5px; background: var(--terracotta); animation: wv 1s ease-in-out infinite; }
+  .wave i:nth-child(2n) { animation-delay: .12s; }
+  .wave i:nth-child(3n) { animation-delay: .24s; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+
+  /* ── A · THE RIPPLE (Uiverse · Gaurav-WebDev, brand-adapted) ── */
+  .btn-ripple {
+    height: 58px; min-width: 236px; position: relative; background: transparent;
+    cursor: pointer; border: 2px solid var(--charcoal); overflow: hidden; border-radius: 30px;
+    color: var(--charcoal); transition: all 0.5s ease-in-out; z-index: 0;
+    font-family: 'Poppins', sans-serif; font-size: 15.5px; font-weight: 800; letter-spacing: 1.5px;
+    padding: 0 30px; display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .btn-ripple::after {
+    content: ""; position: absolute; left: 0; top: 0; transition: all 0.5s ease-in-out;
+    background-color: var(--charcoal); border-radius: 30px; visibility: hidden;
+    height: 10px; width: 10px; z-index: -1;
+  }
+  .btn-ripple:hover { box-shadow: 1px 1px 200px #252525; color: var(--cream); border-color: transparent; }
+  .btn-ripple:hover::after { visibility: visible; transform: scale(100) translateX(2px); }
+
+  /* ── B · THE SWEEP (Uiverse · e-coders — current site button) ── */
+  .btn-sweep {
+    position: relative; overflow: hidden; display: inline-block;
+    border: 2px solid var(--charcoal); color: var(--charcoal); background: #fff; cursor: pointer;
+    font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; line-height: 16px;
+    padding: 21px 36px; text-align: center; user-select: none;
+  }
+  .btn-sweep .lb { position: relative; z-index: 10; display: inline-flex; align-items: center; gap: 12px; transition: color 600ms cubic-bezier(.48,0,.12,1); }
+  .btn-sweep .hv {
+    color: var(--cream); position: absolute; bottom: 0; top: 50%; left: 50%; z-index: 100; opacity: 0;
+    transform: translateY(225%) translateX(-50%); height: 15px; line-height: 15px; white-space: nowrap;
+    font-size: 13.5px; font-weight: 600; transition: all 500ms cubic-bezier(.48,0,.12,1);
+  }
+  .btn-sweep::after {
+    content: ""; position: absolute; bottom: -50%; left: 0; width: 100%; height: 100%;
+    background: var(--charcoal); transform-origin: bottom center; z-index: 50;
+    transform: skewY(9.3deg) scaleY(0); transition: transform 600ms cubic-bezier(.48,0,.12,1);
+  }
+  .btn-sweep:hover::after { transform: skewY(9.3deg) scaleY(2); }
+  .btn-sweep:hover .hv { transform: translateX(-50%) translateY(-50%); opacity: 1; transition: all 900ms cubic-bezier(.48,0,.12,1); }
+
+  /* ── C · THE INCOMING CALL (breathing pill + ringing halo) ── */
+  .orbit { display: inline-block; animation: breathe 3.6s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  .btn-call {
+    position: relative; display: inline-flex; align-items: center; gap: 14px; cursor: pointer;
+    background: #000; color: var(--cream); border: none; padding: 16px 30px; border-radius: 100px;
+    text-align: left; font-family: 'Poppins', sans-serif;
+    box-shadow: 0 16px 44px rgba(42,42,42,.24);
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+  }
+  .btn-call::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 100px;
+    border: 2px solid var(--terracotta); opacity: 0; pointer-events: none;
+    animation: halo 3.6s ease-out infinite;
+  }
+  @keyframes halo { 0% { transform: scale(.97); opacity: 0; } 12% { opacity: .75; } 45% { transform: scale(1.16); opacity: 0; } 100% { transform: scale(1.16); opacity: 0; } }
+  .btn-call:hover { transform: scale(1.045); box-shadow: 0 24px 64px rgba(42,42,42,.34); }
+  .btn-call:active { transform: scale(.97); }
+  .btn-call:hover .wave i { animation-duration: .45s; }
+  .btn-call .t { font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .btn-call .t small { display: block; font-weight: 500; font-size: 11.5px; color: var(--muted-light); }
+
+  /* ── D · THE PUNCH (neo-brutalist, matches the site's tiles) ── */
+  .btn-punch {
+    display: inline-flex; align-items: center; gap: 12px; cursor: pointer;
+    background: var(--terracotta); color: var(--charcoal); border: 2px solid var(--charcoal);
+    font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: .02em;
+    padding: 18px 32px; box-shadow: 6px 6px 0 var(--charcoal);
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .btn-punch .wave i { background: var(--charcoal); }
+  .btn-punch:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--charcoal); background: var(--terracotta-deep); }
+  .btn-punch:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--charcoal); }
+
+  /* ── E · ON AIR (broadcast glow) ── */
+  @keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgba(232,152,90,.55); } 50% { box-shadow: 0 0 0 14px rgba(232,152,90,0); } }
+  .btn-onair {
+    display: inline-flex; align-items: center; gap: 12px; cursor: pointer;
+    background: var(--charcoal); color: var(--cream); border: none; border-radius: 12px;
+    font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700;
+    padding: 18px 30px; animation: glow 2.6s ease-out infinite;
+    transition: transform .2s ease, background .2s ease;
+  }
+  .btn-onair .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--terracotta); animation: pulse 1.3s infinite; }
+  .btn-onair .live { font-size: 10px; font-weight: 800; letter-spacing: .16em; color: var(--terracotta); }
+  .btn-onair:hover { transform: translateY(-3px); background: #000; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Button Lab</p>
+    <h1>Talk to Chloe — five candidates.</h1>
+    <p class="sub">Hover each one. The question to ask: which makes Chloe feel like a living hero you want to answer — not just a button you're told to click?</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="stage">
+          <button class="btn-ripple">TALK TO CHLOE <span class="wave"><i></i><i></i><i></i><i></i><i></i></span></button>
+        </div>
+        <h2><span>A</span>The Ripple</h2>
+        <p>Your Uiverse pick (Gaurav-WebDev). A dot detonates from the corner and floods the pill. Clean, modern, satisfying — the rounded shape is soft and friendly.</p>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <button class="btn-sweep">
+            <span class="lb">Talk to Chloe <span class="wave"><i></i><i></i><i></i><i></i><i></i></span></span>
+            <span class="hv">She picks up in 30 seconds</span>
+          </button>
+        </div>
+        <h2><span>B</span>The Sweep</h2>
+        <p>The current site button (e-coders). A skewed charcoal wave rolls up and the promise — "She picks up in 30 seconds" — slides in. The only one that says something on hover.</p>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <span class="orbit">
+            <button class="btn-call">
+              <span class="t">Talk to Chloe<small>She picks up in 30 seconds</small></span>
+              <span class="wave"><i></i><i></i><i></i><i></i><i></i></span>
+            </button>
+          </span>
+        </div>
+        <h2><span>C</span>The Incoming Call</h2>
+        <p>A black pill that breathes, with a terracotta halo ringing off it like an incoming call. The most "Chloe is alive and waiting" of the five. Hover and she leans in.</p>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <button class="btn-punch">Talk to Chloe <span class="wave"><i></i><i></i><i></i><i></i><i></i></span></button>
+        </div>
+        <h2><span>D</span>The Punch</h2>
+        <p>Neo-brutalist terracotta with a hard offset shadow — the same move your agent tiles make on hover, so it feels native to the brand. Bold, confident, impossible to miss.</p>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <button class="btn-onair"><span class="dot"></span>Talk to Chloe<span class="live">LIVE</span></button>
+        </div>
+        <h2><span>E</span>On Air</h2>
+        <p>A broadcast button: pulsing dot, LIVE tag, and a soft terracotta glow radiating on repeat. Sells the "she's on the line right now" story at a glance.</p>
+      </div>
+    </div>
+
+    <p class="tagline">All five use the site's exact palette and Poppins — whichever wins drops straight into the fold.</p>
+  </div>
+</body>
+</html>

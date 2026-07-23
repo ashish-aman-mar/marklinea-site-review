@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Weight Test | Marklinea</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F5F0E8;--charcoal:#2A2A2A;--terracotta:#E8985A;--tdeep:#D9843F;--muted:#6B6259;--line:rgba(42,42,42,.16);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--charcoal);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:'Sora',sans-serif;letter-spacing:-.02em}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+header{padding:56px 0 28px;border-bottom:2px solid var(--charcoal)}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;margin-bottom:10px}
+.sub{font-size:16px;color:var(--muted);max-width:660px}
+section{padding:46px 0 10px}
+.sec-t{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--tdeep);margin-bottom:6px}
+.sec-d{font-size:14px;color:var(--muted);margin-bottom:22px;max-width:640px}
+
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cell{border:2px solid var(--charcoal);background:#fff;padding:18px 14px;text-align:center}
+.cell.pick{background:var(--terracotta)}
+.cell .lbl{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.cell.pick .lbl{color:rgba(42,42,42,.65)}
+.cell svg{margin:0 auto;display:block}
+.small-note{font-size:13px;color:var(--muted);margin-top:14px;max-width:660px}
+.small-note b{color:var(--charcoal)}
+
+.wm{font-family:'Sora',sans-serif;display:block}
+.wm-1{font-weight:400;letter-spacing:.55em;font-size:15px}
+.wm-2{font-weight:600;letter-spacing:.3em;font-size:15px}
+.wm-3{font-weight:700;letter-spacing:.18em;font-size:15px}
+.wm-s{font-size:9px}
+
+.verdict{margin:44px 0 70px;border:2px solid var(--charcoal);background:var(--terracotta);padding:24px 26px;font-family:'Sora',sans-serif;font-weight:600;font-size:16px;max-width:840px}
+@media(max-width:820px){.row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- The handwritten M redrawn as one reusable path. Only stroke-width changes between cells. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="markM" d="M 84 332
+      C 72 240, 92 138, 122 108
+      C 142 90, 154 122, 151 168
+      C 148 224, 152 262, 163 250
+      C 190 218, 234 118, 268 92
+      C 288 78, 299 104, 296 152
+      C 291 226, 296 300, 303 334" fill="none" stroke-linecap="round"/>
+    <circle id="markO" cx="195" cy="210" r="168" fill="none"/>
+  </defs>
+</svg>
+
+<header><div class="wrap">
+  <h1>Why the logo hides, and the fix.</h1>
+  <p class="sub">Your observation: the logo is too thin and disappears in websites and documents. Below is the same M redrawn at four stroke weights. Only the thickness changes. Watch what happens as the size drops.</p>
+</div></header>
+
+<section><div class="wrap">
+  <p class="sec-t">1 · Large size, 160px. All four look fine.</p>
+  <p class="sec-d">This is the size logos get approved at. Thinness never shows up here. That is the trap.</p>
+  <div class="row">
+    <div class="cell"><div class="lbl">Current weight</div>
+      <svg width="160" height="160" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="6"/></svg></div>
+    <div class="cell"><div class="lbl">2x thicker</div>
+      <svg width="160" height="160" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="14"/></svg></div>
+    <div class="cell pick"><div class="lbl">3x thicker · pick</div>
+      <svg width="160" height="160" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="24"/></svg></div>
+    <div class="cell"><div class="lbl">4x thicker</div>
+      <svg width="160" height="160" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="34"/></svg></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <p class="sec-t">2 · Nav size, 38px. The current weight starts to vanish.</p>
+  <p class="sec-d">This is the size the website actually uses in the top bar. Look at the first box: the M is already grey and faint. The thicker ones stay black.</p>
+  <div class="row">
+    <div class="cell"><div class="lbl">Current weight</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="6"/></svg></div>
+    <div class="cell"><div class="lbl">2x thicker</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="14"/></svg></div>
+    <div class="cell pick"><div class="lbl">3x thicker · pick</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="24"/></svg></div>
+    <div class="cell"><div class="lbl">4x thicker</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="34"/></svg></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <p class="sec-t">3 · The circle makes it worse.</p>
+  <p class="sec-d">Same nav size. With the sketchy circle, the M has to shrink to fit inside it, so it gets even thinner. Dropping the circle gives the M all the space.</p>
+  <div class="row">
+    <div class="cell"><div class="lbl">With circle · current</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markO" stroke="#2A2A2A" stroke-width="5"/><use href="#markM" stroke="#2A2A2A" stroke-width="6" transform="translate(60,75) scale(0.68)"/></svg></div>
+    <div class="cell pick"><div class="lbl">No circle, thick M · pick</div>
+      <svg width="38" height="38" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="24"/></svg></div>
+    <div class="cell"><div class="lbl">Favicon 16px · line art fails</div>
+      <svg width="16" height="16" viewBox="0 0 390 420"><use href="#markM" stroke="#2A2A2A" stroke-width="24"/></svg></div>
+    <div class="cell pick"><div class="lbl">Favicon 16px · solid disc wins</div>
+      <svg width="16" height="16" viewBox="0 0 420 420"><circle cx="210" cy="210" r="200" fill="#2A2A2A"/><use href="#markM" stroke="#F5F0E8" stroke-width="34" transform="translate(28,10)"/></svg></div>
+  </div>
+  <p class="small-note">For the 16px favicon and social avatars, even a thick line-art M gets muddy. A <b>solid charcoal disc with a cream M</b> stays recognisable at any size.</p>
+</div></section>
+
+<section><div class="wrap">
+  <p class="sec-t">4 · The wordmark has the same problem.</p>
+  <p class="sec-d">Light weight plus wide letter spacing reads elegant at poster size and faint at document size. Second row shows each at footer size.</p>
+  <div class="row">
+    <div class="cell"><div class="lbl">Current · light, wide</div>
+      <span class="wm wm-1">MARKLINEA</span>
+      <div style="margin-top:14px"><span class="wm wm-1 wm-s">MARKLINEA</span></div></div>
+    <div class="cell"><div class="lbl">SemiBold, tighter</div>
+      <span class="wm wm-2">MARKLINEA</span>
+      <div style="margin-top:14px"><span class="wm wm-2 wm-s">MARKLINEA</span></div></div>
+    <div class="cell pick"><div class="lbl">Bold, tight · pick</div>
+      <span class="wm wm-3">MARKLINEA</span>
+      <div style="margin-top:14px"><span class="wm wm-3 wm-s">MARKLINEA</span></div></div>
+    <div class="cell"><div class="lbl">Full lockup · proposed</div>
+      <svg width="60" height="60" viewBox="0 0 390 420" style="margin-bottom:8px"><use href="#markM" stroke="#2A2A2A" stroke-width="24"/></svg>
+      <span class="wm wm-3" style="font-size:13px">MARKLINEA</span></div>
+  </div>
+</div></section>
+
+<div class="wrap"><div class="verdict">
+  The fix in one line: keep the handwritten M, redraw it 3x thicker, drop the circle, embolden the wordmark, and use a solid disc for favicon and avatars. The orange boxes above are the proposed system.
+</div></div>
+
+</body>
+</html>

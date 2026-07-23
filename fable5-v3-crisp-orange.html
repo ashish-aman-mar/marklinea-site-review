@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agents for Sales Teams | Marklinea — v3 Crisp Orange</title>
+  <meta name="description" content="Marklinea's AI sales agents answer every inbound lead in 30 seconds. Scout researches the lead, Chloe qualifies it in a live call, Scribe writes the handover to your CRM.">
+  <meta name="keywords" content="AI sales agents, voice AI, discovery calls, sales research, call summary, lead qualification, sales AI, inbound leads">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#F5F0E8">
+  <link rel="icon" type="image/svg+xml" href="logo-badge.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="logo-badge-64.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --cream-soft: #EFE8DC;
+      --charcoal: #000000;
+      --terracotta: #FF6B2C;
+      --terracotta-deep: #E85410;
+      --muted: #6B6259;
+      --muted-light: #B8AE9F;
+      --line: rgba(0, 0, 0, 0.16);
+      --line-dark: rgba(245, 240, 232, 0.16);
+      --font-head: 'Poppins', sans-serif;
+      --font-body: 'Poppins', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body); background: var(--cream); color: var(--charcoal);
+      line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+
+    ::selection { background: var(--terracotta); color: var(--charcoal); }
+    h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.12; letter-spacing: -0.02em; }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+    .skip-link { position: absolute; left: -9999px; top: 0; background: var(--charcoal); color: var(--cream); padding: 10px 16px; z-index: 200; }
+    .skip-link:focus { left: 0; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-block; font-family: var(--font-head); font-weight: 600;
+      font-size: 16px; text-decoration: none; padding: 16px 32px;
+      border: 2px solid var(--charcoal); cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--terracotta); color: var(--charcoal); border-color: var(--charcoal); }
+    .btn-primary:hover { background: var(--terracotta-deep); }
+    .btn-ghost { background: transparent; color: var(--charcoal); }
+    .btn-ghost:hover { background: var(--charcoal); color: var(--cream); }
+    .dark .btn-ghost { color: var(--cream); border-color: var(--cream); }
+    .dark .btn-ghost:hover { background: var(--cream); color: var(--charcoal); }
+
+    /* ---------- Nav ---------- */
+    .nav { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--line); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+    .nav-logo { display: flex; align-items: center; text-decoration: none; }
+    .nav-logo img { height: 56px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a { text-decoration: none; font-size: 15px; font-weight: 500; color: var(--charcoal); }
+    .nav-links a:hover { color: var(--terracotta-deep); }
+    .nav .btn { padding: 10px 22px; font-size: 14px; }
+    @media (max-width: 760px) { .nav-links li.nav-link-item { display: none; } }
+
+    /* ---------- Dot navigation ---------- */
+    .dots { position: fixed; right: 24px; top: 50%; transform: translateY(-50%); z-index: 90; display: flex; flex-direction: column; gap: 13px; }
+    .dots a { width: 10px; height: 10px; border: 2px solid var(--charcoal); background: transparent; display: block; transition: background .2s ease, transform .2s ease; }
+    .dots a:hover { transform: scale(1.3); }
+    .dots a.on { background: var(--terracotta); }
+    @media (max-width: 900px) { .dots { display: none; } }
+
+    /* ---------- Sections ---------- */
+    section { padding: 104px 0; }
+    .dark { background: var(--charcoal); color: var(--cream); }
+    .eyebrow {
+      font-family: var(--font-head); font-size: 13px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--terracotta-deep);
+      margin-bottom: 20px;
+    }
+    .dark .eyebrow { color: var(--terracotta); }
+    .h2 { font-size: clamp(32px, 4.6vw, 52px); font-weight: 700; margin-bottom: 20px; }
+    .lede { font-size: 18px; color: var(--muted); max-width: 620px; }
+    .dark .lede { color: var(--muted-light); }
+    .reveal { opacity: 0; transform: translateY(28px); }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 92px 0 108px; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px; align-items: center; }
+    .hero h1 { font-size: clamp(34px, 4.4vw, 56px); font-weight: 800; margin-bottom: 24px; letter-spacing: -.025em; }
+    .hero h1 .accent { color: var(--terracotta-deep); }
+    .hero-ps {
+      font-family: var(--font-body); font-size: 15px; font-weight: 500; font-style: italic;
+      color: var(--muted); margin-top: 30px; padding-top: 20px;
+      border-top: 1px solid var(--line); max-width: 460px;
+    }
+    .hero-ps b { font-style: normal; font-weight: 700; color: var(--terracotta-deep); letter-spacing: .02em; }
+    .hero-ps s { text-decoration-color: var(--terracotta-deep); text-decoration-thickness: 2px; }
+    .hero .lede { margin-bottom: 40px; font-size: 19px; max-width: 540px; }
+    .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+
+    /* The Chloe button: an incoming call you want to answer.
+       Idle: it breathes. A terracotta halo radiates like a ring tone.
+       Hover: she leans in — the pill lifts, the waveform speeds up.
+       Press: tactile dip. */
+    .chloe-orbit { display: inline-block; animation: breathe 3.6s ease-in-out infinite; }
+    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    .btn-chloe {
+      position: relative; display: inline-flex; align-items: center; gap: 15px; cursor: pointer;
+      background: #000; color: var(--cream); border: none;
+      padding: 16px 30px; border-radius: 100px; text-align: left;
+      font-family: var(--font-head);
+      box-shadow: 0 16px 44px rgba(0,0,0,.24);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+    }
+    .btn-chloe::after {
+      content: ""; position: absolute; inset: -4px; border-radius: 100px;
+      border: 2px solid var(--terracotta); opacity: 0; pointer-events: none;
+      animation: halo 3.6s ease-out infinite;
+    }
+    @keyframes halo {
+      0% { transform: scale(.97); opacity: 0; }
+      12% { opacity: .75; }
+      45% { transform: scale(1.16); opacity: 0; }
+      100% { transform: scale(1.16); opacity: 0; }
+    }
+    .btn-chloe:hover { transform: scale(1.045); box-shadow: 0 24px 64px rgba(0,0,0,.34); }
+    .btn-chloe:active { transform: scale(.97); }
+    .btn-chloe:hover .dock-wave span { animation-duration: .45s; }
+    .btn-chloe .bc-av { width: 42px; height: 38px; display: flex; align-items: center; justify-content: center; }
+    .btn-chloe .bc-av img { height: 38px; width: auto; }
+    .btn-chloe .bc-t { font-size: 17px; font-weight: 700; white-space: nowrap; }
+    .btn-chloe .bc-t small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 12px; color: var(--muted-light); }
+    @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 52px; } }
+
+    /* Hero visual: the agent shuffle (motion.dev reordering) */
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    @keyframes wv { 0%,100% { height: 6px; } 50% { height: 26px; } }
+    .shuffle-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    .shuffle { list-style: none; position: relative; display: grid; grid-template-columns: repeat(2, 180px); gap: 14px; }
+    .tile { width: 180px; height: 180px; border: 2px solid var(--charcoal); box-shadow: 0 18px 40px rgba(0,0,0,.14); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; opacity: 0; transform: scale(.85); will-change: transform; transition: background-color .5s ease, color .5s ease; }
+    .tile .t-top { display: flex; align-items: flex-start; justify-content: space-between; min-height: 34px; }
+    .t-ic { display: block; }
+    .tile .t-nm { font-family: var(--font-head); font-size: 21px; font-weight: 800; line-height: 1.1; }
+    .tile .t-role { font-size: 11.5px; font-weight: 500; margin-top: 4px; color: rgba(0,0,0,.72); transition: color .5s ease; }
+    .tile.st-idle { background: var(--cream-soft); }
+    .tile.st-work { background: var(--terracotta); }
+    .tile.st-done { background: var(--charcoal); color: var(--cream); }
+    .tile.st-done .t-role { color: var(--muted-light); }
+    .tile .ic-check { color: var(--muted-light); transition: color .5s ease; }
+    .tile.st-work .ic-check { color: var(--charcoal); }
+    .tile.st-done .ic-check { color: var(--terracotta); }
+    .t-live { visibility: hidden; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-head); font-size: 9px; font-weight: 700; letter-spacing: .12em; color: var(--charcoal); }
+    .t-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--charcoal); animation: pulse 1.3s infinite; }
+    .tile.st-work .t-live { visibility: visible; }
+    .t-legend { display: flex; gap: 18px; font-family: var(--font-head); font-size: 11px; font-weight: 600; color: var(--muted); }
+    .t-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .t-legend i { width: 10px; height: 10px; border: 1.5px solid var(--charcoal); display: inline-block; }
+    .t-legend .lg-idle i { background: var(--cream-soft); }
+    .t-legend .lg-work i { background: var(--terracotta); }
+    .t-legend .lg-done i { background: var(--charcoal); }
+    @media (max-width: 420px) { .shuffle { grid-template-columns: repeat(2, 142px); } .tile { width: 142px; height: 142px; padding: 14px; } .tile .t-nm { font-size: 17px; } }
+
+    /* ---------- Proof strip ---------- */
+    .proof-strip { padding: 22px 0; border-top: 2px solid var(--charcoal); border-bottom: 2px solid var(--charcoal); background: var(--terracotta); }
+    .proof-strip .wrap { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: var(--font-head); font-size: 14px; font-weight: 600; text-align: center; flex-wrap: wrap; }
+    .proof-strip .tag { background: var(--charcoal); color: var(--cream); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 10px; }
+
+    /* ---------- Problem ---------- */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+    .stat { border: 1px solid var(--line-dark); padding: 36px 30px; }
+    .stat .num { font-family: var(--font-head); font-size: clamp(48px, 6vw, 72px); font-weight: 800; color: var(--terracotta); line-height: 1; margin-bottom: 16px; }
+    .stat p { font-size: 15px; color: var(--muted-light); }
+    .stat p strong { color: var(--cream); }
+    @media (max-width: 820px) { .stats { grid-template-columns: 1fr; } }
+
+    /* ---------- Agents ---------- */
+    .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+    .phase {
+      border: 2px solid var(--charcoal); background: var(--cream); padding: 0;
+      display: flex; flex-direction: column; transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .phase:hover { transform: translate(-4px,-4px); box-shadow: 8px 8px 0 var(--terracotta); }
+    .phase-top { display: flex; align-items: center; gap: 14px; padding: 22px 26px; border-bottom: 2px solid var(--charcoal); }
+    .phase-av { width: 52px; height: 46px; display: flex; align-items: center; justify-content: center; flex: none; }
+    .phase-av img { height: 46px; width: auto; }
+    .phase-top h3 { font-size: 21px; font-weight: 800; line-height: 1.1; }
+    .phase-top .role { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .phase-when { margin-left: auto; font-family: var(--font-head); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; background: var(--charcoal); color: var(--cream); padding: 5px 9px; align-self: flex-start; }
+    .phase-inner { padding: 22px 26px 26px; display: flex; flex-direction: column; flex: 1; }
+    .type-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+    .type-chip { font-family: var(--font-head); font-size: 11px; font-weight: 700; letter-spacing: .06em; border: 1.5px solid var(--charcoal); padding: 5px 11px; }
+    .type-chip.t { background: var(--terracotta); }
+    .agent-say { font-family: var(--font-head); font-size: 16.5px; font-weight: 600; margin-bottom: 12px; }
+    .phase-inner > p { font-size: 14.5px; color: var(--muted); margin-bottom: 20px; }
+    .phase ul { list-style: none; margin-top: auto; }
+    .phase li { font-size: 13.5px; font-weight: 500; padding: 8px 0 8px 20px; position: relative; border-top: 1px solid var(--line); }
+    .phase li::before { content: ""; position: absolute; left: 0; top: 14px; width: 8px; height: 8px; background: var(--terracotta); }
+    .agent-link { display: inline-block; margin-top: 16px; font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--charcoal); text-decoration: none; border-bottom: 2px solid var(--terracotta); padding-bottom: 2px; }
+    .agent-link:hover { color: var(--terracotta-deep); }
+    @media (max-width: 900px) { .phases { grid-template-columns: 1fr; } }
+
+    /* ---------- Urgency ---------- */
+    .urgency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 56px 0 44px; }
+    .u-tile { border: 1px solid var(--line-dark); padding: 34px 28px; text-align: center; }
+    .u-tile .big { font-family: var(--font-head); font-size: clamp(40px, 5vw, 60px); font-weight: 800; line-height: 1; margin-bottom: 10px; }
+    .u-tile.slow .big { color: var(--muted-light); text-decoration: line-through; text-decoration-color: var(--terracotta); text-decoration-thickness: 4px; }
+    .u-tile.fast { border-color: var(--terracotta); }
+    .u-tile.fast .big { color: var(--terracotta); }
+    .u-tile p { font-size: 14px; color: var(--muted-light); font-weight: 500; }
+    .u-line { border: 1.5px solid var(--terracotta); padding: 18px 24px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; font-family: var(--font-head); font-size: clamp(15px, 1.8vw, 19px); font-weight: 600; text-align: center; }
+    .u-line .dot { width: 9px; height: 9px; background: var(--terracotta); animation: pulse 1.4s infinite; flex: none; }
+    @media (max-width: 820px) { .urgency-grid { grid-template-columns: 1fr; } }
+
+    /* ---------- Integrations ---------- */
+    .integrations-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 56px; }
+    .integration {
+      border: 1px solid var(--line); background: #fff; padding: 30px 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      transition: transform 0.15s ease, border-color .15s ease;
+    }
+    .integration:hover { transform: translateY(-4px); border-color: var(--charcoal); }
+    .int-mark { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 800; font-size: 24px; color: #fff; }
+    .int-mark.sf { background: #00A1E0; border-radius: 50%; }
+    .int-mark.hs { background: #FF7A59; border-radius: 50%; }
+    .int-mark.pd { background: #1A1A1A; border-radius: 50%; }
+    .int-mark.zh { background: #E42527; border-radius: 50%; }
+    .integration .name { font-family: var(--font-head); font-size: 14px; font-weight: 600; }
+    .integration .kind { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: -8px; }
+    @media (max-width: 820px) { .integrations-row { grid-template-columns: 1fr 1fr; } }
+
+    /* ---------- Shift (interactive) ---------- */
+    .shift-toggle { display: flex; justify-content: center; margin: 48px 0 36px; }
+    .toggle-pill { display: inline-flex; border: 2px solid var(--cream); }
+    .toggle-pill button {
+      font-family: var(--font-head); font-size: 14px; font-weight: 700; letter-spacing: .02em;
+      background: transparent; color: var(--cream); border: none; padding: 14px 28px; cursor: pointer;
+      transition: background .2s ease, color .2s ease;
+    }
+    .toggle-pill button.on { background: var(--terracotta); color: var(--charcoal); }
+    .shift-stage { max-width: 760px; margin: 0 auto; min-height: 300px; }
+    .shift-item { padding: 20px 0; border-top: 1px solid var(--line-dark); display: flex; gap: 18px; align-items: baseline; }
+    .shift-item .ico { font-family: var(--font-head); font-weight: 800; font-size: 18px; flex: none; width: 28px; text-align: center; }
+    .shift-item.bad .ico { color: var(--muted-light); }
+    .shift-item.good .ico { color: var(--terracotta); }
+    .shift-item h4 { font-size: 18px; margin-bottom: 4px; }
+    .shift-item p { font-size: 14.5px; color: var(--muted-light); }
+    .shift-verdict { margin-top: 28px; text-align: center; font-family: var(--font-head); font-size: 15px; font-weight: 600; color: var(--muted-light); }
+    .shift-verdict b { color: var(--terracotta); }
+
+    /* ---------- RocketPay ---------- */
+    .rp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .rp-card { border: 2px solid var(--charcoal); padding: 40px 36px; background: var(--cream-soft); }
+    .rp-card .rp-mark { font-family: var(--font-head); font-size: 26px; font-weight: 800; margin-bottom: 20px; }
+    .rp-card .rp-mark span { color: var(--terracotta-deep); }
+    .rp-card p { font-size: 16px; margin-bottom: 16px; }
+    .rp-points { list-style: none; margin-top: 28px; }
+    .rp-points li { padding: 12px 0 12px 24px; position: relative; font-size: 15px; font-weight: 500; border-top: 1px solid var(--line); }
+    .rp-points li::before { content: ""; position: absolute; left: 0; top: 19px; width: 9px; height: 9px; background: var(--terracotta); }
+    @media (max-width: 900px) { .rp-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+    /* ---------- CTA ---------- */
+    .cta { text-align: center; }
+    .cta .h2 { margin-bottom: 16px; }
+    .cta .lede { margin: 0 auto 40px; }
+
+    /* ---------- Footer ---------- */
+    footer { background: var(--charcoal); color: var(--cream); border-top: 1px solid var(--line-dark); padding: 40px 0 96px; }
+    .foot-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .foot-inner img { height: 46px; width: auto; }
+    .foot-inner p { font-size: 13px; color: var(--muted-light); }
+    .foot-links { display: flex; gap: 24px; font-size: 13px; }
+    .foot-links a { color: var(--muted-light); text-decoration: none; }
+    .foot-links a:hover { color: var(--terracotta); }
+
+    /* ---------- Chloe dock (now-playing style) ---------- */
+    .dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 150; display: none; }
+    .dock.show { display: block; }
+    .dock-pill {
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      background: var(--charcoal); color: var(--cream); border: 1.5px solid var(--charcoal);
+      padding: 10px 18px 10px 10px; border-radius: 100px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    .dock-pill .d-av { width: 38px; height: 34px; display: flex; align-items: center; justify-content: center; }
+    .dock-pill .d-av img { height: 34px; width: auto; }
+    .dock-pill .d-t { font-family: var(--font-head); font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .dock-pill .d-t small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 10.5px; color: var(--muted-light); }
+    .dock-wave { display: flex; align-items: center; gap: 3px; height: 18px; margin-left: 2px; }
+    .dock-wave span { width: 3px; background: var(--terracotta); height: 6px; animation: wv 1s ease-in-out infinite; }
+    .dock-wave span:nth-child(2n) { animation-delay: .12s; }
+    .dock-wave span:nth-child(3n) { animation-delay: .24s; }
+
+    .chat {
+      position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+      width: min(380px, calc(100vw - 28px)); z-index: 160;
+      background: #FCFAF6; border: 2px solid var(--charcoal);
+      box-shadow: 0 30px 70px rgba(0,0,0,.35);
+      display: none; flex-direction: column; overflow: hidden;
+      transform-origin: 50% 100%;
+    }
+    .chat.open { display: flex; }
+    .chat-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; background: var(--charcoal); color: var(--cream); }
+    .chat-head .c-id { display: flex; align-items: center; gap: 10px; }
+    .chat-head .c-av { width: 36px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .chat-head .c-av img { height: 32px; width: auto; }
+    .chat-head .c-nm { font-family: var(--font-head); font-size: 13.5px; font-weight: 700; }
+    .chat-head .c-live { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--terracotta); font-weight: 700; font-family: var(--font-head); display: flex; align-items: center; gap: 6px; }
+    .chat-head .c-live i { width: 6px; height: 6px; background: var(--terracotta); border-radius: 50%; animation: pulse 1.4s infinite; }
+    .chat-close { background: none; border: none; color: var(--cream); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px; }
+    .chat-body { padding: 14px; height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 86%; padding: 10px 13px; font-size: 13.5px; line-height: 1.45; opacity: 0; transform: translateY(8px); }
+    .msg.chloe { background: var(--cream-soft); border: 1px solid var(--line); align-self: flex-start; }
+    .msg.user { background: var(--charcoal); color: var(--cream); align-self: flex-end; }
+    .quick { display: flex; flex-wrap: wrap; gap: 8px; opacity: 0; transform: translateY(8px); }
+    .quick button { font-family: var(--font-head); font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--charcoal); background: transparent; padding: 8px 14px; cursor: pointer; transition: background .15s ease; }
+    .quick button:hover { background: var(--terracotta); }
+    .slide-card { border: 1.5px solid var(--charcoal); background: #fff; align-self: flex-start; width: 86%; opacity: 0; transform: translateY(8px); }
+    .slide-view { padding: 16px; min-height: 96px; }
+    .slide-view .s-k { font-family: var(--font-head); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--terracotta-deep); margin-bottom: 6px; }
+    .slide-view .s-t { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .slide-view .s-d { font-size: 12.5px; color: var(--muted); }
+    .slide-nav { display: flex; align-items: center; justify-content: space-between; border-top: 1.5px solid var(--charcoal); padding: 8px 12px; }
+    .slide-nav button { font-family: var(--font-head); font-weight: 800; font-size: 14px; background: none; border: 1.5px solid var(--charcoal); width: 28px; height: 28px; cursor: pointer; }
+    .slide-nav button:hover { background: var(--terracotta); }
+    .slide-nav .s-count { font-size: 11px; font-weight: 700; color: var(--muted); font-family: var(--font-head); }
+    .chat-input { display: flex; border-top: 2px solid var(--charcoal); }
+    .chat-input input { flex: 1; border: none; background: #fff; padding: 13px 14px; font-family: var(--font-body); font-size: 13.5px; outline: none; }
+    .chat-input button { font-family: var(--font-head); font-weight: 700; font-size: 13px; border: none; border-left: 2px solid var(--charcoal); background: var(--terracotta); padding: 0 20px; cursor: pointer; }
+    .chat-input button:hover { background: var(--terracotta-deep); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .msg, .quick, .slide-card, .tile { opacity: 1 !important; }
+      .reveal, .msg, .quick, .slide-card, .tile { transform: none !important; }
+      .dock-wave span, .u-line .dot, .chat-head .c-live i, .t-live i,
+      .chloe-orbit, .btn-chloe::after { animation: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-logo" href="#" aria-label="Marklinea home">
+        <img src="logo-lockup-charcoal.svg" alt="Marklinea">
+      </a>
+      <ul class="nav-links">
+        <li class="nav-link-item"><a href="#agents">Agents</a></li>
+        <li class="nav-link-item"><a href="#proof">Proof</a></li>
+        <li class="nav-link-item"><a href="#integrations">Integrations</a></li>
+        <li><a class="btn btn-primary" href="#book-demo" id="navChloe">Talk to Chloe</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <nav class="dots" aria-label="Sections">
+    <a href="#hero" data-for="hero" aria-label="Top"></a>
+    <a href="#problem" data-for="problem" aria-label="The problem"></a>
+    <a href="#agents" data-for="agents" aria-label="The agents"></a>
+    <a href="#coverage" data-for="coverage" aria-label="Why now"></a>
+    <a href="#integrations" data-for="integrations" aria-label="Integrations"></a>
+    <a href="#shift" data-for="shift" aria-label="The shift"></a>
+    <a href="#proof" data-for="proof" aria-label="Customer proof"></a>
+    <a href="#book-demo" data-for="book-demo" aria-label="Book a demo"></a>
+  </nav>
+
+  <main id="main-content">
+
+    <!-- FOLD 1 · HERO · cream -->
+    <section class="hero" id="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow reveal">AI Agents for Sales</p>
+          <h1 class="reveal">Talk To Your Customers. <span class="accent">The Moment They Want.</span></h1>
+          <p class="lede reveal">No forms. No callbacks. No waiting. The moment a prospect raises their hand, they're in a live conversation.</p>
+          <div class="hero-ctas reveal">
+            <span class="chloe-orbit">
+              <button class="btn-chloe" id="heroChloe" aria-label="Talk to Chloe now">
+                <span class="bc-t">Talk to Chloe<small>She picks up in 30 seconds</small></span>
+                <span class="dock-wave"><span></span><span></span><span></span><span></span><span></span></span>
+              </button>
+            </span>
+          </div>
+          <p class="hero-ps reveal"><b>P.S.</b> Scheduling was yesterday.</p>
+        </div>
+
+        <div class="shuffle-wrap" aria-hidden="true">
+          <ul class="shuffle" id="shuffle">
+            <li class="tile st-idle" id="tScout">
+              <div class="t-top">
+                <svg class="t-ic" width="42" height="34" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                  <path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/>
+                  <ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/>
+                  <path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/>
+                </svg>
+              </div>
+              <div><div class="t-nm">Scout</div><div class="t-role" id="rScout">Research agent · reads</div></div>
+            </li>
+            <li class="tile st-idle" id="tChloe">
+              <div class="t-top">
+                <svg class="t-ic" width="42" height="34" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                  <line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/>
+                </svg>
+                <span class="t-live"><i></i>ON CALL</span>
+              </div>
+              <div><div class="t-nm">Chloe</div><div class="t-role" id="rChloe">Discovery agent · speaks</div></div>
+            </li>
+            <li class="tile st-idle" id="tScribe">
+              <div class="t-top">
+                <svg class="t-ic" width="42" height="38" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                  <path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/>
+                  <path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/>
+                </svg>
+              </div>
+              <div><div class="t-nm">Scribe</div><div class="t-role" id="rScribe">Handover agent · writes</div></div>
+            </li>
+            <li class="tile st-idle" id="tDeal">
+              <div class="t-top">
+                <svg class="t-ic ic-check" width="38" height="30" viewBox="0 0 38 30" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round">
+                  <path d="M2 14 C 7 18, 10 21.5, 13 26 C 19 15.5, 26 8, 34 2.5"/>
+                </svg>
+              </div>
+              <div><div class="t-nm">Deal</div><div class="t-role" id="rDeal">Waiting for the handover</div></div>
+            </li>
+          </ul>
+          <div class="t-legend">
+            <span class="lg-idle"><i></i>Waiting</span>
+            <span class="lg-work"><i></i>Working</span>
+            <span class="lg-done"><i></i>Done</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROOF STRIP · terracotta -->
+    <div class="proof-strip">
+      <div class="wrap">
+        <span class="tag">In production</span>
+        <span>RocketPay qualifies every inbound demo request with Marklinea.</span>
+      </div>
+    </div>
+
+    <!-- FOLD 2 · PROBLEM · charcoal -->
+    <section class="dark" id="problem">
+      <div class="wrap">
+        <p class="eyebrow reveal">The problem</p>
+        <h2 class="h2 reveal">Speed wins deals. Silence kills them.</h2>
+        <p class="lede reveal">Your best leads decide in hours. Most teams answer in days. That gap is where revenue leaks.</p>
+        <div class="stats">
+          <div class="stat reveal">
+            <div class="num" data-count="78" data-suffix="%">78%</div>
+            <p>of buyers <strong>purchase from the first vendor to respond.</strong> Speed is the deal.</p>
+          </div>
+          <div class="stat reveal">
+            <div class="num" data-count="42" data-suffix="h">42h</div>
+            <p>average time for B2B teams to <strong>respond to a new lead.</strong> Nearly two full days of silence.</p>
+          </div>
+          <div class="stat reveal">
+            <div class="num" data-count="67" data-suffix="%">67%</div>
+            <p>of lost deals trace back to <strong>poor lead qualification.</strong> Reps chase the wrong prospects.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLD 3 · AGENTS · cream -->
+    <section id="agents">
+      <div class="wrap">
+        <p class="eyebrow reveal">The agents</p>
+        <h2 class="h2 reveal">Meet the team on every call.</h2>
+        <p class="lede reveal">Three agents, one relay. Before the call, on the call, and after it. No code changes. No new tools for your prospect.</p>
+
+        <div class="phases">
+          <article class="phase reveal">
+            <div class="phase-top">
+              <div class="phase-av"><img src="logo-badge.svg" alt=""></div>
+              <div>
+                <h3>Scout</h3>
+                <p class="role">The Research Agent</p>
+              </div>
+              <span class="phase-when">Before</span>
+            </div>
+            <div class="phase-inner">
+              <div class="type-row">
+                <span class="type-chip t">Reads</span>
+                <span class="type-chip">Web + CRM</span>
+                <span class="type-chip">Writes briefs</span>
+              </div>
+              <p class="agent-say">"I know your prospect before the phone rings."</p>
+              <p>The moment a lead comes in, Scout reads the contact, the company, and your CRM history. News, funding, role, signals. The call starts with context, not questions.</p>
+              <ul>
+                <li>Company news and funding rounds</li>
+                <li>Role, seniority, and org size</li>
+                <li>CRM history and past interactions</li>
+              </ul>
+              <a class="agent-link" href="researcher.html">Meet Scout →</a>
+            </div>
+          </article>
+
+          <article class="phase reveal">
+            <div class="phase-top">
+              <div class="phase-av"><img src="logo-badge.svg" alt=""></div>
+              <div>
+                <h3>Chloe</h3>
+                <p class="role">The Discovery Agent</p>
+              </div>
+              <span class="phase-when">During</span>
+            </div>
+            <div class="phase-inner">
+              <div class="type-row">
+                <span class="type-chip t">Speaks</span>
+                <span class="type-chip t">Hears</span>
+                <span class="type-chip">Takes calls</span>
+              </div>
+              <p class="agent-say">"I run the conversation your best AE would."</p>
+              <p>Chloe starts a live voice call in the browser 30 seconds after the form fill. She uncovers process, pain, and the full BANT picture, and scores every answer as you talk.</p>
+              <ul>
+                <li>Live voice call, no downloads</li>
+                <li>Process, pain, and BANT discovery</li>
+                <li>Lead score from 0 to 100</li>
+              </ul>
+              <a class="agent-link" href="discovery.html">Meet Chloe →</a>
+            </div>
+          </article>
+
+          <article class="phase reveal">
+            <div class="phase-top">
+              <div class="phase-av"><img src="logo-badge.svg" alt=""></div>
+              <div>
+                <h3>Scribe</h3>
+                <p class="role">The Handover Agent</p>
+              </div>
+              <span class="phase-when">After</span>
+            </div>
+            <div class="phase-inner">
+              <div class="type-row">
+                <span class="type-chip t">Hears</span>
+                <span class="type-chip t">Writes</span>
+                <span class="type-chip">Syncs CRM</span>
+              </div>
+              <p class="agent-say">"The call ends. Your CRM is already updated."</p>
+              <p>Scribe listens to every call and turns it into a deal-ready brief. Transcript, scorecard, next steps, and a meeting on the calendar. Nobody types notes.</p>
+              <ul>
+                <li>Deal-ready summary and scorecard</li>
+                <li>Full transcript in your CRM</li>
+                <li>Next steps and meeting booked</li>
+              </ul>
+              <a class="agent-link" href="summariser.html">Meet Scribe →</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLD 4 · WHY NOW · charcoal -->
+    <section class="dark" id="coverage">
+      <div class="wrap">
+        <p class="eyebrow reveal">Why now</p>
+        <h2 class="h2 reveal">Right now, a lead on your site is deciding.</h2>
+        <p class="lede reveal">They filled your form. They are still on the page. The next few minutes decide whether they buy from you or from the vendor who answered first.</p>
+        <div class="urgency-grid">
+          <div class="u-tile slow reveal">
+            <div class="big">42 hours</div>
+            <p>The average team's response time. The lead moved on long ago.</p>
+          </div>
+          <div class="u-tile fast reveal">
+            <div class="big" data-count="30" data-suffix=" sec">30 sec</div>
+            <p>Marklinea's response time. The lead is still on your website.</p>
+          </div>
+          <div class="u-tile reveal">
+            <div class="big" data-count="5040" data-suffix="x">5,040x</div>
+            <p>The difference. The deal rarely waits for the slower one.</p>
+          </div>
+        </div>
+        <div class="u-line reveal">
+          <span class="dot"></span>
+          <span>Every form fill starts a 30 second timer. Marklinea beats it. Every time.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLD 5 · INTEGRATIONS · cream -->
+    <section id="integrations">
+      <div class="wrap">
+        <p class="eyebrow reveal">Integrations</p>
+        <h2 class="h2 reveal">Fits right into your stack.</h2>
+        <p class="lede reveal">Qualified leads, call transcripts, and discovery reports sync straight to your CRM.</p>
+        <div class="integrations-row">
+          <div class="integration reveal"><span class="int-mark sf">S</span><span class="name">Salesforce</span><span class="kind">CRM</span></div>
+          <div class="integration reveal"><span class="int-mark hs">H</span><span class="name">HubSpot</span><span class="kind">CRM</span></div>
+          <div class="integration reveal"><span class="int-mark pd">P</span><span class="name">Pipedrive</span><span class="kind">CRM</span></div>
+          <div class="integration reveal"><span class="int-mark zh">Z</span><span class="name">Zoho CRM</span><span class="kind">CRM</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLD 6 · SHIFT · charcoal · interactive -->
+    <section class="dark" id="shift">
+      <div class="wrap">
+        <p class="eyebrow reveal">The shift</p>
+        <h2 class="h2 reveal" style="text-align:center">Flip the switch. Watch what changes.</h2>
+        <div class="shift-toggle reveal">
+          <div class="toggle-pill">
+            <button id="tWithout" class="on">Without Marklinea</button>
+            <button id="tWith">With Marklinea</button>
+          </div>
+        </div>
+        <div class="shift-stage" id="shiftStage" aria-live="polite"></div>
+        <p class="shift-verdict reveal" id="shiftVerdict"></p>
+      </div>
+    </section>
+
+    <!-- FOLD 7 · ROCKETPAY · cream -->
+    <section id="proof">
+      <div class="wrap rp-grid">
+        <div>
+          <p class="eyebrow reveal">Customer proof</p>
+          <h2 class="h2 reveal">RocketPay runs Marklinea in production.</h2>
+          <p class="lede reveal">Every demo request on RocketPay's site gets a live discovery call from Sia, their Marklinea voice agent. Qualified leads, transcripts, and scores land in their CRM automatically. No rep lifts a finger before the meeting.</p>
+        </div>
+        <div class="rp-card reveal">
+          <div class="rp-mark">Rocket<span>Pay</span></div>
+          <p>Fintech. Inbound demo requests qualified by voice, around the clock.</p>
+          <ul class="rp-points">
+            <li>Live voice call on every form submission</li>
+            <li>Discovery scorecard and full transcript in the CRM</li>
+            <li>AEs walk into meetings fully briefed</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLD 8 · CTA · charcoal -->
+    <!-- Wire this CTA to the Marklinea demo-call widget / booking flow. -->
+    <section class="dark cta" id="book-demo">
+      <div class="wrap">
+        <p class="eyebrow reveal">See it live</p>
+        <h2 class="h2 reveal">One demo. That is all it takes.</h2>
+        <p class="lede reveal">Watch Marklinea run a live discovery call on your own website. Thirty minutes, no slides.</p>
+        <a class="btn btn-primary reveal" href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request">Book a Demo</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-inner">
+      <img src="logo-badge-dark.svg" alt="Marklinea">
+      <p>© 2026 Marklinea Software Pvt. Ltd.</p>
+      <div class="foot-links">
+        <a href="#agents">Agents</a>
+        <a href="mailto:ashish.aman@marklinea.com">Contact</a>
+        <a href="https://www.marklinea.com">marklinea.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chloe dock: now-playing pill that expands into a chat -->
+  <div class="dock" id="dock">
+    <div class="dock-pill" id="dockPill" role="button" tabindex="0" aria-label="Chat with Chloe">
+      <span class="d-av"><img src="logo-badge-dark.svg" alt=""></span>
+      <span class="d-t">Chat with Chloe<small>Marklinea's discovery agent</small></span>
+      <span class="dock-wave"><span></span><span></span><span></span><span></span><span></span></span>
+    </div>
+  </div>
+
+  <div class="chat" id="chat" aria-label="Chat with Chloe">
+    <div class="chat-head">
+      <div class="c-id">
+        <span class="c-av"><img src="logo-badge-dark.svg" alt=""></span>
+        <span class="c-nm">Chloe · Marklinea</span>
+      </div>
+      <span class="c-live"><i></i> Live</span>
+      <button class="chat-close" id="chatClose" aria-label="Close chat">×</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-input">
+      <input type="text" id="chatText" placeholder="Ask me anything…" aria-label="Message Chloe">
+      <button id="chatSend">Send</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/motion@12.23.9/dist/motion.js"></script>
+  <script>
+    (function () {
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var M = window.Motion;
+
+      /* ---------- Static fallback ---------- */
+      function showStatic() {
+        document.querySelectorAll('.reveal').forEach(function (el) {
+          el.style.opacity = 1; el.style.transform = 'none';
+        });
+        document.querySelectorAll('.tile').forEach(function (el) {
+          el.style.opacity = 1; el.style.transform = 'none';
+        });
+        // representative frozen frame of the relay
+        var frozen = { tScout: 'done', tChloe: 'work', tScribe: 'idle', tDeal: 'idle' };
+        var frozenRoles = { rScout: 'Brief ready ✓', rChloe: 'On call · qualifying…' };
+        for (var id in frozen) {
+          var el = document.getElementById(id);
+          if (el) { el.className = 'tile st-' + frozen[id]; el.style.opacity = 1; el.style.transform = 'none'; }
+        }
+        for (var rid in frozenRoles) {
+          var rl = document.getElementById(rid);
+          if (rl) rl.textContent = frozenRoles[rid];
+        }
+      }
+
+      /* ---------- Shift toggle content (works with or without Motion) ---------- */
+      var SHIFT = {
+        without: {
+          items: [
+            { ico: '✕', cls: 'bad', h: 'Prospect fills a form', p: 'Then waits days for someone to email back. Most never hear anything at all.' },
+            { ico: '✕', cls: 'bad', h: 'Manual qualification', p: 'AEs spend hours on calls with leads that never fit. Calendars fill with noise.' },
+            { ico: '✕', cls: 'bad', h: 'Revenue leaks', p: 'Most form fills never become a meeting. Nobody even knows which ones were good.' }
+          ],
+          verdict: 'This is the default. It is also why <b>67% of lost deals</b> trace back to qualification.'
+        },
+        with: {
+          items: [
+            { ico: '✓', cls: 'good', h: 'Prospect fills a form', p: 'A live AI voice call starts in under 30 seconds, while they are still on your site.' },
+            { ico: '✓', cls: 'good', h: 'AI qualifies by voice', p: 'Budget, timeline, team size, and fit. Handled in conversation, scored in real time.' },
+            { ico: '✓', cls: 'good', h: 'Revenue captured', p: 'AEs only talk to qualified leads, full transcript in hand, meeting already booked.' }
+          ],
+          verdict: 'Same form. Same traffic. <b>A completely different pipeline.</b>'
+        }
+      };
+      var stage = document.getElementById('shiftStage');
+      var verdictEl = document.getElementById('shiftVerdict');
+      var bW = document.getElementById('tWithout');
+      var bM = document.getElementById('tWith');
+      function renderShift(key, animated) {
+        var data = SHIFT[key];
+        stage.innerHTML = data.items.map(function (it) {
+          return '<div class="shift-item ' + it.cls + '"><span class="ico">' + it.ico + '</span><div><h4>' + it.h + '</h4><p>' + it.p + '</p></div></div>';
+        }).join('');
+        verdictEl.innerHTML = data.verdict;
+        bW.classList.toggle('on', key === 'without');
+        bM.classList.toggle('on', key === 'with');
+        if (animated && M) {
+          var rows = stage.querySelectorAll('.shift-item');
+          rows.forEach(function (r) { r.style.opacity = 0; r.style.transform = 'translateY(14px)'; });
+          M.animate(rows, { opacity: 1, transform: 'translateY(0px)' },
+            { duration: .5, ease: 'easeOut', delay: M.stagger(.1) });
+        }
+      }
+      bW.addEventListener('click', function () { renderShift('without', true); });
+      bM.addEventListener('click', function () { renderShift('with', true); });
+      renderShift('without', false);
+
+      /* ---------- Chloe dock / chat (works with or without Motion) ---------- */
+      var dock = document.getElementById('dock');
+      var pill = document.getElementById('dockPill');
+      var chat = document.getElementById('chat');
+      var body = document.getElementById('chatBody');
+      var input = document.getElementById('chatText');
+      var send = document.getElementById('chatSend');
+      var chatStarted = false;
+
+      function popIn(el, delay) {
+        if (M && !reduced) {
+          M.animate(el, { opacity: 1, transform: 'translateY(0px)' },
+            { duration: .45, delay: delay || 0, ease: [0.34, 1.56, 0.64, 1] });
+        } else {
+          el.style.opacity = 1; el.style.transform = 'none';
+        }
+        body.scrollTop = body.scrollHeight;
+      }
+      function addMsg(who, text, delay) {
+        var d = document.createElement('div');
+        d.className = 'msg ' + who;
+        d.innerHTML = text;
+        body.appendChild(d);
+        setTimeout(function () { popIn(d); }, (delay || 0) * 1000);
+        return d;
+      }
+      function addQuick(opts, delay) {
+        var q = document.createElement('div');
+        q.className = 'quick';
+        opts.forEach(function (o) {
+          var b = document.createElement('button');
+          b.textContent = o.label;
+          b.addEventListener('click', function () {
+            q.remove();
+            addMsg('user', o.label);
+            setTimeout(o.action, 600);
+          });
+          q.appendChild(b);
+        });
+        body.appendChild(q);
+        setTimeout(function () { popIn(q); }, (delay || 0) * 1000);
+      }
+      var SLIDES = [
+        { k: 'Slide 1 of 3', t: 'The 30 second rule', d: '78% of buyers choose the first vendor to respond. Marklinea responds while the lead is still on your site.' },
+        { k: 'Slide 2 of 3', t: 'The relay', d: 'Scout researches. I run the live call. Scribe writes it all to your CRM. One lead, three agents, zero waiting.' },
+        { k: 'Slide 3 of 3', t: 'What your AE gets', d: 'Score 92, full transcript, BANT breakdown, and a meeting already on the calendar.' }
+      ];
+      function addSlides(delay) {
+        var card = document.createElement('div');
+        card.className = 'slide-card';
+        var i = 0;
+        function view() {
+          return '<div class="slide-view"><div class="s-k">' + SLIDES[i].k + '</div><div class="s-t">' + SLIDES[i].t + '</div><div class="s-d">' + SLIDES[i].d + '</div></div>';
+        }
+        function render() {
+          card.innerHTML = view() +
+            '<div class="slide-nav"><button data-d="-1" aria-label="Previous">‹</button><span class="s-count">' + (i + 1) + ' / ' + SLIDES.length + '</span><button data-d="1" aria-label="Next">›</button></div>';
+          card.querySelectorAll('.slide-nav button').forEach(function (b) {
+            b.addEventListener('click', function () {
+              i = (i + parseInt(b.getAttribute('data-d'), 10) + SLIDES.length) % SLIDES.length;
+              render();
+              card.style.opacity = 1; card.style.transform = 'none';
+            });
+          });
+        }
+        render();
+        body.appendChild(card);
+        setTimeout(function () { popIn(card); }, (delay || 0) * 1000);
+      }
+      function scriptIntro() {
+        addMsg('chloe', 'Hi, I am Chloe. On a real site, I would already be calling you. You filled no form, so let us just talk.', .2);
+        addQuick([
+          { label: 'Show me what you do', action: function () {
+              addMsg('chloe', 'Happy to. Three slides, then you can grill me.');
+              addSlides(.6);
+              setTimeout(function () {
+                addMsg('chloe', 'That is the whole product. Want to see it run on your own website?');
+                addQuick([
+                  { label: 'Book a demo', action: function () {
+                      addMsg('chloe', 'Perfect. Thirty minutes, no slides, your website. <a href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request" style="font-weight:700">Click here to book</a> and I will see you there.');
+                    } },
+                  { label: 'How fast are you really?', action: function () {
+                      addMsg('chloe', 'Under 30 seconds from form fill to my first sentence. The average B2B team takes 42 hours. That is 5,040 times slower than me.');
+                    } }
+                ], .4);
+              }, 1600);
+            } },
+          { label: 'How fast are you?', action: function () {
+              addMsg('chloe', 'Under 30 seconds from form fill to my first sentence, right in the browser. While your competitor is still routing the lead, I have finished discovery.');
+            } }
+        ], .9);
+      }
+      /* Dock appears only after the hero CTA scrolls out of view */
+      var heroCta = document.getElementById('heroChloe');
+      var heroOut = false, dockShown = false;
+      function updateDock() {
+        var shouldShow = heroOut && !chat.classList.contains('open');
+        if (shouldShow === dockShown) return;
+        dockShown = shouldShow;
+        if (shouldShow) {
+          dock.classList.add('show');
+          if (M && !reduced) {
+            M.animate(dock,
+              { opacity: [0, 1], transform: ['translateX(-50%) translateY(90px)', 'translateX(-50%) translateY(0px)'] },
+              { type: 'spring', stiffness: 300, damping: 24 });
+          }
+        } else {
+          if (M && !reduced) {
+            M.animate(dock,
+              { opacity: 0, transform: 'translateX(-50%) translateY(90px)' },
+              { duration: .25, ease: 'easeIn' }).finished.then(function () {
+                dock.classList.remove('show');
+                dock.style.opacity = ''; dock.style.transform = '';
+              });
+          } else { dock.classList.remove('show'); }
+        }
+      }
+      if ('IntersectionObserver' in window && heroCta) {
+        new IntersectionObserver(function (entries) {
+          heroOut = !entries[0].isIntersecting;
+          updateDock();
+        }, { threshold: 0 }).observe(heroCta);
+      } else { heroOut = true; updateDock(); }
+
+      function openChat() {
+        dockShown = false; dock.classList.remove('show');
+        chat.classList.add('open');
+        if (M && !reduced) {
+          chat.style.opacity = 0;
+          chat.style.transform = 'translateX(-50%) translateY(24px) scale(.92)';
+          M.animate(chat, { opacity: 1, transform: 'translateX(-50%) translateY(0px) scale(1)' },
+            { duration: .5, ease: [0.34, 1.56, 0.64, 1] });
+        }
+        if (!chatStarted) { chatStarted = true; scriptIntro(); }
+        input.focus();
+      }
+      function closeChat() {
+        function done() { chat.classList.remove('open'); updateDock(); }
+        if (M && !reduced) {
+          M.animate(chat, { opacity: 0, transform: 'translateX(-50%) translateY(24px) scale(.92)' },
+            { duration: .3, ease: 'easeIn' }).finished.then(done);
+        } else { done(); }
+      }
+      if (heroCta) heroCta.addEventListener('click', openChat);
+      var navCta = document.getElementById('navChloe');
+      if (navCta) navCta.addEventListener('click', function (e) { e.preventDefault(); openChat(); });
+      pill.addEventListener('click', openChat);
+      pill.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') openChat(); });
+      document.getElementById('chatClose').addEventListener('click', closeChat);
+      function userSend() {
+        var t = input.value.trim();
+        if (!t) return;
+        input.value = '';
+        addMsg('user', t.replace(/</g, '&lt;'));
+        setTimeout(function () {
+          addMsg('chloe', 'Good question. The honest answer is best shown live. Book a thirty minute demo and I will answer it on your own website. <a href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request" style="font-weight:700">Book a demo</a>');
+        }, 700);
+      }
+      send.addEventListener('click', userSend);
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') userSend(); });
+
+      /* ---------- Motion-dependent parts ---------- */
+      if (reduced || !M) { showStatic(); return; }
+      var animate = M.animate, inView = M.inView, stagger = M.stagger;
+      var EASE = [0.22, 1, 0.36, 1];
+
+      // Reveals + dot nav
+      var dots = document.querySelectorAll('.dots a');
+      function setDot(id) {
+        dots.forEach(function (d) { d.classList.toggle('on', d.getAttribute('data-for') === id); });
+      }
+      document.querySelectorAll('section').forEach(function (sec) {
+        var items = sec.querySelectorAll('.reveal');
+        if (items.length) {
+          inView(sec, function () {
+            animate(items, { opacity: 1, transform: 'translateY(0px)' },
+              { duration: .8, ease: EASE, delay: stagger(.12) });
+          }, { margin: '0px 0px -22% 0px' });
+        }
+        if (sec.id) {
+          inView(sec, function () {
+            setDot(sec.id);
+            return function () {};
+          }, { amount: 0.45 });
+        }
+      });
+
+      // Counters (problem stats + urgency tiles)
+      document.querySelectorAll('[data-count]').forEach(function (el) {
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        inView(el, function () {
+          animate(0, target, {
+            duration: 1.4, ease: 'easeOut',
+            onUpdate: function (v) {
+              var n = Math.round(v);
+              el.textContent = (n >= 1000 ? n.toLocaleString('en-US') : n) + suffix;
+            }
+          });
+        }, { margin: '0px 0px -15% 0px' });
+      });
+
+      // Hero: agent relay tiles. Static positions, state colors:
+      // cream = waiting, terracotta = working, charcoal = done.
+      var AG = {
+        scout:  { el: 'tScout',  r: 'rScout',  role: { idle: 'Research agent · reads',    work: 'Researching the lead…',  done: 'Brief ready ✓' } },
+        chloe:  { el: 'tChloe',  r: 'rChloe',  role: { idle: 'Discovery agent · speaks',  work: 'On call · qualifying…',  done: 'Call complete ✓' } },
+        scribe: { el: 'tScribe', r: 'rScribe', role: { idle: 'Handover agent · writes',   work: 'Writing the handover…',  done: 'Synced to CRM ✓' } },
+        deal:   { el: 'tDeal',   r: 'rDeal',   role: { idle: 'Waiting for the handover',  work: 'Booking the meeting…',   done: 'Score 92 · booked ✓' } }
+      };
+      function setAgent(k, st) {
+        var a = AG[k];
+        var el = document.getElementById(a.el);
+        if (!el) return;
+        el.className = 'tile st-' + st;
+        document.getElementById(a.r).textContent = a.role[st];
+        animate(el, { transform: ['scale(.96)', 'scale(1)'] }, { duration: .4, ease: [0.34, 1.56, 0.64, 1] });
+      }
+      var SEQ = [
+        [900,  { scout: 'work' }],
+        [2000, { scout: 'done', chloe: 'work' }],
+        [2600, { chloe: 'done', scribe: 'work' }],
+        [1900, { scribe: 'done', deal: 'work' }],
+        [1400, { deal: 'done' }],
+        [3000, { scout: 'idle', chloe: 'idle', scribe: 'idle', deal: 'idle' }]
+      ];
+      function runRelay(i) {
+        var step = SEQ[i % SEQ.length];
+        setTimeout(function () {
+          for (var k in step[1]) setAgent(k, step[1][k]);
+          runRelay(i + 1);
+        }, step[0]);
+      }
+      var relayStarted = false;
+      inView('#hero', function () {
+        if (relayStarted) return; relayStarted = true;
+        document.querySelectorAll('.tile').forEach(function (t, i) {
+          animate(t, { opacity: 1, transform: 'scale(1)' },
+            { type: 'spring', stiffness: 260, damping: 20, delay: .15 + i * .1 });
+        });
+        setTimeout(function () { runRelay(0); }, 900);
+      }, { amount: 0.25 });
+    })();
+  </script>
+</body>
+</html>

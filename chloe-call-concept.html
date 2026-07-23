@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chloe — Call Screen Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8; --cream-soft: #EFE8DC; --charcoal: #2A2A2A;
+    --terracotta: #E8985A; --terracotta-deep: #D9843F;
+    --muted: #6B6259; --muted-light: #B8AE9F;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif; background: var(--cream);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 40px 16px 60px; -webkit-font-smoothing: antialiased; color: var(--charcoal);
+  }
+  .lab-title { font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .lab-sub { font-size: 14px; color: var(--muted); margin-bottom: 34px; text-align: center; max-width: 420px; }
+
+  /* ---------- Phone frame ---------- */
+  .phone {
+    width: 375px; height: 760px; background: var(--charcoal); border-radius: 46px;
+    padding: 10px; box-shadow: 0 40px 90px rgba(42,42,42,.35);
+    position: relative;
+  }
+  .screen {
+    width: 100%; height: 100%; border-radius: 38px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column;
+    background:
+      radial-gradient(120% 60% at 80% 0%, #F8E9D8 0%, transparent 55%),
+      radial-gradient(100% 55% at 15% 95%, #EAD9C4 0%, transparent 50%),
+      linear-gradient(180deg, #F7F1E7 0%, #F0E5D4 48%, #E9D9C2 100%);
+  }
+  /* soft office shapes behind Chloe */
+  .scene { position: absolute; inset: 0; pointer-events: none; opacity: .5; filter: blur(2px); }
+  .scene i { position: absolute; background: rgba(42,42,42,.08); border-radius: 6px; }
+  .scene .win { left: 8%; top: 12%; width: 34%; height: 22%; border-radius: 50% 50% 8px 8px; background: rgba(232,152,90,.18); }
+  .scene .shelf1 { right: 8%; top: 16%; width: 26%; height: 8px; }
+  .scene .shelf2 { right: 8%; top: 26%; width: 26%; height: 8px; }
+  .scene .plant { right: 12%; top: 18%; width: 12px; height: 26px; background: rgba(217,132,63,.35); border-radius: 8px 8px 0 0; }
+  .scene .desk { left: 0; bottom: 18%; width: 100%; height: 7px; background: rgba(42,42,42,.10); }
+
+  /* ---------- Status bar ---------- */
+  .status { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 6px; font-size: 14px; font-weight: 600; position: relative; z-index: 5; }
+  .notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 110px; height: 26px; background: var(--charcoal); border-radius: 20px; }
+  .status .icons { display: inline-flex; gap: 5px; align-items: center; font-size: 11px; letter-spacing: .05em; }
+
+  /* ---------- Top controls ---------- */
+  .topbar { display: flex; justify-content: space-between; padding: 12px 18px 0; position: relative; z-index: 5; }
+  .chip {
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(42,42,42,.85); color: var(--cream);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; border: none;
+  }
+
+  /* ---------- Speech bubble ---------- */
+  .bubble {
+    margin: 14px 18px 0; background: rgba(252,250,246,.92); border: 1.5px solid rgba(42,42,42,.12);
+    border-radius: 20px; padding: 16px 16px 12px; position: relative; z-index: 5;
+    box-shadow: 0 12px 34px rgba(42,42,42,.10);
+    opacity: 0; transform: translateY(-12px); animation: drop .6s cubic-bezier(.34,1.56,.64,1) .5s forwards;
+  }
+  @keyframes drop { to { opacity: 1; transform: translateY(0); } }
+  .bubble .who { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .bubble p { font-size: 15.5px; font-weight: 500; line-height: 1.45; min-height: 66px; }
+  .bubble p .caret { display: inline-block; width: 2px; height: 1em; background: var(--terracotta-deep); vertical-align: -2px; animation: blinkc 1s steps(1) infinite; }
+  @keyframes blinkc { 50% { opacity: 0; } }
+  .bubble .tools { display: flex; gap: 14px; margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+  /* ---------- Chloe (flat vector, brand palette) ---------- */
+  .stage { flex: 1; display: flex; align-items: flex-end; justify-content: center; position: relative; z-index: 4; }
+  .chloe { width: 240px; margin-bottom: -6px; animation: float 4.2s ease-in-out infinite; transform-origin: bottom center; }
+  @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+  .chloe .eye { animation: blink 4.6s infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96%, 98% { transform: scaleY(.08); } }
+  .chloe .brow-l, .chloe .brow-r { animation: brows 4.2s ease-in-out infinite; transform-box: fill-box; }
+  @keyframes brows { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1.5px) } }
+  .chest-wave rect { animation: cw 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .chest-wave rect:nth-child(2) { animation-delay: .15s; } .chest-wave rect:nth-child(3) { animation-delay: .3s; }
+  .chest-wave rect:nth-child(4) { animation-delay: .45s; } .chest-wave rect:nth-child(5) { animation-delay: .6s; }
+  @keyframes cw { 0%,100% { transform: scaleY(.45) } 50% { transform: scaleY(1) } }
+
+  /* ---------- Bottom controls ---------- */
+  .bottom { position: relative; z-index: 6; padding: 0 0 26px; text-align: center; }
+  .tap { font-size: 13.5px; font-weight: 600; color: var(--charcoal); margin-bottom: 14px; opacity: .8; }
+  .mic-row { display: flex; align-items: center; justify-content: center; gap: 26px; }
+  .mic {
+    width: 78px; height: 78px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--terracotta); color: var(--charcoal); font-size: 26px;
+    display: flex; align-items: center; justify-content: center; position: relative;
+    box-shadow: 0 16px 36px rgba(217,132,63,.45);
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1), background .2s ease;
+  }
+  .mic:hover { transform: scale(1.07); background: var(--terracotta-deep); }
+  .mic:active { transform: scale(.94); }
+  .mic::before, .mic::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--terracotta); opacity: 0; animation: ring 2.6s ease-out infinite;
+  }
+  .mic::after { animation-delay: 1.3s; }
+  @keyframes ring { 0% { transform: scale(.9); opacity: .8; } 70% { transform: scale(1.5); opacity: 0; } 100% { opacity: 0; } }
+  .alt {
+    width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(42,42,42,.88); color: var(--cream); font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .note { margin-top: 30px; font-size: 12.5px; color: var(--muted); text-align: center; max-width: 400px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <p class="lab-title">Concept · Chloe call screen</p>
+  <p class="lab-sub">The character-led voice experience, in Marklinea's own design language. Tap the mic.</p>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="status"><span>9:41</span><span class="icons">●●● ⌁ ▮</span></div>
+
+      <div class="scene">
+        <i class="win"></i><i class="shelf1"></i><i class="shelf2"></i><i class="plant"></i><i class="desk"></i>
+      </div>
+
+      <div class="topbar">
+        <button class="chip" aria-label="Close">✕</button>
+        <button class="chip" aria-label="Settings">⚙</button>
+      </div>
+
+      <div class="bubble">
+        <div class="who">Chloe · Marklinea</div>
+        <p id="say"><span class="caret"></span></p>
+        <div class="tools"><span>🔈</span><span>💬</span><span style="margin-left:auto">⚑</span></div>
+      </div>
+
+      <div class="stage">
+        <!-- Chloe: flat-vector, brand palette, drawn in SVG -->
+        <svg class="chloe" viewBox="0 0 240 300" fill="none" aria-label="Chloe, Marklinea's discovery agent">
+          <!-- soft halo -->
+          <ellipse cx="120" cy="170" rx="105" ry="118" fill="#E8985A" opacity=".14"/>
+          <!-- body / blazer -->
+          <path d="M52 300 C52 236 82 212 120 212 C158 212 188 236 188 300 Z" fill="#2A2A2A"/>
+          <!-- collar -->
+          <path d="M104 214 L120 238 L136 214 L120 222 Z" fill="#F5F0E8"/>
+          <path d="M96 218 C104 214 112 212 120 212 L120 238 Z" fill="#3A3A3A"/>
+          <path d="M144 218 C136 214 128 212 120 212 L120 238 Z" fill="#3A3A3A"/>
+          <!-- chest badge with live waveform -->
+          <rect x="98" y="252" width="44" height="26" rx="13" fill="#F5F0E8"/>
+          <g class="chest-wave">
+            <rect x="106" y="258" width="3" height="14" rx="1.5" fill="#D9843F"/>
+            <rect x="113" y="258" width="3" height="14" rx="1.5" fill="#D9843F"/>
+            <rect x="120" y="258" width="3" height="14" rx="1.5" fill="#D9843F"/>
+            <rect x="127" y="258" width="3" height="14" rx="1.5" fill="#D9843F"/>
+            <rect x="134" y="258" width="3" height="14" rx="1.5" fill="#D9843F"/>
+          </g>
+          <!-- neck -->
+          <rect x="108" y="188" width="24" height="30" rx="10" fill="#E8985A"/>
+          <!-- head -->
+          <rect x="58" y="64" width="124" height="130" rx="58" fill="#E8985A"/>
+          <!-- face plate -->
+          <rect x="72" y="86" width="96" height="92" rx="44" fill="#F5F0E8"/>
+          <!-- hair sweep -->
+          <path d="M58 122 C58 84 86 60 122 60 C158 60 182 86 182 118 C182 106 170 78 150 84 C160 96 158 102 152 108 C142 88 118 78 96 92 C80 102 74 112 72 128 C66 128 60 126 58 122 Z" fill="#2A2A2A"/>
+          <!-- headset -->
+          <rect x="50" y="118" width="14" height="34" rx="7" fill="#2A2A2A"/>
+          <rect x="176" y="118" width="14" height="34" rx="7" fill="#2A2A2A"/>
+          <circle cx="57" cy="135" r="4" fill="#E8985A"/>
+          <circle cx="183" cy="135" r="4" fill="#E8985A"/>
+          <!-- mic boom -->
+          <path d="M62 148 C70 168 86 180 104 184" stroke="#2A2A2A" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="106" cy="185" r="7" fill="#D9843F"/>
+          <!-- brows -->
+          <rect class="brow-l" x="88" y="112" width="20" height="5" rx="2.5" fill="#2A2A2A"/>
+          <rect class="brow-r" x="132" y="112" width="20" height="5" rx="2.5" fill="#2A2A2A"/>
+          <!-- eyes -->
+          <circle class="eye" cx="98" cy="132" r="7.5" fill="#2A2A2A"/>
+          <circle class="eye" cx="142" cy="132" r="7.5" fill="#2A2A2A"/>
+          <circle cx="100.5" cy="129.5" r="2.4" fill="#F5F0E8"/>
+          <circle cx="144.5" cy="129.5" r="2.4" fill="#F5F0E8"/>
+          <!-- blush -->
+          <circle cx="86" cy="148" r="6" fill="#E8985A" opacity=".55"/>
+          <circle cx="154" cy="148" r="6" fill="#E8985A" opacity=".55"/>
+          <!-- smile -->
+          <path d="M104 154 C112 164 128 164 136 154" stroke="#2A2A2A" stroke-width="5.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="bottom">
+        <div class="tap" id="tapLabel">Tap to respond</div>
+        <div class="mic-row">
+          <button class="mic" id="mic" aria-label="Tap to talk">🎙</button>
+          <button class="alt" aria-label="Switch to chat">💬</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Concept mock — the same layout drops into the site as the full-screen call view. The vector Chloe is a placeholder slot: swap in your final generated character (PNG with transparent background) without touching the layout.</p>
+
+  <script>
+    // Chloe "speaks": typed line in the bubble
+    var lines = [
+      "Hi, I'm Chloe — Marklinea's discovery agent. What brought you to us today?",
+      "Nice — and how does your team handle inbound leads right now?",
+      "Got it. Want me to show you what your AEs would receive after a call like this?"
+    ];
+    var li = 0, sayEl = document.getElementById('say');
+    function typeLine(text, done) {
+      sayEl.innerHTML = '<span class="caret"></span>';
+      var i = 0;
+      (function tick() {
+        if (i <= text.length) {
+          sayEl.innerHTML = text.slice(0, i) + '<span class="caret"></span>';
+          i++;
+          setTimeout(tick, 24);
+        } else if (done) { done(); }
+      })();
+    }
+    setTimeout(function () { typeLine(lines[0]); }, 1100);
+
+    // Tap the mic: "listening" state, then Chloe's next line
+    var mic = document.getElementById('mic'), tapLabel = document.getElementById('tapLabel'), busy = false;
+    mic.addEventListener('click', function () {
+      if (busy) return; busy = true;
+      tapLabel.textContent = "Listening…";
+      mic.style.background = '#2A2A2A'; mic.style.color = '#F5F0E8';
+      setTimeout(function () {
+        tapLabel.textContent = "Tap to respond";
+        mic.style.background = ''; mic.style.color = '';
+        li = (li + 1) % lines.length;
+        typeLine(lines[li]);
+        busy = false;
+      }, 1800);
+    });
+  </script>
+</body>
+</html>

@@ -283,7 +283,7 @@
     .btn-chloe .sb-dots i { width: 5px; height: 5px; background: rgba(245, 240, 232, .65); }
     .btn-chloe.typing .sb-dots { display: inline-flex; }
     .btn-chloe.typing .sb-sub { display: none; }
-    @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 52px; } }
+    @media (max-width: 900px) { .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 52px; } .hero-grid > * { min-width: 0; } }
 
     /* Hero visual: the agent shuffle (motion.dev reordering) */
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
@@ -932,6 +932,30 @@
       .ticker-item[aria-hidden="true"] { display: none; }
       .btn-chloe, .btn-chloe::before, .btn-chloe::after { transition: none !important; }
       html { scroll-behavior: auto; }
+    }
+
+    /* ---------- Mobile ---------- */
+    html { overflow-x: hidden; }
+    @media (max-width: 640px) {
+      section { padding: 72px 0; }
+      .hero { padding: 20px 0 44px; }
+      .hero-say { max-width: 100%; }
+      .vol-pop { left: auto; right: 0; transform: translateY(6px); }
+      .ci-vol:hover .vol-pop, .ci-vol:focus-within .vol-pop { transform: translateY(0); }
+      .agent-rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      .ar-card { flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 12px 6px; min-width: 0; }
+      .ar-card .ar-t b { font-size: 12px; line-height: 1.25; }
+      .ar-card .ac-ic { width: 30px; height: 30px; }
+      .agent-stage { padding: 22px 18px; }
+      .as-head { gap: 12px; }
+      .as-head h3 { font-size: 20px; }
+      .as-quote { min-height: 0; }
+      .rpx-side { padding: 22px 18px; }
+      .lane, .verdict-tile { padding: 24px 20px; }
+      .rp-phead { min-height: 0; margin-bottom: 16px; }
+      .miss-line { font-size: 13px; padding: 14px 16px; }
+      .shift-stage { min-height: 0; }
+      .cta-chloe { max-width: 100%; }
     }
   </style>
 </head>

@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PC2N97N4');</script>
+  <!-- End Google Tag Manager -->
   <title>AI Agents for Sales Teams | Marklinea</title>
   <link rel="canonical" href="https://marklinea.com/">
   <link rel="icon" type="image/png" href="logo-badge-64.png">
@@ -344,28 +351,47 @@
       display: inline-flex; align-items: center; gap: 14px; padding-right: 110px;
       font-family: var(--font-head); font-size: 14px; font-weight: 600; white-space: nowrap;
     }
-    @keyframes tickerMove { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+    @keyframes tickerMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     .proof-strip .tag { background: var(--charcoal); color: var(--cream); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 10px; flex: none; }
 
     /* ---------- Problem ---------- */
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
-    .stat { border: 1px solid var(--line-dark); padding: 36px 30px; display: flex; flex-direction: column; min-height: 232px; }
+    .stat { border: 1px solid var(--line-dark); padding: 34px 28px 28px; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 204px; }
     .stat .num {
       font-family: var(--font-head); font-size: clamp(44px, 5.4vw, 66px); font-weight: 800;
-      color: var(--terracotta); line-height: 1; margin-bottom: 16px;
+      color: var(--cream); line-height: 1; margin-bottom: 14px;
       font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
       white-space: nowrap; min-height: 1em;
     }
-    .stat p { font-size: 15px; color: var(--muted-light); }
+    .stat p { font-size: 15px; color: var(--muted-light); text-wrap: balance; max-width: 30ch; }
     .stat p strong { color: var(--cream); }
     .stat .num, .stat p { transition: opacity .38s ease, transform .38s ease; }
     .stat.swapping .num, .stat.swapping p { opacity: 0; transform: translateY(10px); }
-    .pain-live {
-      margin-top: 44px; border: 1.5px solid var(--terracotta); padding: 18px 24px;
-      display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
-      font-family: var(--font-head); font-size: clamp(14px, 1.7vw, 18px); font-weight: 600; text-align: center;
+    /* ---------- One time axis: every card measured against the same 5-minute ruler ---------- */
+    .stat .tl { position: relative; width: 100%; margin-top: auto; padding-top: 24px; }
+    .tl-rail { position: absolute; left: 0; right: 0; top: 26px; height: 3px; background: rgba(245, 240, 232, .12); }
+    .tl-rail.dash { background: repeating-linear-gradient(90deg, rgba(245, 240, 232, .20) 0 6px, transparent 6px 13px); }
+    .tl-end { position: absolute; right: 0; top: 20px; width: 2px; height: 15px; background: var(--terracotta); opacity: .8; }
+    .tl-fill {
+      position: absolute; left: 0; top: 25.5px; height: 4px; width: 10%;
+      background: linear-gradient(90deg, rgba(232, 152, 90, .55), #F5B47D);
     }
-    .pain-live .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--terracotta); animation: pulse 1.4s infinite; flex: none; }
+    .tl-dot {
+      position: absolute; top: 22px; left: 0; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%;
+      background: var(--muted-light); opacity: .55;
+    }
+    .tl-note {
+      margin-top: 18px; text-align: center;
+      font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; color: var(--muted-light);
+    }
+    .stat.live { border-color: rgba(232, 152, 90, .55); }
+    .stat.live .num { color: var(--terracotta); }
+    .stat.live .tl-note { color: var(--terracotta); }
+    .proof {
+      margin-top: 34px; border: 1.5px solid var(--terracotta); padding: 21px 26px; text-align: center;
+      font-family: var(--font-head); font-weight: 600; font-size: clamp(15px, 1.8vw, 19px); color: var(--cream);
+    }
+    .proof b { color: var(--terracotta); font-weight: 800; }
     @media (max-width: 820px) { .stats { grid-template-columns: 1fr; } }
 
     /* ---------- Agents: spotlight relay — one agent explains, then hands over ---------- */
@@ -458,7 +484,7 @@
     /* Why now: the race. Facts are square, like the Problem stats. */
     .race { margin-top: 56px; }
     .race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
-    .lane { border: 1px solid var(--line-dark); padding: 34px 30px 30px; display: flex; flex-direction: column; }
+    .lane { border: 1px solid var(--line-dark); padding: 34px 30px 30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
     .lane.fast { border-color: var(--terracotta); }
     .lane-name {
       font-family: var(--font-head); font-size: 12px; font-weight: 700;
@@ -477,10 +503,10 @@
     .lane-time .lt-u { font-size: .46em; font-weight: 700; letter-spacing: .01em; margin-left: .04em; margin-right: .18em; opacity: .8; vertical-align: .12em; }
     .lane.fast .lane-time { color: var(--terracotta); }
     .lane.slow.dead .lane-time { text-decoration: line-through; text-decoration-color: var(--terracotta); text-decoration-thickness: 4px; }
-    .lane-track { height: 6px; background: rgba(245, 240, 232, .12); overflow: hidden; margin-top: auto; }
+    .lane-track { align-self: stretch; height: 6px; background: rgba(245, 240, 232, .12); overflow: hidden; margin-top: auto; }
     .lane-fill { display: block; height: 100%; width: 100%; background: var(--muted); }
     .lane.fast .lane-fill { background: linear-gradient(90deg, var(--terracotta-deep), var(--terracotta)); }
-    .lane-status { margin-top: 16px; font-size: 13.5px; font-weight: 500; color: var(--muted-light); display: flex; align-items: center; gap: 9px; min-height: 20px; }
+    .lane-status { align-self: stretch; justify-content: flex-start; text-align: left; margin-top: 16px; font-size: 13.5px; font-weight: 500; color: var(--muted-light); display: flex; align-items: center; gap: 9px; min-height: 20px; }
     .lane-status .ld { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; animation: pulse 2.2s infinite; }
     .lane-status .fd {
       width: 12px; height: 12px; border-radius: 50%; flex: none;
@@ -488,7 +514,7 @@
       animation: orbIdle 4.8s ease-in-out infinite;
     }
     .lane.fast .lane-status { color: var(--cream); }
-    .verdict-tile { background: var(--terracotta); color: var(--charcoal); padding: 34px 30px 30px; display: flex; flex-direction: column; justify-content: center; }
+    .verdict-tile { background: var(--terracotta); color: var(--charcoal); padding: 34px 30px 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     .verdict-tile .rv-num {
       font-family: var(--font-head); font-size: clamp(44px, 5vw, 64px); font-weight: 800;
       line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums;
@@ -532,17 +558,17 @@
 
     /* ---------- RocketPay ---------- */
     .rpx-stage {
-      display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto;
+      display: grid; grid-template-columns: 1fr 1fr;
       border: 2px solid var(--charcoal); margin-top: 56px; max-width: 1000px;
     }
-    .rpx-side { padding: 26px 32px 28px; display: flex; flex-direction: column; }
+    .rpx-side { padding: 26px 32px 14px; display: flex; flex-direction: column; }
     .rpx-side.you { border-right: 1px solid var(--line); background: rgba(42, 42, 42, .028); }
     .rpx-side.rp { background: #FCFAF6; }
     .rpx-head { height: 40px; display: flex; align-items: center; margin-bottom: 18px; }
     .rpx-head.you-h .rh-lab {
       font-family: var(--font-head); font-size: 11px; font-weight: 700; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--muted);
-      border: 1px solid var(--line); padding: 7px 12px;
+      text-transform: uppercase; color: var(--cream);
+      background: var(--muted); border: 1px solid var(--muted); padding: 7px 12px;
     }
     .rpx-head.rp-h { font-family: var(--font-head); font-size: 22px; font-weight: 800; line-height: 1; }
     .rpx-head.rp-h img { width: 30px; height: 30px; border-radius: 7px; object-fit: cover; margin-right: 9px; }
@@ -570,17 +596,10 @@
     .rm.sq { border: 1px solid var(--line); }
     .rm.sq::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted-light); }
     .rm.agic { width: 30px; height: 30px; background: var(--terracotta); color: var(--charcoal); }
-    .rpx-foot {
-      grid-column: 1 / -1; border-top: 2px solid var(--charcoal);
-      background: var(--terracotta); color: var(--charcoal); padding: 18px 32px;
-    }
-    .rpx-foot p { font-family: var(--font-head); font-size: 14.5px; font-weight: 500; line-height: 1.5; }
-    .rpx-foot b { font-weight: 800; }
     .rpx-cap { margin-top: 18px; font-size: 13px; color: var(--muted); }
     @media (max-width: 760px) {
       .rpx-stage { grid-template-columns: 1fr; }
       .rpx-side.you { border-right: none; border-bottom: 1px solid var(--line); }
-      .rpx-foot { padding: 16px 20px; }
     }
 
     /* ---------- CTA ---------- */
@@ -609,33 +628,39 @@
     /* ---------- Chloe dock (now-playing style) ---------- */
     .dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 150; display: none; transition: opacity .5s cubic-bezier(.22, 1, .36, 1); }
     .dock.show { display: block; }
-    /* minimized Chloe — just her; hovering opens a message bar */
+    /* minimized Chloe — the message bar is always open, not hover-revealed */
     .dock-pill {
       position: relative;
-      display: flex; flex-direction: row; align-items: center; cursor: pointer;
-      background: transparent; border: none; padding: 0; border-radius: 100px;
-      transition: background .5s ease, padding .5s ease, box-shadow .5s ease, transform .25s cubic-bezier(.22, 1, .36, 1);
-    }
-    .dock-pill:hover, .dock-pill:focus-within {
+      display: flex; flex-direction: row; align-items: center;
       background: var(--glass-bg);
       -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-edge);
-      padding: 8px 10px 8px 8px;
+      padding: 8px 10px 8px 8px; border-radius: 100px;
       box-shadow: var(--glass-shadow), var(--glass-inner);
+      transition: box-shadow .35s ease, background .5s ease, border-color .5s ease, padding .5s cubic-bezier(.22, 1, .36, 1), backdrop-filter .5s ease;
     }
-    .dock-pill:active { transform: scale(.97); }
-    .d-orb { position: relative; width: 58px; height: 58px; flex: none; }
+    .dock-pill:hover, .dock-pill:focus-within {
+      box-shadow: var(--glass-shadow), var(--glass-inner), 0 0 0 3px rgba(232, 152, 90, .16);
+    }
+    .d-orb { position: relative; width: 58px; height: 58px; flex: none; cursor: pointer; border-radius: 50%; transition: transform .25s cubic-bezier(.22, 1, .36, 1); }
+    .d-orb:active { transform: scale(.95); }
+    .d-orb:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
     .d-orb .morb {
       display: block; width: 100%; height: 100%;
       animation: orbIdle 4.6s ease-in-out infinite;
       box-shadow: 0 14px 34px rgba(217, 132, 63, .45), inset 0 -6px 12px rgba(110, 52, 10, .32), inset 0 4px 8px rgba(255, 235, 210, .4);
     }
     .dock-expand {
-      display: flex; align-items: center; gap: 8px;
-      max-width: 0; opacity: 0; overflow: hidden;
-      transition: max-width .75s cubic-bezier(.22, 1, .36, 1), opacity .5s ease .08s, margin-left .75s cubic-bezier(.22, 1, .36, 1);
+      display: flex; align-items: center; gap: 8px; margin-left: 10px; cursor: auto;
+      max-width: 420px; opacity: 1; overflow: hidden;
+      transition: max-width .55s cubic-bezier(.22, 1, .36, 1), opacity .4s ease .12s, margin-left .55s cubic-bezier(.22, 1, .36, 1);
     }
-    .dock-pill:hover .dock-expand, .dock-pill:focus-within .dock-expand { max-width: 420px; opacity: 1; margin-left: 10px; }
+    /* entrance: she lands as just an orb, then the bar unfurls around her */
+    .dock.entering .dock-expand { max-width: 0; opacity: 0; margin-left: 0; }
+    .dock.entering .dock-pill {
+      background: transparent; border-color: transparent; box-shadow: none; padding: 0;
+      -webkit-backdrop-filter: none; backdrop-filter: none;
+    }
     .dock-expand input {
       width: 200px; border: 1px solid rgba(255, 255, 255, .75); border-radius: 100px;
       padding: 11px 16px; font-family: var(--font-body); font-size: 13px; outline: none;
@@ -652,6 +677,13 @@
       display: flex; align-items: center; justify-content: center; transition: background .15s ease;
     }
     .dock-expand button:hover { background: var(--terracotta-deep); }
+    @media (max-width: 480px) {
+      .dock { left: 12px; right: 12px; transform: none; }
+      .dock-pill { width: 100%; }
+      .dock-expand { flex: 1; min-width: 0; margin-left: 8px; }
+      .dock-expand input { width: 100%; min-width: 0; }
+      .d-orb { width: 48px; height: 48px; }
+    }
     /* unread: she throws soft fading rings — no number, just presence */
     .dock-pill.unread .d-orb::before,
     .dock-pill.unread .d-orb::after {
@@ -1016,6 +1048,10 @@
   </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PC2N97N4"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <nav class="nav">
@@ -1031,12 +1067,12 @@
           <div class="drop">
             <a href="researcher.html">
               <span class="ic"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span>
-              <span class="tx"><b>AI Researcher</b><small>Knows your prospect before you do</small></span>
+              <span class="tx"><b>Researcher</b><small>Knows your prospect before you do</small></span>
               <span class="arr">→</span>
             </a>
             <a href="discovery.html">
               <span class="ic"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span>
-              <span class="tx"><b>AI Sales Engineer</b><small>Runs the live discovery call</small></span>
+              <span class="tx"><b>Sales Engineer</b><small>Runs the live discovery call</small></span>
               <span class="arr">→</span>
             </a>
             <a href="analyser.html">
@@ -1046,7 +1082,7 @@
             </a>
             <a href="summariser.html">
               <span class="ic"><svg width="24" height="22" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span>
-              <span class="tx"><b>AI Summariser</b><small>Writes the handover into your CRM</small></span>
+              <span class="tx"><b>Summariser</b><small>Writes the handover into your CRM</small></span>
               <span class="arr">→</span>
             </a>
           </div>
@@ -1089,7 +1125,7 @@
           </div>
           <div class="hero-id">
             <b>Chloe</b>
-            <span>AI Sales Engineer</span>
+            <span>Sales Engineer</span>
           </div>
           <div id="heroSay" class="hero-say">
             <div class="hero-msg">
@@ -1112,10 +1148,10 @@
 
     <!-- PROOF STRIP · terracotta -->
     <div class="proof-strip">
-      <div class="ticker" aria-label="Customer story: Companies like RocketPay have Sia, an AI Sales Engineer powered by Marklinea, taking care of every lead that reaches out.">
+      <div class="ticker" aria-label="Customer story: RocketPay has Sia, a Sales Engineer powered by Marklinea, taking care of every lead that reaches out.">
         <div class="ticker-track">
-          <span class="ticker-item"><span class="tag">Customer story</span> Companies like RocketPay have Sia, an AI Sales Engineer powered by Marklinea, taking care of every lead that reaches out.</span>
-          <span class="ticker-item" aria-hidden="true"><span class="tag">Customer story</span> Companies like RocketPay have Sia, an AI Sales Engineer powered by Marklinea, taking care of every lead that reaches out.</span>
+          <span class="ticker-item"><span class="tag">Customer story</span> RocketPay has Sia, a Sales Engineer powered by Marklinea, taking care of every lead that reaches out.</span>
+          <span class="ticker-item" aria-hidden="true"><span class="tag">Customer story</span> RocketPay has Sia, a Sales Engineer powered by Marklinea, taking care of every lead that reaches out.</span>
         </div>
       </div>
     </div>
@@ -1125,25 +1161,37 @@
       <div class="wrap">
         <p class="eyebrow reveal">The problem</p>
         <h2 class="h2 reveal">Speed wins deals. Silence kills them.</h2>
-        <p class="lede reveal">Your best leads decide in hours. Most teams answer in days. That gap is where revenue leaks.</p>
+        <p class="lede reveal">Your best leads decide in minutes. Most teams answer in days. That gap is where revenue leaks.</p>
         <div class="stats">
           <div class="stat reveal">
-            <div class="num" data-count="78" data-suffix="%">78%</div>
-            <p>of buyers <strong>purchase from the first vendor to respond.</strong> Speed is the deal.</p>
+            <div class="num" data-count="5" data-suffix=" min">5 min</div>
+            <p>is all you get before <strong>your odds collapse.</strong> After that they drop 10&times;.</p>
+            <div class="tl">
+              <div class="tl-rail"></div>
+              <div class="tl-end"></div>
+              <p class="tl-note">The deadline</p>
+            </div>
           </div>
           <div class="stat reveal">
             <div class="num" data-count="42" data-suffix="h">42h</div>
-            <p>of <strong>dead silence</strong> before the average B2B team answers a new lead. Your competitor answered on day one.</p>
+            <p>is what the average B2B team takes. <strong>504&times; past the window.</strong></p>
+            <div class="tl">
+              <div class="tl-rail dash"></div>
+              <div class="tl-dot"></div>
+              <p class="tl-note">No reply sent</p>
+            </div>
           </div>
-          <div class="stat reveal">
-            <div class="num" data-count="67" data-suffix="%">67%</div>
-            <p>of lost deals trace back to <strong>poor lead qualification.</strong> Reps chase the wrong prospects.</p>
+          <div class="stat reveal live">
+            <div class="num" data-count="30" data-suffix="s">30s</div>
+            <p>is what Chloe takes. <strong>Every lead, every time.</strong></p>
+            <div class="tl">
+              <div class="tl-rail"></div>
+              <div class="tl-fill"></div>
+              <p class="tl-note">10&times; inside the window</p>
+            </div>
           </div>
         </div>
-        <div class="pain-live reveal">
-          <span class="dot"></span>
-          <span id="painLine">Right now, a lead somewhere is waiting for a reply that will take two days.</span>
-        </div>
+        <p class="proof reveal"><b>78%</b> of buyers purchase from the first vendor to respond. Speed is the deal.</p>
       </div>
     </section>
 
@@ -1152,18 +1200,18 @@
       <div class="wrap">
         <p class="eyebrow reveal">The agents</p>
         <h2 class="h2 reveal">Orchestration is the product.</h2>
-        <p class="lede reveal">Four agents cover the whole life of a lead — research, conversation, intent, handover. Marklinea conducts them, so what reaches your prospect is one unbroken call.</p>
+        <p class="lede reveal">Five agents cover the whole life of a lead — research, conversation, intent, handover, follow-up. Marklinea conducts them, so what reaches your prospect is one unbroken call.</p>
 
         <div class="agent-show" id="agentShow">
           <div class="agent-rail reveal" role="tablist" aria-label="The agents">
             <button class="ar-card on" data-i="0" role="tab" aria-selected="true">
               <span class="ac-ic"><svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span>
-              <span class="ar-t"><b>AI Researcher</b></span>
+              <span class="ar-t"><b>Researcher</b></span>
               <i class="ar-progress"></i>
             </button>
             <button class="ar-card" data-i="1" role="tab" aria-selected="false">
               <span class="ac-ic"><svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span>
-              <span class="ar-t"><b>AI Sales Engineer</b></span>
+              <span class="ar-t"><b>Sales Engineer</b></span>
               <i class="ar-progress"></i>
             </button>
             <button class="ar-card" data-i="2" role="tab" aria-selected="false">
@@ -1173,7 +1221,12 @@
             </button>
             <button class="ar-card" data-i="3" role="tab" aria-selected="false">
               <span class="ac-ic"><svg viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span>
-              <span class="ar-t"><b>AI Summariser</b></span>
+              <span class="ar-t"><b>Summariser</b></span>
+              <i class="ar-progress"></i>
+            </button>
+            <button class="ar-card" data-i="4" role="tab" aria-selected="false">
+              <span class="ac-ic"><svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="25" height="21"/><path d="M2 7.5 L14.5 18 L27 7.5"/><path d="M31.5 16.5 L40 16.5"/><path d="M36.5 12.5 L40.5 16.5 L36.5 20.5"/></svg></span>
+              <span class="ar-t"><b>Follow-up</b></span>
               <i class="ar-progress"></i>
             </button>
           </div>
@@ -1181,12 +1234,12 @@
             <div class="as-head swap-el">
               <span class="ac-ic as-ic" id="asOrb"><svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span>
               <div>
-                <h3 id="asName">AI Researcher</h3>
+                <h3 id="asName">Researcher</h3>
               </div>
             </div>
             <p class="as-quote swap-el" id="asQuote">"I know your prospect before the phone rings."</p>
             <p class="as-desc swap-el" id="asDesc">Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.</p>
-            <div class="ac-tags swap-el" id="asTags"><span class="ac-tag hot">Reads</span><span class="ac-tag">Web + CRM</span><span class="ac-tag">Writes briefs</span></div>
+            <div class="ac-tags swap-el" id="asTags"><span class="ac-tag">Before the call</span><span class="ac-tag">Web + CRM</span><span class="ac-tag hot">A brief</span></div>
             <ul class="ac-list swap-el" id="asList"><li>Company news and funding rounds</li><li>Role, seniority, and org size</li><li>CRM history and past interactions</li></ul>
             <a class="ac-link swap-el" id="asLink" href="researcher.html">See how it works <span>→</span></a>
           </div>
@@ -1221,7 +1274,7 @@
           </div>
           <div class="miss-line">
             <span class="dot"></span>
-            <span class="ml-txt">Every second, another lead goes unanswered. <b id="missN">1</b> since you opened this page.</span>
+            <span class="ml-txt">Every second you wait, another lead goes unanswered. <b id="missN">1</b> leads dropped since you opened this page.</span>
           </div>
         </div>
       </div>
@@ -1245,17 +1298,14 @@
           <div class="rpx-side rp">
             <p class="rpx-head rp-h"><img src="data:image/png;base64,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" alt="RocketPay"><span class="w1">Rocket</span><span class="w2">Pay</span></p>
             <div class="rpx-feed">
-              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="17" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span><span class="rx"><b class="rt">Seconds</b><p>The <b>AI Researcher</b> has the full brief ready</p></span></div>
-              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="17" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span><span class="rx"><b class="rt">30 sec</b><p>The <b>AI Sales Engineer</b> is on the call, in any language</p></span></div>
-              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="19" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span><span class="rx"><b class="rt">Instant</b><p>The <b>AI Summariser</b> writes the CRM handover</p></span></div>
+              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="17" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span><span class="rx"><b class="rt">Seconds</b><p>The <b>Researcher</b> has the full brief ready</p></span></div>
+              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="17" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span><span class="rx"><b class="rt">30 sec</b><p>The <b>Sales Engineer</b> is on the call, in any language</p></span></div>
+              <div class="rpx-ev"><span class="rm agic"><svg width="20" height="19" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span><span class="rx"><b class="rt">Instant</b><p>The <b>Summariser</b> writes the CRM handover</p></span></div>
               <div class="rpx-ev"><span class="rm agic"><svg class="ic-faces" width="26" height="25" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M 23.12 21.72 A 10.6 10.6 0 1 0 13.88 12.48"/><path d="M 19.4 9 Q 20.8 6.9 22.2 9"/><path d="M 26.6 9 Q 28 6.9 29.4 9"/><path d="M 20.1 13.6 Q 24.4 18.1 28.7 13.6"/><circle cx="12.6" cy="23" r="10.6"/><path d="M 7.6 20.6 Q 9 22.7 10.4 20.6"/><path d="M 14.8 20.6 Q 16.2 22.7 17.6 20.6"/><path d="M 8.3 27.6 Q 12.6 23.1 16.9 27.6"/></svg></span><span class="rx"><b class="rt">Every call</b><p>The <b>Intent Analyser</b> reads how the buyer really felt</p></span></div>
             </div>
           </div>
-          <div class="rpx-foot">
-            <p><b>Every lead. Every hour. No one waiting.</b> RocketPay's inbound motion runs on Marklinea — under their own brand, in their own voice.</p>
-          </div>
         </div>
-        <p class="rpx-cap reveal">Four agents. One relay. Live on RocketPay today.</p>
+        <p class="rpx-cap reveal">Five agents. One relay. Live on RocketPay today.</p>
       </div>
     </section>
 
@@ -1319,8 +1369,8 @@
       <b>Chloe</b>
       <span id="dockToastText"></span>
     </div>
-    <div class="dock-pill" id="dockPill" role="button" tabindex="0" aria-label="Message Chloe">
-      <span class="d-orb"><span class="morb"></span></span>
+    <div class="dock-pill" id="dockPill">
+      <span class="d-orb" id="dockOrb" role="button" tabindex="0" aria-label="Talk to Chloe"><span class="morb"></span></span>
       <span class="dock-expand">
         <button class="ci-ic ci-mic" id="dkMic" aria-label="Enable microphone" aria-pressed="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
@@ -1367,12 +1417,12 @@
         </div>
         <div class="stage-id">
           <div class="nm">Chloe</div>
-          <div class="rl">AI Sales Engineer · <b id="stageState">Listening</b></div>
+          <div class="rl">Sales Engineer · <b id="stageState">Listening</b></div>
         </div>
       </div>
       <aside class="call-chat">
         <div class="cc-head">
-          <div class="t">Chloe · Marklinea<small>AI Sales Engineer</small></div>
+          <div class="t">Chloe · Marklinea<small>Sales Engineer</small></div>
           <button class="cc-close" id="callCloseX" aria-label="Close">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
@@ -1549,6 +1599,14 @@
         dockShown = shouldShow;
         if (shouldShow) {
           dock.classList.add('show');
+          /* unfurl the bar around her, whether or not the Motion slide-up runs */
+          if (!reduced) {
+            dock.classList.add('entering');
+            void dock.offsetWidth;                     /* commit the collapsed state */
+            requestAnimationFrame(function () { requestAnimationFrame(function () {
+              dock.classList.remove('entering');
+            }); });
+          }
           if (M && !reduced && !dockNoAnim) {
             M.animate(dock,
               { opacity: [0, 1], transform: ['translateX(-50%) translateY(14px)', 'translateX(-50%) translateY(0px)'] },
@@ -1563,6 +1621,7 @@
                 dock.style.opacity = ''; dock.style.transform = '';
               });
           } else { dock.classList.remove('show'); dock.style.opacity = ''; dock.style.transform = ''; }
+          dock.classList.remove('entering');
         }
       }
       /* Is the visitor still up at the hero? Measured on the hero SECTION, not the orb —
@@ -1585,14 +1644,23 @@
          own clock and completes — she never hovers over content waiting for more scroll.
          Coming back up triggers the return flight. */
       var heroOrbWrapEl = document.getElementById('heroOrbWrap');
-      var morphP = 0, morphState = 0, morphAnim = null;
+      var morphP = 0, morphState = 0, morphAnim = null, morphBase = null;
+      /* One reflow per flight, not one per frame. Stored in DOCUMENT space so it stays
+         correct while the visitor keeps scrolling mid-flight. */
+      function measureMorphBase() {
+        if (!heroOrbWrapEl) return null;
+        var prev = heroOrbWrapEl.style.transform;
+        heroOrbWrapEl.style.transform = 'none';
+        var r = heroOrbWrapEl.getBoundingClientRect();
+        heroOrbWrapEl.style.transform = prev;
+        return { cx: r.left + r.width / 2, docCy: r.top + window.scrollY + r.height / 2, w: r.width };
+      }
       function applyMorph() {
         if (!heroOrbWrapEl) return;
         var p = morphP;
-        /* measure her natural spot (transform cleared), then steer toward the widget's spot */
-        heroOrbWrapEl.style.transform = 'none';
-        var r = heroOrbWrapEl.getBoundingClientRect();
-        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        if (!morphBase) morphBase = measureMorphBase();
+        var r = { width: morphBase.w };
+        var cx = morphBase.cx, cy = morphBase.docCy - window.scrollY;
         var targetX = window.innerWidth / 2;
         var targetY = window.innerHeight - 22 - 29; /* dock: 22px from bottom, 58px orb */
         var s = 1 + (58 / r.width - 1) * p;
@@ -1625,6 +1693,7 @@
       function animateMorph(toDock) {
         if (!heroOrbWrapEl) return;
         if (morphAnim) cancelAnimationFrame(morphAnim);
+        morphBase = measureMorphBase();   /* the flight's single measurement */
         if (!toDock && morphDone) setDocked(false); /* widget yields before she flies home */
         var from = morphP, to = toDock ? 1 : 0;
         var dur = reduced ? 0 : 700;
@@ -2089,8 +2158,9 @@
         if (e.target.closest && e.target.closest('.dock-expand')) return;
         openCallFromWidget();
       });
-      pill.addEventListener('keydown', function (e) {
-        if ((e.key === 'Enter' || e.key === ' ') && e.target === pill) { e.preventDefault(); openCallFromWidget(); }
+      var dockOrb = document.getElementById('dockOrb');
+      if (dockOrb) dockOrb.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCallFromWidget(); }
       });
       if (dkSend) dkSend.addEventListener('click', dkSubmit);
       if (dkText) dkText.addEventListener('keydown', function (e) { if (e.key === 'Enter') dkSubmit(); });
@@ -2295,23 +2365,24 @@
       }
       window.addEventListener('scroll', syncDot, { passive: true });
       window.addEventListener('resize', syncDot);
+      window.addEventListener('resize', function () { morphBase = null; });
       syncDot();
 
       // The Agents: spotlight relay — one agent explains themselves, then hands over
       var AGENTS_DATA = [
         {
-          name: 'AI Researcher', ico: '<svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg>',
+          name: 'Researcher', ico: '<svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg>',
           quote: '"I know your prospect before the phone rings."',
           desc: 'Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.',
-          tags: [['Reads', 1], ['Web + CRM', 0], ['Writes briefs', 0]],
+          tags: [['Before the call', 0], ['Web + CRM', 0], ['A brief', 1]],
           points: ['Company news and funding rounds', 'Role, seniority, and org size', 'CRM history and past interactions'],
           link: 'researcher.html'
         },
         {
-          name: 'AI Sales Engineer', ico: '<svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg>',
+          name: 'Sales Engineer', ico: '<svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg>',
           quote: '"I run the conversation your best AE would."',
           desc: 'Takes the calls and speaks to your customers. A live voice call in the browser, uncovering process, pain, and the full BANT picture as you talk.',
-          tags: [['Speaks', 1], ['Hears', 1], ['Takes calls', 0]],
+          tags: [['On the call', 0], ['Live voice', 0], ['BANT', 1]],
           points: ['Live voice call, no downloads', 'Process, pain, and BANT discovery', 'Lead score from 0 to 100'],
           link: 'discovery.html'
         },
@@ -2319,17 +2390,25 @@
           name: 'Intent Analyser', ico: '<svg class="ic-faces" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M 23.12 21.72 A 10.6 10.6 0 1 0 13.88 12.48"/><path d="M 19.4 9 Q 20.8 6.9 22.2 9"/><path d="M 26.6 9 Q 28 6.9 29.4 9"/><path d="M 20.1 13.6 Q 24.4 18.1 28.7 13.6"/><circle cx="12.6" cy="23" r="10.6"/><path d="M 7.6 20.6 Q 9 22.7 10.4 20.6"/><path d="M 14.8 20.6 Q 16.2 22.7 17.6 20.6"/><path d="M 8.3 27.6 Q 12.6 23.1 16.9 27.6"/></svg>',
           quote: '"I hear what they meant, not just what they said."',
           desc: 'Reads tone, hesitation, and urgency across the whole call, then scores how ready this buyer really is. Your team knows who is warm before they pick up the phone.',
-          tags: [['Listens', 1], ['Reads sentiment', 1], ['Scores intent', 0]],
+          tags: [['On the call', 0], ['Tone + hesitation', 0], ['Buying intent', 1]],
           points: ['Sentiment and tone, moment by moment', 'Buying intent scored 0 to 100', 'The objection they never said out loud'],
+          link: 'analyser.html'
+        },
+        {
+          name: 'Summariser', ico: '<svg viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg>',
+          quote: '"The call ends. Your CRM is already updated."',
+          desc: 'Turns the conversation into a deal-ready handover. Summary, scorecard, transcript, and next steps land in your CRM before your AE opens their laptop.',
+          tags: [['After the call', 0], ['Full transcript', 0], ['CRM handover', 1]],
+          points: ['Deal-ready summary and scorecard', 'Full transcript in your CRM', 'Next steps and meeting booked'],
           link: 'summariser.html'
         },
         {
-          name: 'AI Summariser', ico: '<svg viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg>',
-          quote: '"The call ends. Your CRM is already updated."',
-          desc: 'Turns the conversation into a deal-ready handover. Summary, scorecard, transcript, and next steps land in your CRM before your AE opens their laptop.',
-          tags: [['Writes', 1], ['Syncs CRM', 1], ['Books the next step', 0]],
-          points: ['Deal-ready summary and scorecard', 'Full transcript in your CRM', 'Next steps and meeting booked'],
-          link: 'summariser.html'
+          name: 'Follow-up', ico: '<svg viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="25" height="21"/><path d="M2 7.5 L14.5 18 L27 7.5"/><path d="M31.5 16.5 L40 16.5"/><path d="M36.5 12.5 L40.5 16.5 L36.5 20.5"/></svg>',
+          quote: '"They hear from us before they\'ve closed the tab."',
+          desc: 'Drafts and sends the follow-up the moment the call ends — a recap, answers to what they actually asked, and the next step. In their inbox before your AE has opened the transcript.',
+          tags: [['After the call', 0], ['What they asked', 0], ['Email in their inbox', 1]],
+          points: ['Recap of what they told you', 'Answers to the questions they asked', 'The next step, with a booking link'],
+          link: null
         }
       ];
       var showEl = document.getElementById('agentShow');
@@ -2348,7 +2427,14 @@
           asDesc.textContent = a.desc;
           asTags.innerHTML = a.tags.map(function (t) { return '<span class="ac-tag' + (t[1] ? ' hot' : '') + '">' + t[0] + '</span>'; }).join('');
           asList.innerHTML = a.points.map(function (p) { return '<li>' + p + '</li>'; }).join('');
-          asLink.href = a.link; asLink.innerHTML = 'See how it works <span>→</span>';
+          if (a.link) {
+            asLink.href = a.link;
+            asLink.innerHTML = 'See how it works <span>→</span>';
+            asLink.style.display = '';
+          } else {
+            asLink.removeAttribute('href');
+            asLink.style.display = 'none';
+          }
           if (narrate) {
             var end = fillWords(asQuote, a.quote, 0.1, 0.09);
             agStage.classList.add('talking-stage');
@@ -2407,55 +2493,7 @@
         }
       }
 
-      // The Problem: rotating pain stats + a live clock the visitor can feel
-      var PAIN = [
-        [
-          { n: '78%', p: 'of buyers <strong>purchase from the first vendor to respond.</strong> Speed is the deal.' },
-          { n: '391%', p: 'higher conversion when a lead is <strong>called within the first minute.</strong> Minute two is already too late.' }
-        ],
-        [
-          { n: '42h', p: 'of <strong>dead silence</strong> before the average B2B team answers a new lead. Your competitor answered on day one.' },
-          { n: '5 min', p: 'is the window before <strong>the odds collapse.</strong> After that, your chance of qualifying drops 10x.' }
-        ],
-        [
-          { n: '67%', p: 'of lost deals trace back to <strong>poor lead qualification.</strong> Reps chase the wrong prospects.' },
-          { n: '21x', p: 'more likely to qualify a lead <strong>contacted in 5 minutes</strong> than in 30. Every minute bleeds odds.' }
-        ]
-      ];
-      document.querySelectorAll('#problem .stat').forEach(function (el, i) {
-        if (!PAIN[i]) return;
-        var idx = 0;
-        setInterval(function () {
-          idx = (idx + 1) % PAIN[i].length;
-          el.classList.add('swapping');
-          setTimeout(function () {
-            var num = el.querySelector('.num'), p = el.querySelector('p');
-            if (num) { num.dataset.rotated = '1'; num.textContent = PAIN[i][idx].n; }
-            if (p) p.innerHTML = PAIN[i][idx].p;
-            el.classList.remove('swapping');
-          }, 390);
-        }, 6200 + i * 1100);
-      });
-      var painLine = document.getElementById('painLine');
-      if (painLine) {
-        var pageStart = Date.now();
-        /* one duration format everywhere on this line: 52s · 1m 52s · 41h 58m */
-        var pad = function (n) { return (n < 10 ? '0' : '') + n; };
-        var fmtT = function (s) {
-          if (s < 60) return s + 's';
-          var m = Math.floor(s / 60);
-          if (m < 60) return m + 'm ' + pad(s % 60) + 's';
-          return Math.floor(m / 60) + 'h ' + pad(m % 60) + 'm';
-        };
-        setInterval(function () {
-          var t = Math.floor((Date.now() - pageStart) / 1000);
-          if (t < 30) {
-            painLine.textContent = "You've been on this page for " + fmtT(t) + '. Chloe would answer your lead in ' + fmtT(30 - t) + '. The average team takes 42h.';
-          } else {
-            painLine.textContent = "You've been on this page for " + fmtT(t) + '. Chloe would have answered ' + fmtT(t - 30) + ' ago. The average team is still ' + fmtT(42 * 3600 - t) + ' away.';
-          }
-        }, 1000);
-      }
+      // The Problem is stated in numbers only. The live race lives in Fold 4 (#coverage).
 
       // Counters (problem stats + urgency tiles)
       document.querySelectorAll('[data-count]').forEach(function (el) {

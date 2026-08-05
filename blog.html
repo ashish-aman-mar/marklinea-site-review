@@ -70,54 +70,83 @@
     .drop {
       position: absolute; top: calc(100% + 14px); left: 50%;
       transform: translateX(-50%) translateY(8px);
-      width: 358px; max-width: calc(100vw - 32px);
-      background: #fff; border: 1px solid var(--line);
-      border-radius: 16px; padding: 8px;
+      width: 600px; max-width: calc(100vw - 32px);
+      background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 8px;
       box-shadow: 0 24px 60px rgba(42, 42, 42, .16);
       opacity: 0; visibility: hidden; transition: opacity .22s ease, transform .22s ease, visibility .22s;
-      z-index: 130; display: flex; flex-direction: column; gap: 2px;
+      z-index: 130; display: grid; grid-template-columns: 200px 1fr; gap: 8px;
     }
     .drop::before { content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
     .nav-drop:hover .drop, .nav-drop:focus-within .drop {
       opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
     }
-    /* one row per agent — the whole row is the hit area and the highlight */
-    .drop a {
-      position: relative; display: grid; grid-template-columns: 38px 1fr 16px;
-      align-items: center; gap: 12px; padding: 11px 12px;
-      border: none; border-radius: 10px; background: transparent;
-      text-align: left; text-decoration: none;
-      transition: background .16s ease;
+    /* left rail */
+    .dl { display: flex; flex-direction: column; gap: 2px; }
+    .drop .b {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      padding: 10px 11px; border-radius: 9px; text-decoration: none;
+      font-size: 13px; font-weight: 600; color: var(--charcoal);
+      transition: background .16s ease, color .16s ease;
     }
-    .drop a::before {
-      content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px;
-      border-radius: 3px; background: var(--terracotta);
-      opacity: 0; transform: scaleY(.35); transform-origin: center;
-      transition: opacity .16s ease, transform .24s cubic-bezier(.22, 1, .36, 1);
+    .drop .b::before {
+      content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 3px;
+      background: var(--terracotta); opacity: 0; transform: scaleY(.4);
+      transition: opacity .16s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
     }
-    .drop a:hover, .drop a:focus-visible, .drop a.now { background: var(--cream-soft); outline: none; }
-    .drop a:hover::before, .drop a:focus-visible::before, .drop a.now::before { opacity: 1; transform: scaleY(1); }
-    .drop .ic {
-      width: 38px; height: 38px; border-radius: 10px; flex: none;
-      background: var(--cream-soft); color: var(--charcoal);
-      display: flex; align-items: center; justify-content: center;
-      transition: background .16s ease;
+    .drop .b:hover, .drop .b:focus-visible, .drop .b.now { background: var(--cream-soft); color: var(--terracotta-deep); outline: none; }
+    .drop .b:hover::before, .drop .b:focus-visible::before, .drop .b.now::before { opacity: 1; transform: scaleY(1); }
+    .drop .bi { display: flex; flex: none; opacity: .7; transition: opacity .16s ease; }
+    .drop .bi svg { width: 19px; height: 16px; }
+    .drop .b:hover .bi, .drop .b:focus-visible .bi, .drop .b.now .bi { opacity: 1; }
+    /* right preview — fixed box so nothing jumps between agents */
+    .dr { position: relative; background: var(--cream); border-radius: 11px; min-height: 292px; }
+    .pv {
+      position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column;
+      opacity: 0; visibility: hidden; transition: opacity .18s ease, visibility .18s;
     }
-    .drop a:hover .ic, .drop a:focus-visible .ic, .drop a.now .ic { background: var(--terracotta); }
-    .drop .tx { min-width: 0; }
-    .drop .tx b {
-      font-family: var(--font-head); font-size: 13.5px; font-weight: 700;
-      display: block; color: var(--charcoal); line-height: 1.25;
-      transition: color .16s ease;
+    .pv:first-child { opacity: 1; visibility: visible; }
+    .drop:has(.dl .b:hover) .pv, .drop:has(.dl .b:focus-visible) .pv { opacity: 0; visibility: hidden; }
+    .drop:has(.dl .b:nth-child(1):hover) .pv:nth-child(1),
+    .drop:has(.dl .b:nth-child(1):focus-visible) .pv:nth-child(1) { opacity: 1; visibility: visible; }
+    .drop:has(.dl .b:nth-child(2):hover) .pv:nth-child(2),
+    .drop:has(.dl .b:nth-child(2):focus-visible) .pv:nth-child(2) { opacity: 1; visibility: visible; }
+    .drop:has(.dl .b:nth-child(3):hover) .pv:nth-child(3),
+    .drop:has(.dl .b:nth-child(3):focus-visible) .pv:nth-child(3) { opacity: 1; visibility: visible; }
+    .drop:has(.dl .b:nth-child(4):hover) .pv:nth-child(4),
+    .drop:has(.dl .b:nth-child(4):focus-visible) .pv:nth-child(4) { opacity: 1; visibility: visible; }
+    .drop:has(.dl .b:nth-child(5):hover) .pv:nth-child(5),
+    .drop:has(.dl .b:nth-child(5):focus-visible) .pv:nth-child(5) { opacity: 1; visibility: visible; }
+    .pi {
+      width: 46px; height: 46px; border-radius: 12px; background: var(--terracotta); color: var(--charcoal);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 13px; flex: none;
     }
-    .drop .tx small { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
-    .drop a:hover .tx b, .drop a:focus-visible .tx b { color: var(--terracotta-deep); }
-    .drop .arr {
-      display: block; font-size: 14px; line-height: 1; color: var(--terracotta-deep);
-      opacity: 0; transform: translateX(-5px);
-      transition: opacity .16s ease, transform .24s cubic-bezier(.22, 1, .36, 1);
+    .pi svg { width: 26px; height: 22px; }
+    .pq { font-family: var(--font-head); font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 9px; }
+    .pd { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 14px; }
+    .tg {
+      font-size: 9.5px; letter-spacing: .11em; text-transform: uppercase; font-weight: 700;
+      padding: 4px 8px; border-radius: 5px; background: var(--cream-soft); color: var(--muted);
+      border: 1px solid var(--line);
     }
-    .drop a:hover .arr, .drop a:focus-visible .arr { opacity: 1; transform: translateX(0); }
+    .tg.hot { background: var(--terracotta); color: var(--charcoal); border-color: var(--terracotta); }
+    @media (max-width: 720px) {
+      .drop { grid-template-columns: 1fr; width: 320px; }
+      .dr { display: none; }
+    }
+    .nav-links a:not(.btn) {
+      position: relative; padding: 9px 15px; border-radius: 9px;
+      transition: background .16s ease, color .16s ease;
+    }
+    .nav-links a:not(.btn)::after {
+      content: ""; position: absolute; left: 50%; right: 50%; bottom: 4px; height: 2px;
+      background: var(--terracotta-deep); border-radius: 2px;
+      transition: left .22s cubic-bezier(.22, 1, .36, 1), right .22s cubic-bezier(.22, 1, .36, 1);
+    }
+    .nav-links a:not(.btn):hover, .nav-links a:not(.btn):focus-visible {
+      background: var(--cream-soft); color: var(--terracotta-deep); outline: none;
+    }
+    .nav-links a:not(.btn):hover::after, .nav-links a:not(.btn):focus-visible::after { left: 14px; right: 14px; }
 
   .head { padding: 96px 0 56px; }
   .eyebrow { font-family: var(--font-head); font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terracotta-deep); margin-bottom: 20px; }
@@ -151,32 +180,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </a>
           <div class="drop">
-            <a href="/researcher">
-              <span class="ic"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span>
-              <span class="tx"><b>Researcher</b><small>Knows your prospect before you do</small></span>
-              <span class="arr">→</span>
-            </a>
-            <a href="/discovery">
-              <span class="ic"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span>
-              <span class="tx"><b>Sales Engineer</b><small>Runs the live discovery call</small></span>
-              <span class="arr">→</span>
-            </a>
-            <a href="/analyser">
-              <span class="ic"><svg class="ic-faces" width="26" height="25" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M 23.12 21.72 A 10.6 10.6 0 1 0 13.88 12.48"/><path d="M 19.4 9 Q 20.8 6.9 22.2 9"/><path d="M 26.6 9 Q 28 6.9 29.4 9"/><path d="M 20.1 13.6 Q 24.4 18.1 28.7 13.6"/><circle cx="12.6" cy="23" r="10.6"/><path d="M 7.6 20.6 Q 9 22.7 10.4 20.6"/><path d="M 14.8 20.6 Q 16.2 22.7 17.6 20.6"/><path d="M 8.3 27.6 Q 12.6 23.1 16.9 27.6"/></svg></span>
-              <span class="tx"><b>Intent Analyser</b><small>Reads how the buyer really felt</small></span>
-              <span class="arr">→</span>
-            </a>
-            <a href="/summariser">
-              <span class="ic"><svg width="24" height="22" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span>
-              <span class="tx"><b>Summariser</b><small>Writes the handover into your CRM</small></span>
-              <span class="arr">→</span>
-            </a>
-            <a href="/#agents">
-              <span class="ic"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="25" height="21"/><path d="M2 7.5 L14.5 18 L27 7.5"/><path d="M31.5 16.5 L40 16.5"/><path d="M36.5 12.5 L40.5 16.5 L36.5 20.5"/></svg></span>
-              <span class="tx"><b>Follow-up</b><small>Emails the lead the moment it ends</small></span>
-              <span class="arr">&rarr;</span>
-            </a>
+          <div class="dl">
+            <a class="b" href="/researcher"><span class="bi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span><span>Researcher</span></a>
+            <a class="b" href="/discovery"><span class="bi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span><span>Sales Engineer</span></a>
+            <a class="b" href="/analyser"><span class="bi"><svg class="ic-faces" width="30" height="28" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M 23.12 21.72 A 10.6 10.6 0 1 0 13.88 12.48"/><path d="M 19.4 9 Q 20.8 6.9 22.2 9"/><path d="M 26.6 9 Q 28 6.9 29.4 9"/><path d="M 20.1 13.6 Q 24.4 18.1 28.7 13.6"/><circle cx="12.6" cy="23" r="10.6"/><path d="M 7.6 20.6 Q 9 22.7 10.4 20.6"/><path d="M 14.8 20.6 Q 16.2 22.7 17.6 20.6"/><path d="M 8.3 27.6 Q 12.6 23.1 16.9 27.6"/></svg></span><span>Intent Analyser</span></a>
+            <a class="b" href="/summariser"><span class="bi"><svg width="24" height="22" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span><span>Summariser</span></a>
+            <a class="b" href="/#agents"><span class="bi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="25" height="21"/><path d="M2 7.5 L14.5 18 L27 7.5"/><path d="M31.5 16.5 L40 16.5"/><path d="M36.5 12.5 L40.5 16.5 L36.5 20.5"/></svg></span><span>Follow-up</span></a>
           </div>
+          <div class="dr">
+            <div class="pv"><span class="pi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M2 6 C 10 4.5, 18 5.5, 24 5"/><path d="M2 13 C 8 11.5, 13 12.5, 17 12"/><path d="M2 20 C 7 18.8, 10 19.6, 13 19.2"/><ellipse cx="27" cy="18" rx="8.5" ry="8" transform="rotate(-12 27 18)"/><path d="M33.5 24.5 C 36 27, 38 29.5, 40 32"/></svg></span><p class="pq">&ldquo;I know your prospect before the phone rings.&rdquo;</p><p class="pd">Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.</p><div class="tags"><span class="tg">Before the call</span><span class="tg">Web + CRM</span><span class="tg hot">A brief</span></div></div>
+            <div class="pv"><span class="pi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="3" y1="13.5" x2="3" y2="20.5"/><line x1="9" y1="9.5" x2="9" y2="24.5"/><line x1="15" y1="5" x2="15" y2="29"/><line x1="21" y1="11.5" x2="21" y2="22.5"/><line x1="27" y1="7.5" x2="27" y2="26.5"/><line x1="33" y1="12.5" x2="33" y2="21.5"/><line x1="39" y1="10" x2="39" y2="24"/></svg></span><p class="pq">&ldquo;I run the conversation your best AE would.&rdquo;</p><p class="pd">Takes the calls and speaks to your customers. A live voice call in the browser, uncovering process, pain, and the full BANT picture as you talk.</p><div class="tags"><span class="tg">On the call</span><span class="tg">Live voice</span><span class="tg hot">BANT</span></div></div>
+            <div class="pv"><span class="pi"><svg class="ic-faces" width="30" height="28" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M 23.12 21.72 A 10.6 10.6 0 1 0 13.88 12.48"/><path d="M 19.4 9 Q 20.8 6.9 22.2 9"/><path d="M 26.6 9 Q 28 6.9 29.4 9"/><path d="M 20.1 13.6 Q 24.4 18.1 28.7 13.6"/><circle cx="12.6" cy="23" r="10.6"/><path d="M 7.6 20.6 Q 9 22.7 10.4 20.6"/><path d="M 14.8 20.6 Q 16.2 22.7 17.6 20.6"/><path d="M 8.3 27.6 Q 12.6 23.1 16.9 27.6"/></svg></span><p class="pq">&ldquo;I hear what they meant, not just what they said.&rdquo;</p><p class="pd">Reads tone, hesitation, and urgency across the whole call, then scores how ready this buyer really is. Your team knows who is warm before they pick up the phone.</p><div class="tags"><span class="tg">On the call</span><span class="tg">Tone + hesitation</span><span class="tg hot">Buying intent</span></div></div>
+            <div class="pv"><span class="pi"><svg width="24" height="22" viewBox="0 0 42 40" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M28 3 C 31 5.5, 32.5 7, 34 10 L 14 30 C 11 31.2, 8.5 31.8, 6 32 C 6.5 29.5, 7.2 27, 8.5 24.5 Z"/><path d="M2 37 C 12 34.5, 24 36.5, 38 35.5"/></svg></span><p class="pq">&ldquo;The call ends. Your CRM is already updated.&rdquo;</p><p class="pd">Turns the conversation into a deal-ready handover. Summary, scorecard, transcript, and next steps land in your CRM before your AE opens their laptop.</p><div class="tags"><span class="tg">After the call</span><span class="tg">Full transcript</span><span class="tg hot">CRM handover</span></div></div>
+            <div class="pv"><span class="pi"><svg width="24" height="20" viewBox="0 0 42 34" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="25" height="21"/><path d="M2 7.5 L14.5 18 L27 7.5"/><path d="M31.5 16.5 L40 16.5"/><path d="M36.5 12.5 L40.5 16.5 L36.5 20.5"/></svg></span><p class="pq">&ldquo;They hear from us before they&#x27;ve closed the tab.&rdquo;</p><p class="pd">Drafts and sends the follow-up the moment the call ends — a recap, answers to what they actually asked, and the next step. In their inbox before your AE has opened the transcript.</p><div class="tags"><span class="tg">After the call</span><span class="tg">What they asked</span><span class="tg hot">Email in their inbox</span></div></div>
+          </div>
+        </div>
         </li>
         <li class="nav-link-item"><a href="/#proof">Customers</a></li>
         <li class="nav-link-item"><a class="on" href="/blog">Blog</a></li>

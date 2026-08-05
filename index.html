@@ -757,6 +757,89 @@
     .dock-wave span:nth-child(2n) { animation-delay: .12s; }
     .dock-wave span:nth-child(3n) { animation-delay: .24s; }
 
+    /* ---------- Chloe voice greeting: sound cue + callback ---------- */
+    /* the cue only ever appears when the browser refused autoplay */
+    .cg-cue {
+      display: none; align-items: center; gap: 7px; margin: 12px auto 0;
+      padding: 7px 14px 7px 11px; border-radius: 100px; cursor: pointer;
+      background: rgba(255, 255, 255, .62);
+      -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, .8);
+      box-shadow: 0 6px 20px rgba(42, 42, 42, .1), inset 0 1px 0 rgba(255, 255, 255, .9);
+      font-family: var(--font-body); font-size: 12.5px; color: var(--charcoal);
+      transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    .cg-cue.show { display: inline-flex; animation: cgCueIn .45s cubic-bezier(.22, 1, .36, 1); }
+    .cg-cue:hover { background: rgba(255, 255, 255, .88); box-shadow: 0 10px 26px rgba(42, 42, 42, .14), inset 0 1px 0 rgba(255, 255, 255, .95); }
+    .cg-cue:active { transform: scale(.97); }
+    .cg-cue:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
+    .cg-cue svg { color: var(--terracotta-deep); flex: none; }
+    @keyframes cgCueIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* callback: a second way to reach her, offered from the dock */
+    .dock-alt {
+      display: block; margin: 10px auto 0; padding: 6px 14px; border: none; border-radius: 100px;
+      background: rgba(255, 255, 255, .5);
+      -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+      box-shadow: 0 4px 14px rgba(42, 42, 42, .09), inset 0 1px 0 rgba(255, 255, 255, .85);
+      font-family: var(--font-body); font-size: 12px; color: var(--muted); cursor: pointer;
+      transition: color .15s ease, background .15s ease;
+    }
+    .dock-alt:hover { color: var(--terracotta-deep); background: rgba(255, 255, 255, .8); }
+    .dock-alt:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
+    .dock-alt[hidden] { display: none; }
+
+    .dock-call {
+      position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
+      width: 306px; text-align: left;
+      /* this panel carries real reading copy over the dark fold — glass alone loses it */
+      background: rgba(253, 250, 245, .97);
+      -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-edge); border-radius: 18px;
+      padding: 15px 16px 14px; box-shadow: var(--glass-shadow), var(--glass-inner);
+    }
+    .dock-call[hidden] { display: none; }
+    .dock-call b {
+      display: block; font-family: var(--font-head); font-size: 13px; font-weight: 700;
+      color: var(--charcoal); margin-bottom: 3px;
+    }
+    .dock-call .dc-sub { display: block; font-size: 12.5px; line-height: 1.5; color: var(--muted); margin-bottom: 11px; }
+    .dc-row { display: flex; gap: 8px; align-items: center; }
+    .dc-row input {
+      flex: 1; min-width: 0; border: 1px solid rgba(255, 255, 255, .75); border-radius: 100px;
+      background: rgba(255, 255, 255, .62); color: var(--charcoal);
+      padding: 11px 15px; font-family: var(--font-body); font-size: 13.5px; outline: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .dc-row input::placeholder { color: var(--muted); opacity: .7; }
+    .dc-row input:focus { border-color: var(--terracotta-deep); background: rgba(255, 255, 255, .85); }
+    .dock-call.invalid .dc-row input { border-color: rgba(197, 68, 62, .6); background: rgba(197, 68, 62, .06); }
+    .dc-row button {
+      width: 42px; height: 42px; flex: none; border-radius: 50%; border: none; cursor: pointer;
+      background: var(--terracotta); color: var(--charcoal);
+      display: flex; align-items: center; justify-content: center; transition: background .15s ease;
+    }
+    .dc-row button:hover { background: var(--terracotta-deep); }
+    .dc-row button[disabled] { opacity: .55; cursor: default; }
+    .dc-err { display: none; margin-top: 8px; font-size: 12px; color: #C5443E; }
+    .dock-call.invalid .dc-err { display: block; }
+    .dc-note { display: block; margin-top: 9px; font-size: 11px; color: var(--muted); }
+    .dc-x {
+      position: absolute; top: 9px; right: 10px; width: 22px; height: 22px;
+      border: none; border-radius: 50%; background: rgba(42, 42, 42, .06);
+      color: var(--muted); font-size: 14px; line-height: 1; cursor: pointer;
+    }
+    .dc-x:hover { background: rgba(42, 42, 42, .13); color: var(--charcoal); }
+    /* confirmed state: the form gives way to her promise */
+    .dc-done { display: none; }
+    .dock-call.done .dc-form, .dock-call.done .dc-note, .dock-call.done .dc-sub { display: none; }
+    .dock-call.done .dc-done { display: block; animation: cgCueIn .4s cubic-bezier(.22, 1, .36, 1); }
+    .dc-done .dcd-line { font-size: 13px; line-height: 1.55; color: var(--charcoal); }
+    .dc-done .dcd-num { font-weight: 700; color: var(--terracotta-deep); }
+    .dc-done .dcd-qa { display: block; margin-top: 8px; font-size: 11px; color: #C5443E; }
+    @media (max-width: 480px) { .dock-call { width: calc(100vw - 40px); } }
+
     /* Chloe mini-orb — the same being as the call-screen orb */
     .morb {
       border-radius: 50%;
@@ -1183,6 +1266,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg>
               </button>
             </div>
+              <button class="cg-cue" id="cgCueH" type="button" hidden>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      Turn on sound
+              </button>
           </div>
         </div>
       </div>
@@ -1405,11 +1492,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="mh-x" id="micHintX" aria-label="Dismiss">×</button>
   </div>
 
+  <!-- Chloe's recorded greeting: two beats, so the words and her voice stay in step.
+       If the files are absent, the greeting silently falls back to visual-only. -->
+  <audio id="cgA1" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-1.mp3" type="audio/mpeg"></audio>
+  <audio id="cgA2" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-2.mp3" type="audio/mpeg"></audio>
+
   <!-- Chloe dock: now-playing pill that expands into a chat -->
   <div class="dock" id="dock">
     <div class="dock-toast" id="dockToast" hidden role="status">
       <b>Chloe</b>
       <span id="dockToastText"></span>
+    </div>
+    <div class="dock-call" id="dockCall" hidden role="dialog" aria-label="Get a call from Chloe">
+      <button class="dc-x" id="dockCallX" aria-label="Close">×</button>
+      <b>Get a call from Chloe</b>
+      <span class="dc-sub">Give her your number and she'll ring you in about 30 seconds.</span>
+      <form class="dc-form" id="dockCallForm" novalidate>
+        <span class="dc-row">
+          <input type="tel" id="dockPhone" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210" aria-label="Your phone number">
+          <button type="submit" id="dockCallGo" aria-label="Request a call">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+          </button>
+        </span>
+        <span class="dc-err" id="dockCallErr" role="alert">That doesn't look like a working number — include your country code.</span>
+      </form>
+      <span class="dc-note">Used only for this call. Nothing else.</span>
+      <div class="dc-done" id="dockCallDone" role="status">
+        <span class="dcd-line">On my way — I'm calling <span class="dcd-num" id="dockCallNum"></span> now. Keep an eye on your phone.</span>
+        <span class="dcd-qa" id="dockCallQa" hidden>QA preview — no call was actually placed.</span>
+      </div>
     </div>
     <div class="dock-pill" id="dockPill">
       <span class="d-orb" id="dockOrb" role="button" tabindex="0" aria-label="Talk to Chloe"><span class="morb"></span></span>
@@ -1424,6 +1535,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
       <span class="msg-badge" id="badgePill" hidden>1</span>
     </div>
+    <button class="dock-alt" id="dockAlt" type="button">Not a good time? Get a call instead</button>
   </div>
 
   <!-- Chloe's proactive hello (fires 5s after landing; she speaks the greeting) -->
@@ -1445,6 +1557,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg>
       </button>
     </div>
+    <button class="cg-cue" id="cgCue" type="button" hidden>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      Turn on sound
+    </button>
   </div>
 
   <div class="chat" id="chat" aria-label="Live call with Chloe" role="dialog" aria-modal="true">
@@ -1829,35 +1945,132 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var len = (text || '').length;
         wrapEl.style.setProperty('--orbW', (len > 90 ? 170 : len > 50 ? 195 : 220) + 'px');
       }
-      function speakGreeting() {
+      /* ---------- Chloe's recorded voice ----------
+         Browsers refuse audible playback until the visitor has interacted with the page.
+         So: try for real at 3s (returning visitors with engagement will actually hear her),
+         and if the browser says no, keep today's silent greeting and arm a one-shot
+         unlock on their first gesture. The words always land either way. */
+      var VOICE = {
+        a1: document.getElementById('cgA1'),
+        a2: document.getElementById('cgA2'),
+        cues: [document.getElementById('cgCueH'), document.getElementById('cgCue')].filter(Boolean),
+        unlocked: false, muted: false, armed: false, armedAt: 0, running: false, done: false,
+        has: function (el) { return !!(el && !el.error); },
+        dur: function (el) { return (el && isFinite(el.duration) && el.duration > 0.3) ? el.duration : 0; },
+        /* resolves {ok, dur} — never rejects, so a missing file degrades instead of throwing */
+        play: function (el) {
+          if (!el || VOICE.muted || document.hidden) return Promise.resolve({ ok: false, dur: 0 });
+          try { el.currentTime = 0; } catch (e) {}
+          var pr;
+          try { pr = el.play(); } catch (e) { return Promise.resolve({ ok: false, dur: 0 }); }
+          if (!pr || !pr.then) return Promise.resolve({ ok: true, dur: VOICE.dur(el) });
+          return pr.then(function () { VOICE.unlocked = true; return { ok: true, dur: VOICE.dur(el) }; })
+                   .catch(function () { return { ok: false, dur: 0 }; });
+        },
+        /* pace the word reveal to the real length of the take, so voice and text finish together */
+        stepFor: function (dur, text) {
+          var n = (text || '').split(' ').length;
+          if (!dur || !n) return 0.13;
+          return Math.min(0.30, Math.max(0.06, (dur - 0.35) / n));
+        },
+        /* the greeting has two surfaces — hero while she's in the fold, floating panel once
+           the visitor scrolls away. The cue has to live on both or it shows up on neither. */
+        showCue: function () {
+          if (VOICE.muted || !VOICE.has(VOICE.a1)) return;
+          VOICE.cues.forEach(function (c) { c.hidden = false; c.classList.add('show'); });
+        },
+        hideCue: function () {
+          VOICE.cues.forEach(function (c) { c.classList.remove('show'); c.hidden = true; });
+        },
+        arm: function () {
+          if (VOICE.armed || VOICE.unlocked || VOICE.muted) return;
+          VOICE.armed = true; VOICE.armedAt = Date.now();
+          ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+            document.addEventListener(ev, VOICE.onGesture, true);
+          });
+        },
+        disarm: function () {
+          VOICE.armed = false;
+          ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+            document.removeEventListener(ev, VOICE.onGesture, true);
+          });
+        },
+        onGesture: function (ev) {
+          VOICE.disarm();
+          if (VOICE.muted || VOICE.unlocked) return;
+          var t = ev && ev.target;
+          /* the cue has its own handler — let it do the work */
+          if (t && t.closest && t.closest('#cgCue, #cgCueH')) return;
+          /* they've moved on; replaying a greeting minutes later would be jarring */
+          if (Date.now() - VOICE.armedAt > 45000) { VOICE.hideCue(); return; }
+          /* they're engaging or navigating — the greeting has served its purpose */
+          if (t && t.closest && t.closest('#dock, .chloe-pop, .hero-say, .cta-host, #navChloe, a[href], button')) {
+            VOICE.hideCue(); return;
+          }
+          VOICE.hideCue();
+          VOICE.running = false;
+          speakGreeting(true);   /* synchronous enough to keep the gesture context alive on iOS */
+        }
+      };
+      VOICE.cues.forEach(function (c) {
+        c.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          VOICE.disarm(); VOICE.hideCue(); VOICE.running = false;
+          speakGreeting(true);
+        });
+      });
+      /* opened in a background tab: don't talk into an empty room — wait until they look */
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && VOICE.deferred && !VOICE.unlocked && !VOICE.running) {
+          VOICE.deferred = false; speakGreeting();
+        }
+      });
+
+      function speakGreeting(fast) {
+        if (VOICE.running || VOICE.done) return;
+        if (document.hidden && !fast) { VOICE.deferred = true; return; }
+        VOICE.running = true;
         /* Beat 1: she leans back to make room — nothing else moves */
         setTalking(true);
         sizeOrbFor(GREET1 + ' ' + GREET2);
+        var lead = fast ? 0 : 500;
+        /* on the gesture path the audio must start in the same tick as the click */
+        var first = fast ? VOICE.play(VOICE.a1) : null;
         /* Beat 2: once she's settled, the words breathe into the reserved space */
         setTimeout(function () {
-          SURFACES.forEach(function (p) {
-            if (!p[0] || !p[1]) return;
-            p[0].className = 'cp-line active'; p[1].className = 'cp-line'; p[1].innerHTML = '';
-            fillWords(p[0], GREET1, 0.05, 0.13);
-          });
-          var t1 = 0.05 + GREET1.split(' ').length * 0.13;
-          setTimeout(function () {
-            /* she moves to the next sentence: the first settles small, the new one takes the stage */
+          (first || VOICE.play(VOICE.a1)).then(function (r1) {
+            if (!r1.ok && !VOICE.unlocked) VOICE.showCue(), VOICE.arm();
+            var s1 = r1.ok ? VOICE.stepFor(r1.dur, GREET1) : 0.13;
             SURFACES.forEach(function (p) {
               if (!p[0] || !p[1]) return;
-              p[0].className = 'cp-line done';
-              p[1].className = 'cp-line active';
-              fillWords(p[1], GREET2, 0.2, 0.13);
+              p[0].className = 'cp-line active'; p[1].className = 'cp-line'; p[1].innerHTML = '';
+              fillWords(p[0], GREET1, 0.05, s1);
             });
-            var t2 = 0.2 + GREET2.split(' ').length * 0.13;
-            /* Beat 3: she rests */
+            var t1 = Math.max(0.05 + GREET1.split(' ').length * s1, r1.ok ? r1.dur : 0);
             setTimeout(function () {
-              setTalking(false);
-              if (!heroOut) setBtnState('resume', GREET2);
-            }, (t2 + 0.5) * 1000);
-          }, (t1 + 0.55) * 1000);
-        }, 500);
+              VOICE.play(r1.ok ? VOICE.a2 : null).then(function (r2) {
+                var s2 = r2.ok ? VOICE.stepFor(r2.dur, GREET2) : 0.13;
+                /* she moves to the next sentence: the first settles small, the new one takes the stage */
+                SURFACES.forEach(function (p) {
+                  if (!p[0] || !p[1]) return;
+                  p[0].className = 'cp-line done';
+                  p[1].className = 'cp-line active';
+                  fillWords(p[1], GREET2, 0.2, s2);
+                });
+                var t2 = Math.max(0.2 + GREET2.split(' ').length * s2, r2.ok ? r2.dur : 0);
+                /* Beat 3: she rests */
+                setTimeout(function () {
+                  VOICE.running = false;
+                  if (r1.ok) VOICE.done = true;
+                  setTalking(false);
+                  if (!heroOut) setBtnState('resume', GREET2);
+                }, (t2 + 0.5) * 1000);
+              });
+            }, (t1 + (r1.ok ? 0.3 : 0.55)) * 1000);
+          });
+        }, lead);
       }
+
       /* Two fixed surfaces, no docking: the hero block speaks while the fold is visible;
          the floating panel appears only when the visitor has scrolled away */
       var hsL1 = document.getElementById('hsL1');
@@ -2238,6 +2451,92 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (dockToast) dockToast.addEventListener('click', function () {
         hideDockToast();
         if (dkText) { try { dkText.focus({ preventScroll: true }); } catch (e) { dkText.focus(); } }
+      });
+
+      /* ---------- Callback: the second way to reach her ----------
+         Not everyone can talk in a browser tab at 3pm. Give them the number field
+         and she calls them — same agent, same conversation, on their phone. */
+      var dockAlt = document.getElementById('dockAlt');
+      var dockCall = document.getElementById('dockCall');
+      var dockCallForm = document.getElementById('dockCallForm');
+      var dockPhone = document.getElementById('dockPhone');
+      var dockCallGo = document.getElementById('dockCallGo');
+      var dockCallErr = document.getElementById('dockCallErr');
+      var dockCallNum = document.getElementById('dockCallNum');
+      var dockCallQa = document.getElementById('dockCallQa');
+      var DEFAULT_CC = '+91';
+      /* E.164 or nothing — the dialler will reject anything else, so catch it here */
+      function normalisePhone(raw) {
+        var s = String(raw || '').replace(/[^\d+]/g, '');
+        if (s.indexOf('+') > 0) s = s.replace(/\+/g, '');
+        if (s.charAt(0) === '+') return /^\+[1-9]\d{7,14}$/.test(s) ? s : null;
+        s = s.replace(/^0+/, '');
+        if (/^\d{10}$/.test(s)) return DEFAULT_CC + s;
+        if (/^\d{11,15}$/.test(s)) return '+' + s;
+        return null;
+      }
+      function openCallback() {
+        if (!dockCall) return;
+        hideDockToast();
+        dockCall.hidden = false;
+        if (dockAlt) dockAlt.hidden = true;
+        try { dockPhone.focus({ preventScroll: true }); } catch (e) { dockPhone.focus(); }
+      }
+      function closeCallback() {
+        if (!dockCall) return;
+        dockCall.hidden = true;
+        dockCall.classList.remove('invalid');
+        if (dockAlt && !dockCall.classList.contains('done')) dockAlt.hidden = false;
+      }
+      if (dockAlt) dockAlt.addEventListener('click', function (e) { e.stopPropagation(); openCallback(); });
+      var dockCallX = document.getElementById('dockCallX');
+      if (dockCallX) dockCallX.addEventListener('click', function (e) { e.stopPropagation(); closeCallback(); });
+      if (dockCall) dockCall.addEventListener('click', function (e) { e.stopPropagation(); });
+      if (dockPhone) dockPhone.addEventListener('input', function () { dockCall.classList.remove('invalid'); });
+      if (dockCallForm) dockCallForm.addEventListener('submit', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var e164 = normalisePhone(dockPhone.value);
+        if (!e164) {
+          dockCallErr.textContent = "That doesn't look like a working number — include your country code.";
+          dockCall.classList.add('invalid');
+          try { dockPhone.focus(); } catch (err) {}
+          return;
+        }
+        dockCall.classList.remove('invalid');
+        dockCallGo.disabled = true;
+        /* +919876543210 is unreadable, and if we guessed the country code they need to see it */
+        function prettyPhone(raw, norm) {
+          var typed = String(raw || '').trim();
+          if (typed.charAt(0) === '+') return typed;
+          var cc = DEFAULT_CC, rest = norm.slice(cc.length);
+          return cc + ' ' + (rest.length === 10 ? rest.slice(0, 5) + ' ' + rest.slice(5) : rest);
+        }
+        function confirmed(isQa) {
+          dockCallNum.textContent = prettyPhone(dockPhone.value, e164);
+          if (dockCallQa) dockCallQa.hidden = !isQa;
+          dockCall.classList.add('done');
+          if (dockAlt) dockAlt.hidden = true;
+        }
+        var ep = window.MARKLINEA_CALLBACK_ENDPOINT;
+        /* no endpoint wired yet: confirm the flow but say so, rather than promise a call nobody placed */
+        if (!ep) { confirmed(true); return; }
+        fetch(ep, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: e164,
+            page: location.pathname,
+            referrer: document.referrer || null,
+            requested_at: new Date().toISOString()
+          })
+        }).then(function (r) {
+          if (!r.ok) throw new Error('bad status');
+          confirmed(false);
+        }).catch(function () {
+          dockCallGo.disabled = false;
+          dockCallErr.textContent = "Couldn't reach Chloe just now — try that once more?";
+          dockCall.classList.add('invalid');
+        });
       });
       document.getElementById('chatClose').addEventListener('click', closeChat);
       var closeX = document.getElementById('callCloseX');

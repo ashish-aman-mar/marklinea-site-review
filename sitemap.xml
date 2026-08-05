@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://marklinea.com/</loc>
-    <lastmod>2026-07-23</lastmod>
-  </url>
-  <url>
-    <loc>https://marklinea.com/researcher.html</loc>
-    <lastmod>2026-07-23</lastmod>
-  </url>
-  <url>
-    <loc>https://marklinea.com/discovery.html</loc>
-    <lastmod>2026-07-23</lastmod>
-  </url>
-  <url>
-    <loc>https://marklinea.com/analyser.html</loc>
-    <lastmod>2026-07-28</lastmod>
-  </url>
-  <url>
-    <loc>https://marklinea.com/summariser.html</loc>
-    <lastmod>2026-07-23</lastmod>
-  </url>
-  <url>
-    <loc>https://marklinea.com/blog.html</loc>
-    <lastmod>2026-07-23</lastmod>
-  </url>
+  <url><loc>https://marklinea.com/</loc><lastmod>2026-08-04</lastmod><priority>1.0</priority></url>
+  <url><loc>https://marklinea.com/researcher</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://marklinea.com/discovery</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://marklinea.com/analyser</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://marklinea.com/summariser</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://marklinea.com/blog</loc><lastmod>2026-08-04</lastmod><priority>0.6</priority></url>
 </urlset>

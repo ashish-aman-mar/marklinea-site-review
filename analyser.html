@@ -4,6 +4,26 @@
   <meta name="robots" content="noindex, nofollow">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('ml_consent'); } catch (e) {}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+      if (stored === 'granted') gtag('consent', 'update', { analytics_storage: 'granted' });
+      window.__mlConsent = stored;   /* 'granted' | 'denied' | null */
+    })();
+  </script>
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -511,7 +531,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .mlw-expand input:focus { border-color: #D9843F; }
     .mlw-send { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; background: #E8985A; color: #2A2A2A; display: flex; align-items: center; justify-content: center; flex: none; transition: background .15s ease; }
     .mlw-send:hover { background: #D9843F; }
-  </style>
+  
+    /* ---------- Consent bar ---------- */
+    /* Non-blocking by design: the hero still lands, the page still works.
+       Accept and Decline are visually identical — a "reject" that is harder
+       to find than "accept" is exactly what regulators fine people for. */
+    .consent {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 300;
+      background: rgba(253, 250, 245, .98);
+      -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+      border-top: 1px solid rgba(42, 42, 42, .1);
+      box-shadow: 0 -10px 40px rgba(42, 42, 42, .09);
+      transform: translateY(100%); transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+    }
+    .consent[hidden] { display: none; }
+    .consent.show { transform: translateY(0); }
+    .consent-in {
+      max-width: 1120px; margin: 0 auto; padding: 15px 24px 16px;
+      display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+    }
+    .consent-txt {
+      flex: 1; min-width: 260px; margin: 0;
+      font-family: var(--font-body); font-size: 13.5px; line-height: 1.6; color: var(--charcoal);
+    }
+    .consent-more {
+      border: none; background: none; padding: 0; margin-left: 6px; cursor: pointer;
+      font-family: var(--font-body); font-size: 13.5px; color: var(--terracotta-deep);
+      text-decoration: underline; text-underline-offset: 3px;
+    }
+    .consent-more:hover { color: var(--charcoal); }
+    .consent-detail {
+      flex-basis: 100%; order: 3; margin: 2px 0 0;
+      font-family: var(--font-body); font-size: 12.5px; line-height: 1.65; color: var(--muted);
+      border-left: 2px solid rgba(217, 132, 63, .4); padding-left: 12px;
+    }
+    .consent-detail[hidden] { display: none; }
+    .consent-detail b { color: var(--charcoal); font-weight: 700; }
+    .consent-btns { display: flex; gap: 10px; flex: none; }
+    /* identical weight, deliberately */
+    .consent-btn {
+      min-width: 116px; padding: 10px 20px; border-radius: 100px; cursor: pointer;
+      font-family: var(--font-head); font-size: 13px; font-weight: 700;
+      background: #fff; color: var(--charcoal);
+      border: 1.5px solid rgba(42, 42, 42, .22);
+      transition: border-color .15s ease, background .15s ease, color .15s ease;
+    }
+    .consent-btn:hover { border-color: var(--terracotta-deep); color: var(--terracotta-deep); background: var(--cream-soft); }
+    .consent-btn:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
+    /* Chloe sits bottom-centre — lift her clear of the bar while it's up */
+    body.consent-open .dock { bottom: calc(22px + var(--consent-h, 84px)); }
+    @media (max-width: 720px) {
+      .consent-in { padding: 14px 16px 15px; gap: 12px; }
+      .consent-btns { width: 100%; }
+      .consent-btn { flex: 1; min-width: 0; }
+    }
+</style>
   <div class="mlw-dock">
     <div class="mlw-pill">
       <button class="mlw-orb" id="mlwOrb" aria-label="Talk to Chloe"></button>
@@ -530,6 +604,64 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       document.getElementById('mlwOrb').addEventListener('click', function () { go(''); });
       document.getElementById('mlwSend').addEventListener('click', function () { go(t.value.trim()); });
       t.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(t.value.trim()); });
+    })();
+  </script>
+  <!-- Consent: non-blocking, equal-weight choices -->
+  <div class="consent" id="consentBar" role="region" aria-label="Cookie choices" hidden>
+    <div class="consent-in">
+      <p class="consent-txt">
+        We use analytics cookies to see how this site gets used. We don't run advertising cookies and we don't sell anything to anyone.
+        <button type="button" class="consent-more" id="consentMore" aria-expanded="false" aria-controls="consentDetail">What we collect</button>
+      </p>
+      <div class="consent-detail" id="consentDetail" hidden>
+        <b>Accept</b> — Google Analytics records which pages you open, roughly which country you're in, and how you found us. That's it.<br>
+        <b>Decline</b> — nothing is recorded, and every part of this site works exactly the same, Chloe included.<br>
+        Advertising and personalisation cookies stay switched off either way. You can change your mind any time by clearing this site's data.
+      </div>
+      <div class="consent-btns">
+        <button type="button" class="consent-btn" id="consentReject">Decline</button>
+        <button type="button" class="consent-btn" id="consentAccept">Accept</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var bar = document.getElementById('consentBar');
+      if (!bar) return;
+      var moreBtn = document.getElementById('consentMore');
+      var detail = document.getElementById('consentDetail');
+      function measure() {
+        document.documentElement.style.setProperty('--consent-h', bar.offsetHeight + 'px');
+      }
+      function decide(choice) {
+        try { localStorage.setItem('ml_consent', choice); } catch (e) {}
+        if (choice === 'granted' && typeof gtag === 'function') {
+          gtag('consent', 'update', { analytics_storage: 'granted' });
+        }
+        window.__mlConsent = choice;
+        bar.classList.remove('show');
+        document.body.classList.remove('consent-open');
+        setTimeout(function () { bar.hidden = true; }, 460);
+        /* the click that answers this bar is also the gesture that unlocks audio —
+           tell Chloe synchronously so she can speak inside the same user gesture */
+        document.dispatchEvent(new CustomEvent('marklinea:consent', { detail: { choice: choice } }));
+      }
+      if (moreBtn) moreBtn.addEventListener('click', function () {
+        var open = detail.hidden;
+        detail.hidden = !open;
+        moreBtn.setAttribute('aria-expanded', String(open));
+        moreBtn.textContent = open ? 'Hide detail' : 'What we collect';
+        measure();
+      });
+      document.getElementById('consentAccept').addEventListener('click', function () { decide('granted'); });
+      document.getElementById('consentReject').addEventListener('click', function () { decide('denied'); });
+      if (window.__mlConsent == null) {
+        bar.hidden = false;
+        document.body.classList.add('consent-open');
+        measure();
+        window.addEventListener('resize', measure);
+        requestAnimationFrame(function () { requestAnimationFrame(function () { bar.classList.add('show'); measure(); }); });
+      }
     })();
   </script>
 </body>

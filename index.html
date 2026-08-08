@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Live call with the real QA Chloe. Uncomment and fill in clientid to switch it on.
+       base/clientname/clientid follow the same iframe contract RocketPay uses.
+  <script>
+    window.MARKLINEA_LIVE = {
+      base: 'https://qa.marklinea.com/',
+      clientname: 'marklinea',
+      clientid: ''            // <-- Marklinea's own client id goes here
+    };
+  </script>
+  -->
   <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -1043,43 +1053,12 @@
     .ci-spk { color: var(--charcoal); }
     .ci-spk.muted { color: var(--muted); border-color: rgba(42, 42, 42, .18); background: rgba(255, 255, 255, .38); }
     .ci-spk:not(.muted) { border-color: var(--terracotta-deep); }
+    /* without this the browser paints its own blue ring, which fights the palette */
+    .ci-spk:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
+    .ci-spk:focus:not(:focus-visible) { outline: none; }
 
-    /* ---------- Chloe's email ask ----------
-       Never a bare ask: this only renders after she has answered something.
-       She asks by voice or text; the visitor TYPES the address — speech-to-text
-       mangles email addresses and a wrong one silently kills the handover. */
-    .ask-email {
-      align-self: flex-start; max-width: 92%; width: 100%;
-      background: #fff; border: 1.5px solid var(--terracotta); border-radius: 16px;
-      border-bottom-left-radius: 5px; padding: 13px 15px 14px;
-      opacity: 0; transform: translateY(8px);
-    }
-    .ask-email.in { opacity: 1; transform: none; transition: opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
-    .ae-why { margin: 0 0 10px; font-size: 13px; line-height: 1.5; color: var(--muted); }
-    .ae-row { display: flex; gap: 8px; align-items: center; }
-    .ae-row input {
-      flex: 1; min-width: 0; border: 1.5px solid var(--line); border-radius: 100px;
-      padding: 10px 14px; font-family: var(--font-body); font-size: 13.5px; outline: none;
-      color: var(--charcoal); background: #fff;
-    }
-    .ae-row input:focus { border-color: var(--terracotta-deep); }
-    .ask-email.bad .ae-row input { border-color: #C5443E; background: rgba(197,68,62,.05); }
-    .ae-row button {
-      flex: none; border: none; border-radius: 100px; cursor: pointer;
-      background: var(--terracotta); color: var(--charcoal);
-      font-family: var(--font-head); font-size: 12.5px; font-weight: 700; padding: 11px 18px;
-      transition: background .15s ease;
-    }
-    .ae-row button:hover { background: var(--terracotta-deep); }
-    .ae-row button[disabled] { opacity: .55; cursor: default; }
-    .ae-err { display: none; margin-top: 8px; font-size: 12px; color: #C5443E; }
-    .ask-email.bad .ae-err { display: block; }
-    .ae-skip {
-      display: block; margin-top: 9px; background: none; border: none; padding: 0; cursor: pointer;
-      font-family: var(--font-body); font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px;
-    }
-    .ae-skip:hover { color: var(--charcoal); }
-    .ask-email.done .ae-row, .ask-email.done .ae-skip, .ask-email.done .ae-err { display: none; }
+    /* (Chloe's email ask now lives in her own message plus the existing message bar;
+       the separate card component was removed.) */
     .ci-ic.muted .w1, .ci-ic.muted .w2 { display: none; }
     .ci-ic.muted .mx { display: block; }
     .cp-input input {
@@ -1330,6 +1309,47 @@
       .consent-in { padding: 14px 16px 15px; gap: 12px; }
       .consent-btns { width: 100%; }
       .consent-btn { flex: 1; min-width: 0; }
+    }
+
+    /* ---------- Live call with the real Chloe ----------
+       The QA agent is reached the same way RocketPay reaches it: an iframe with query
+       params and allow="microphone". There is no POST API. Modal behaviour mirrors the
+       proven rocketpay_qa_landing.html — 100dvh on phones so browser chrome cannot clip
+       it, safe-area insets, scroll lock, Escape and backdrop close. */
+    .live-wrap {
+      position: fixed; inset: 0; z-index: 400; display: none;
+      align-items: center; justify-content: center;
+      background: rgba(20, 18, 16, .72);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      opacity: 0; transition: opacity .28s ease;
+    }
+    .live-wrap.open { display: flex; }
+    .live-wrap.in { opacity: 1; }
+    .live-card {
+      position: relative; background: var(--cream); border-radius: 20px; overflow: hidden;
+      width: min(420px, calc(100vw - 32px)); height: min(88vh, 720px);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, .45);
+      transform: translateY(18px) scale(.96); opacity: 0;
+      transition: transform .38s cubic-bezier(.22, 1, .36, 1), opacity .28s ease;
+    }
+    .live-wrap.in .live-card { transform: none; opacity: 1; }
+    .live-card iframe { display: block; width: 100%; height: 100%; border: 0; }
+    .live-x {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(42, 42, 42, .82); color: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .live-x:hover { background: var(--charcoal); }
+    .live-x:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }
+    @media (max-width: 600px) {
+      .live-card {
+        width: 100vw; height: 100dvh; border-radius: 0;
+      }
+      .live-x { top: calc(12px + env(safe-area-inset-top, 0px)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .live-wrap, .live-card { transition: none; }
     }
 </style>
 </head>
@@ -1652,6 +1672,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="mh-x" id="micHintX" aria-label="Dismiss">×</button>
   </div>
 
+  <!-- Live call with the real Chloe. The iframe is created on open and destroyed on
+       close, so no agent session is ever held open in the background. -->
+  <div class="live-wrap" id="liveWrap" role="dialog" aria-modal="true" aria-label="Live call with Chloe">
+    <div class="live-card" id="liveCard">
+      <button class="live-x" id="liveX" aria-label="End call and close">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
   <!-- Chloe's recorded greeting: two beats, so the words and her voice stay in step.
        If the files are absent, the greeting silently falls back to visual-only. -->
   <audio id="cgA1" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-1.mp3" type="audio/mpeg"></audio>
@@ -1912,7 +1942,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function scriptIntroReplied(userText) {
         addMsg('chloe', GREET, .2);
         addMsg('user', userText, 1.0);
-        addMsg('chloe', 'Glad you are here! Ask me anything below — or pick a place to start.', 1.9);
+        /* Answer, don't deflect. This used to say "Ask me anything below", which ignored
+           the question they had just typed — and left nothing for the email ask to follow. */
+        addMsg('chloe', 'Good to meet you. The short version: I answer every inbound lead in under thirty seconds, qualify them on a live call, and hand your team a deal-ready brief.', 1.9);
         introQuicks(3.1);
       }
       /* Dock appears only after the hero CTA scrolls out of view */
@@ -2275,7 +2307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          Value first, then the ask, at most twice, always with a reason tied to what
          they just asked about. Front-end only for now: the real decision of when to
          ask belongs to the Tier-1 chat service (see the always-on Chloe ADR). */
-      var IDENT = { email: null, asks: 0, refused: false };
+      var IDENT = { email: null, asks: 0, refused: false, pending: false };
       function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(String(v || '').trim()); }
       /* Centralised so every path she answers on is covered — there are six, and
          hand-placing the call missed four of them. The length test IS the value-first
@@ -2285,44 +2317,122 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         /* force = the substance was delivered by something the length test cannot see,
            e.g. the three product slides */
         if (!force && (!plain || plain.length < ASK_MIN_CHARS)) return;
-        maybeAskEmail('I can send you the detail on this \u2014 what is your work email? If we get cut off you will still have it.', 2.2);
+        maybeAskEmail('One thing \u2014 what is your work email? I will send you the detail on this, so you have it even if we get cut off.', 2.2);
       }
+      var AWAIT_EMAIL = false;
+      var PH_WAS = {};
+      function emailInputs() {
+        return ['chatText', 'cpText', 'dkText', 'hsText'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+      }
+      function setEmailMode(on) {
+        AWAIT_EMAIL = on;
+        if (!on) IDENT.pending = false;
+        emailInputs().forEach(function (el) {
+          if (on) {
+            if (PH_WAS[el.id] === undefined) PH_WAS[el.id] = el.placeholder;
+            el.placeholder = 'Enter your email';
+            el.setAttribute('inputmode', 'email');
+            el.setAttribute('autocomplete', 'email');
+          } else {
+            if (PH_WAS[el.id] !== undefined) el.placeholder = PH_WAS[el.id];
+            el.removeAttribute('inputmode'); el.removeAttribute('autocomplete');
+          }
+        });
+      }
+      /* She asks in her own words, in her own message bubble, and the message bar the
+         visitor is already using becomes the email field. No second widget to notice. */
       function maybeAskEmail(reason, delay) {
-        if (IDENT.email || IDENT.refused || IDENT.asks >= 2) return;
-        IDENT.asks++;
+        /* IDENT.pending is set synchronously because her ask message is itself long
+           enough to satisfy considerAsk — without it she asks again about her own ask. */
+        if (IDENT.email || IDENT.refused || IDENT.asks >= 2 || AWAIT_EMAIL || IDENT.pending) return;
+        IDENT.asks++; IDENT.pending = true;
+        var d = delay || 0.9;
+        addMsg('chloe', reason, d);
         setTimeout(function () {
-          var wrap = document.createElement('div');
-          wrap.className = 'ask-email';
-          wrap.innerHTML =
-            '<p class="ae-why">' + reason + '</p>' +
-            '<form class="ae-row" novalidate><input type="email" inputmode="email" autocomplete="email" placeholder="you@company.com" aria-label="Your work email">' +
-            '<button type="submit">Send it</button></form>' +
-            '<span class="ae-err" role="alert">That does not look like a working email address.</span>' +
-            '<button type="button" class="ae-skip">Not right now</button>';
-          body.appendChild(wrap);
-          body.scrollTop = body.scrollHeight;
-          requestAnimationFrame(function () { wrap.classList.add('in'); });
-          var form = wrap.querySelector('.ae-row');
-          var input = wrap.querySelector('input');
-          var skip = wrap.querySelector('.ae-skip');
-          input.addEventListener('input', function () { wrap.classList.remove('bad'); });
-          form.addEventListener('submit', function (ev) {
-            ev.preventDefault();
-            var v = input.value.trim();
-            if (!validEmail(v)) { wrap.classList.add('bad'); input.focus(); return; }
-            IDENT.email = v;
-            wrap.classList.add('done');
-            wrap.querySelector('.ae-why').textContent = 'Thanks — sending it to ' + v + ' now.';
-            addMsg('chloe', 'Got it. That is on its way to <b>' + v.replace(/</g, '&lt;') + '</b>. Anything else you want to dig into?', .5);
-          });
-          skip.addEventListener('click', function () {
-            IDENT.refused = true;
-            wrap.classList.add('done');
-            wrap.querySelector('.ae-why').textContent = 'No problem — carrying on.';
-            addMsg('chloe', 'All good. Ask me anything else.', .4);
-          });
-          try { input.focus({ preventScroll: true }); } catch (e) {}
-        }, (delay || 0.9) * 1000);
+          IDENT.pending = false;
+          setEmailMode(true);
+          var el = document.getElementById('chatText');
+          if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
+        }, (d + 0.8) * 1000);
+      }
+      /* true = the typed text was consumed as an answer to her ask */
+      function handleEmailReply(text) {
+        if (!AWAIT_EMAIL) return false;
+        var t = String(text || '').trim();
+        if (validEmail(t)) {
+          IDENT.email = t; setEmailMode(false);
+          addMsg('user', t.replace(/</g, '&lt;'));
+          addMsg('chloe', 'Got it \u2014 that is on its way to <b>' + t.replace(/</g, '&lt;') + '</b>. What else do you want to dig into?', .8);
+          offerLive(2.1);
+          return true;
+        }
+        if (t.indexOf('@') > -1) {
+          addMsg('user', t.replace(/</g, '&lt;'));
+          addMsg('chloe', 'That address does not look quite right \u2014 mind checking it?', .7);
+          return true;
+        }
+        /* no @ at all: they would rather keep talking. Drop the ask, never nag. */
+        setEmailMode(false);
+        return false;
+      }
+
+      /* ---------- Live call with the real Chloe ----------
+         Reached exactly the way RocketPay reaches it: an iframe with query params and
+         allow="microphone". There is no POST API, so there is nothing to CORS.
+         Stays hidden until MARKLINEA_LIVE is configured — a button that cannot connect
+         is worse than no button. */
+      function liveCfg() { return window.MARKLINEA_LIVE || null; }
+      function liveReady() {
+        var c = liveCfg();
+        return !!(c && c.base && c.clientid);
+      }
+      function liveUrl() {
+        var c = liveCfg(), q = [];
+        if (IDENT.email) q.push('email=' + encodeURIComponent(IDENT.email));
+        q.push('autostart=true');
+        q.push('clientname=' + encodeURIComponent(c.clientname || 'marklinea'));
+        q.push('clientid=' + encodeURIComponent(c.clientid));
+        return c.base + (c.base.indexOf('?') > -1 ? '&' : '?') + q.join('&');
+      }
+      var liveWrap = document.getElementById('liveWrap');
+      var liveCard = document.getElementById('liveCard');
+      var liveFrame = null, liveScrollY = 0;
+      function openLive() {
+        if (!liveReady() || !liveWrap || liveFrame) return;
+        liveScrollY = window.scrollY;
+        liveFrame = document.createElement('iframe');
+        liveFrame.setAttribute('allow', 'microphone; autoplay; clipboard-write');
+        liveFrame.setAttribute('title', 'Live call with Chloe');
+        liveFrame.src = liveUrl();
+        liveCard.appendChild(liveFrame);
+        liveWrap.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        void liveWrap.offsetWidth;
+        requestAnimationFrame(function () { liveWrap.classList.add('in'); });
+        try { document.getElementById('liveX').focus({ preventScroll: true }); } catch (e) {}
+      }
+      function closeLive() {
+        if (!liveWrap || !liveFrame) return;
+        liveWrap.classList.remove('in');
+        /* tear the iframe down only after the animation, otherwise the card flashes white */
+        setTimeout(function () {
+          liveWrap.classList.remove('open');
+          if (liveFrame) { liveFrame.src = 'about:blank'; liveFrame.remove(); liveFrame = null; }
+          document.body.style.overflow = '';
+          window.scrollTo(0, liveScrollY);
+        }, reduced ? 0 : 300);
+      }
+      var liveXBtn = document.getElementById('liveX');
+      if (liveXBtn) liveXBtn.addEventListener('click', closeLive);
+      if (liveWrap) liveWrap.addEventListener('click', function (e) { if (e.target === liveWrap) closeLive(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && liveFrame) { e.stopPropagation(); closeLive(); }
+      }, true);
+      /* offered only once she has the email — voice is the tier identity actually gates */
+      function offerLive(delay) {
+        if (!liveReady()) return;
+        addMsg('chloe', 'Want to just talk instead? I can pick up right now — you will need to let your browser use the microphone.', delay || 1.2);
+        addQuick([{ label: 'Talk to me now', action: openLive }], (delay || 1.2) + 1.1);
       }
 
       /* opened in a background tab: don't talk into an empty room — wait until they look */
@@ -2496,6 +2606,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var t = hsTextEl.value.trim();
         if (!t) return;
         hsTextEl.value = '';
+        if (handleEmailReply(t)) return;
         openCall();
         if (!callStarted) {
           callStarted = true;
@@ -2718,6 +2829,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var t = dkText.value.trim();
         if (!t) return;
         dkText.value = '';
+        if (handleEmailReply(t)) return;
         openCall();
         if (!callStarted) {
           callStarted = true;
@@ -2869,6 +2981,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var t = input.value.trim();
         if (!t) return;
         input.value = '';
+        if (handleEmailReply(t)) return;
         addMsg('user', t.replace(/</g, '&lt;'));
         setTimeout(function () {
           /* substance first — the ask only ever follows an answer */

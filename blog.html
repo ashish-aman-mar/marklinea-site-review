@@ -107,6 +107,16 @@
        appear, while a deliberate hover pays a delay nobody notices. Closing stays
        instant. Keyboard focus is exempt — tabbing to the link opens it immediately. */
     .nav-drop { --drop-wait: 160ms; }
+    /* ---- The closed panel must not be touchable ----
+       .drop is visibility:hidden when closed, but .pv:first-child sets
+       visibility:visible as a no-JS fallback — and a child CAN override an inherited
+       "hidden" back to "visible". opacity:0 hides it to the eye and does nothing to
+       hit-testing, so the closed panel left a ~374x292 invisible hover trap sitting
+       over the hero: moving the cursor through it opened the dropdown. Gating
+       pointer-events on the whole subtree fixes it regardless of any visibility
+       override now or later. */
+    .drop { pointer-events: none; }
+    .nav-drop:hover .drop, .nav-drop:focus-within .drop { pointer-events: auto; }
     .nav-drop:hover .drop {
       opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
       transition: opacity .2s ease var(--drop-wait), transform .2s ease var(--drop-wait),

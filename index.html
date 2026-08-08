@@ -1035,6 +1035,51 @@
     @media (max-width: 640px) { .mic-hint { bottom: 96px; } }
 
     .ci-ic .mx { display: none; }
+
+    /* ---------- Speaker toggle ----------
+       The .w1 / .w2 / .mx swap already existed in the stylesheet and was never
+       given a button. Always visible, so the visitor can always tell whether
+       Chloe has a voice — and can silence her in one tap. */
+    .ci-spk { color: var(--charcoal); }
+    .ci-spk.muted { color: var(--muted); border-color: rgba(42, 42, 42, .18); background: rgba(255, 255, 255, .38); }
+    .ci-spk:not(.muted) { border-color: var(--terracotta-deep); }
+
+    /* ---------- Chloe's email ask ----------
+       Never a bare ask: this only renders after she has answered something.
+       She asks by voice or text; the visitor TYPES the address — speech-to-text
+       mangles email addresses and a wrong one silently kills the handover. */
+    .ask-email {
+      align-self: flex-start; max-width: 92%; width: 100%;
+      background: #fff; border: 1.5px solid var(--terracotta); border-radius: 16px;
+      border-bottom-left-radius: 5px; padding: 13px 15px 14px;
+      opacity: 0; transform: translateY(8px);
+    }
+    .ask-email.in { opacity: 1; transform: none; transition: opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
+    .ae-why { margin: 0 0 10px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+    .ae-row { display: flex; gap: 8px; align-items: center; }
+    .ae-row input {
+      flex: 1; min-width: 0; border: 1.5px solid var(--line); border-radius: 100px;
+      padding: 10px 14px; font-family: var(--font-body); font-size: 13.5px; outline: none;
+      color: var(--charcoal); background: #fff;
+    }
+    .ae-row input:focus { border-color: var(--terracotta-deep); }
+    .ask-email.bad .ae-row input { border-color: #C5443E; background: rgba(197,68,62,.05); }
+    .ae-row button {
+      flex: none; border: none; border-radius: 100px; cursor: pointer;
+      background: var(--terracotta); color: var(--charcoal);
+      font-family: var(--font-head); font-size: 12.5px; font-weight: 700; padding: 11px 18px;
+      transition: background .15s ease;
+    }
+    .ae-row button:hover { background: var(--terracotta-deep); }
+    .ae-row button[disabled] { opacity: .55; cursor: default; }
+    .ae-err { display: none; margin-top: 8px; font-size: 12px; color: #C5443E; }
+    .ask-email.bad .ae-err { display: block; }
+    .ae-skip {
+      display: block; margin-top: 9px; background: none; border: none; padding: 0; cursor: pointer;
+      font-family: var(--font-body); font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px;
+    }
+    .ae-skip:hover { color: var(--charcoal); }
+    .ask-email.done .ae-row, .ask-email.done .ae-skip, .ask-email.done .ae-err { display: none; }
     .ci-ic.muted .w1, .ci-ic.muted .w2 { display: none; }
     .ci-ic.muted .mx { display: block; }
     .cp-input input {
@@ -1371,6 +1416,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <button class="ci-ic ci-mic" id="hsMic" aria-label="Enable microphone" aria-pressed="false">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
               </button>
+              <button class="ci-ic ci-spk" id="hsSpk" aria-label="Mute Chloe" aria-pressed="false" title="Mute Chloe">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path class="w1" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="w2" d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path class="mx" d="M22 9.5l-5 5M17 9.5l5 5"/></svg>
+              </button>
               <input type="text" id="hsText" placeholder="Ask me anything…" aria-label="Message Chloe">
               <button id="hsSend" aria-label="Send">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg>
@@ -1640,6 +1688,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button class="ci-ic ci-mic" id="dkMic" aria-label="Enable microphone" aria-pressed="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
         </button>
+        <button class="ci-ic ci-spk" id="dkSpk" aria-label="Mute Chloe" aria-pressed="false" title="Mute Chloe">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path class="w1" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="w2" d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path class="mx" d="M22 9.5l-5 5M17 9.5l5 5"/></svg>
+        </button>
         <input type="text" id="dkText" placeholder="Ask me anything…" aria-label="Message Chloe">
         <button id="dkSend" aria-label="Send">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg>
@@ -1663,6 +1714,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="cp-input" id="cpInput">
       <button class="ci-ic ci-mic" id="cpMic" aria-label="Enable microphone" aria-pressed="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+      </button>
+      <button class="ci-ic ci-spk" id="cpSpk" aria-label="Mute Chloe" aria-pressed="false" title="Mute Chloe">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path class="w1" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="w2" d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path class="mx" d="M22 9.5l-5 5M17 9.5l5 5"/></svg>
       </button>
       <input type="text" id="cpText" placeholder="Ask me anything…" aria-label="Message Chloe">
       <button id="cpSend" aria-label="Send">
@@ -1846,6 +1900,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             } },
           { label: 'How fast are you?', action: function () {
               addMsg('chloe', 'Under 30 seconds from form fill to my first sentence, right in the browser. While your competitor is still routing the lead, I have finished discovery.');
+              maybeAskEmail('Want the response-time benchmark behind that number? Drop your work email and I will send it over.', 2.2);
             } }
         ], delay);
       }
@@ -2187,6 +2242,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           speakGreeting(true);
         });
       });
+      /* ---------- Speaker toggle ---------- */
+      VOICE.spks = ['hsSpk', 'cpSpk', 'dkSpk'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+      function paintSpk() {
+        VOICE.spks.forEach(function (b) {
+          b.classList.toggle('muted', VOICE.muted);
+          b.setAttribute('aria-pressed', String(VOICE.muted));
+          var lab = VOICE.muted ? 'Unmute Chloe' : 'Mute Chloe';
+          b.setAttribute('aria-label', lab); b.setAttribute('title', lab);
+        });
+      }
+      VOICE.spks.forEach(function (b) {
+        b.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          VOICE.muted = !VOICE.muted;
+          if (VOICE.muted) {
+            [VOICE.a1, VOICE.a2].forEach(function (a) { if (a) { try { a.pause(); } catch (err) {} } });
+            VOICE.hideCue();
+          } else {
+            /* unmuting IS a gesture — replay her greeting so the tap has an audible result */
+            VOICE.disarm(); VOICE.hideCue();
+            VOICE.running = false; VOICE.done = false;
+            speakGreeting(true);
+          }
+          paintSpk();
+        });
+      });
+      paintSpk();
+
+      /* ---------- Chloe's email ask ----------
+         Value first, then the ask, at most twice, always with a reason tied to what
+         they just asked about. Front-end only for now: the real decision of when to
+         ask belongs to the Tier-1 chat service (see the always-on Chloe ADR). */
+      var IDENT = { email: null, asks: 0, refused: false };
+      function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(String(v || '').trim()); }
+      function maybeAskEmail(reason, delay) {
+        if (IDENT.email || IDENT.refused || IDENT.asks >= 2) return;
+        IDENT.asks++;
+        setTimeout(function () {
+          var wrap = document.createElement('div');
+          wrap.className = 'ask-email';
+          wrap.innerHTML =
+            '<p class="ae-why">' + reason + '</p>' +
+            '<form class="ae-row" novalidate><input type="email" inputmode="email" autocomplete="email" placeholder="you@company.com" aria-label="Your work email">' +
+            '<button type="submit">Send it</button></form>' +
+            '<span class="ae-err" role="alert">That does not look like a working email address.</span>' +
+            '<button type="button" class="ae-skip">Not right now</button>';
+          body.appendChild(wrap);
+          body.scrollTop = body.scrollHeight;
+          requestAnimationFrame(function () { wrap.classList.add('in'); });
+          var form = wrap.querySelector('.ae-row');
+          var input = wrap.querySelector('input');
+          var skip = wrap.querySelector('.ae-skip');
+          input.addEventListener('input', function () { wrap.classList.remove('bad'); });
+          form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            var v = input.value.trim();
+            if (!validEmail(v)) { wrap.classList.add('bad'); input.focus(); return; }
+            IDENT.email = v;
+            wrap.classList.add('done');
+            wrap.querySelector('.ae-why').textContent = 'Thanks — sending it to ' + v + ' now.';
+            addMsg('chloe', 'Got it. That is on its way to <b>' + v.replace(/</g, '&lt;') + '</b>. Anything else you want to dig into?', .5);
+          });
+          skip.addEventListener('click', function () {
+            IDENT.refused = true;
+            wrap.classList.add('done');
+            wrap.querySelector('.ae-why').textContent = 'No problem — carrying on.';
+            addMsg('chloe', 'All good. Ask me anything else.', .4);
+          });
+          try { input.focus({ preventScroll: true }); } catch (e) {}
+        }, (delay || 0.9) * 1000);
+      }
+
       /* opened in a background tab: don't talk into an empty room — wait until they look */
       document.addEventListener('visibilitychange', function () {
         if (!document.hidden && VOICE.deferred && !VOICE.unlocked && !VOICE.running) {
@@ -2732,7 +2859,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         input.value = '';
         addMsg('user', t.replace(/</g, '&lt;'));
         setTimeout(function () {
-          addMsg('chloe', 'Good question. The honest answer is best shown live. Book a thirty minute demo and I will answer it on your own website. <a href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request" style="font-weight:700">Book a demo</a>');
+          /* substance first — the ask only ever follows an answer */
+          addMsg('chloe', 'Good question. The short version: I answer every inbound lead in under thirty seconds, qualify them on a live call, and hand your team a deal-ready brief.');
+          maybeAskEmail('I can send you the full breakdown on that \u2014 what is your work email? If we get cut off you will still have it.', 1.9);
         }, 700);
       }
       send.addEventListener('click', userSend);

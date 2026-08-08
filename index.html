@@ -1928,7 +1928,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         morphBase = measureMorphBase();   /* the flight's single measurement */
         if (!toDock && morphDone) setDocked(false); /* widget yields before she flies home */
         var from = morphP, to = toDock ? 1 : 0;
-        var dur = reduced ? 0 : 700;
+        var dur = reduced ? 0 : 800;   /* slower on purpose: this plays once per visit */
         var start = performance.now();
         function frame(now) {
           var t = dur === 0 ? 1 : Math.min(1, (now - start) / dur);
@@ -1943,19 +1943,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
         morphAnim = requestAnimationFrame(frame);
       }
+      /* ---------- The flight is a lesson, not a loop ----------
+         Three rules, in order of how much they matter:
+         1. She leaves when she has ACTUALLY left the screen — not at an arbitrary
+            scroll number. The old 28%-of-a-viewport trigger fired while the orb was
+            still fully visible near the top, so she abandoned a post you could still
+            see. Motion without a motive always reads as too much motion.
+         2. The full flight plays ONCE per visit. It exists to teach that she comes
+            along; once taught, repeating it is noise. Later handoffs are silent.
+         3. A departure is an event. A homecoming is not. Coming back up she never
+            flies — the dock fades out and she fades in where she belongs. You are
+            returning to her; she is not travelling to you. */
+      var morphTaught = false;
+      var orbAnchor = null;
+      /* Her box in document space, independent of any flight transform. Read live while
+         she is home — the transform is empty then, so the rect is true and it self-corrects
+         when the greeting resizes her — and cached the moment she is flying or docked. */
+      function orbBottom() {
+        var home = morphP === 0 && !morphAnim && heroOrbWrapEl.style.visibility !== 'hidden';
+        if (home) {
+          var r = heroOrbWrapEl.getBoundingClientRect();
+          orbAnchor = { docTop: r.top + window.scrollY, h: r.height };
+          return r.bottom;
+        }
+        if (!orbAnchor) {
+          var b = measureMorphBase();
+          if (b) orbAnchor = { docTop: b.docCy - b.w / 2, h: b.w };
+        }
+        return orbAnchor ? orbAnchor.docTop + orbAnchor.h - window.scrollY : -1;
+      }
+      /* Silent handoff. Going away she is already off-screen, so there is nothing to
+         fade — only the widget arriving is visible. Coming home both are about to be
+         seen, so they genuinely cross-fade and never read as two Chloes. */
+      function quietHandoff(toDock) {
+        var dur = reduced ? 0 : 200;
+        if (toDock) { setDocked(true); return; }
+        morphP = 0; applyMorph();                 /* drop any leftover flight transform */
+        heroOrbWrapEl.style.visibility = '';
+        heroOrbWrapEl.style.transition = 'none';
+        heroOrbWrapEl.style.opacity = '0';
+        void heroOrbWrapEl.offsetWidth;
+        heroOrbWrapEl.style.transition = 'opacity ' + dur + 'ms ease';
+        heroOrbWrapEl.style.opacity = '1';
+        dock.style.transition = 'opacity ' + dur + 'ms ease';
+        dock.style.opacity = '0';
+        setTimeout(function () {
+          heroOrbWrapEl.style.transition = ''; heroOrbWrapEl.style.opacity = '';
+          setDocked(false);
+          dock.style.transition = ''; dock.style.opacity = '';
+        }, dur + 30);
+      }
       function checkMorph() {
         if (!heroOrbWrapEl) return;
-        /* hysteresis: dock past 28% of a screen, return under 16% — no flip-flopping */
-        var wantDock = morphState === 1
-          ? window.scrollY > window.innerHeight * 0.16
-          : window.scrollY > window.innerHeight * 0.28;
-        if (wantDock !== (morphState === 1)) {
-          morphState = wantDock ? 1 : 0;
-          animateMorph(wantDock);
-        }
+        var b = orbBottom(), docked = morphState === 1;
+        /* 80px of hysteresis, nearly all of it spent while she is still off-screen */
+        var wantDock = docked ? b < 80 : b < 0;
+        if (wantDock === docked) return;
+        morphState = wantDock ? 1 : 0;
+        if (!wantDock) { quietHandoff(false); return; }
+        if (morphTaught) { quietHandoff(true); return; }
+        morphTaught = true; animateMorph(true);
       }
-      /* landing mid-page (e.g. refresh while scrolled): she's already in the widget */
-      if (window.scrollY > window.innerHeight * 0.28) { morphState = 1; morphP = 1; setDocked(true); }
+      /* Landing mid-page (a refresh while scrolled): she is already in the widget.
+         morphTaught stays false — if the visitor scrolls up to meet her properly,
+         her first real departure should still be the one that teaches. */
+      if (window.scrollY > window.innerHeight * 0.5) { morphState = 1; morphP = 0; setDocked(true); }
       var morphTick = false;
       window.addEventListener('scroll', function () {
         if (morphTick) return;

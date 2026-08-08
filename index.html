@@ -1828,6 +1828,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               body.scrollTop = body.scrollHeight;
               speak(Math.min(1200 + text.length * 28, 4200));
               setBtnState('resume', plainText(text));
+              considerAsk(plainText(text));
             }, 750);
           } else {
             d.innerHTML = text;
@@ -1888,6 +1889,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               addSlides(.6);
               setTimeout(function () {
                 addMsg('chloe', 'That is the whole product. Want to see it run on your own website?');
+                considerAsk('', true);   /* the slides were the substance */
                 addQuick([
                   { label: 'Book a demo', action: function () {
                       addMsg('chloe', 'Perfect. Thirty minutes, live on your website. <a href="mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request" style="font-weight:700">Click here to book</a> and I will see you there.');
@@ -1900,7 +1902,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             } },
           { label: 'How fast are you?', action: function () {
               addMsg('chloe', 'Under 30 seconds from form fill to my first sentence, right in the browser. While your competitor is still routing the lead, I have finished discovery.');
-              maybeAskEmail('Want the response-time benchmark behind that number? Drop your work email and I will send it over.', 2.2);
             } }
         ], delay);
       }
@@ -2276,6 +2277,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          ask belongs to the Tier-1 chat service (see the always-on Chloe ADR). */
       var IDENT = { email: null, asks: 0, refused: false };
       function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(String(v || '').trim()); }
+      /* Centralised so every path she answers on is covered — there are six, and
+         hand-placing the call missed four of them. The length test IS the value-first
+         rule: a greeting or an acknowledgement is short and never earns an ask. */
+      var ASK_MIN_CHARS = 90;
+      function considerAsk(plain, force) {
+        /* force = the substance was delivered by something the length test cannot see,
+           e.g. the three product slides */
+        if (!force && (!plain || plain.length < ASK_MIN_CHARS)) return;
+        maybeAskEmail('I can send you the detail on this \u2014 what is your work email? If we get cut off you will still have it.', 2.2);
+      }
       function maybeAskEmail(reason, delay) {
         if (IDENT.email || IDENT.refused || IDENT.asks >= 2) return;
         IDENT.asks++;
@@ -2444,6 +2455,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           setTalking(false);
           setBtnState('resume', text);
         }, (t + 0.5) * 1000);
+        considerAsk(text);
       }
       /* typing a message escalates to the full call screen */
       var callStarted = false;
@@ -2861,7 +2873,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         setTimeout(function () {
           /* substance first — the ask only ever follows an answer */
           addMsg('chloe', 'Good question. The short version: I answer every inbound lead in under thirty seconds, qualify them on a live call, and hand your team a deal-ready brief.');
-          maybeAskEmail('I can send you the full breakdown on that \u2014 what is your work email? If we get cut off you will still have it.', 1.9);
         }, 700);
       }
       send.addEventListener('click', userSend);

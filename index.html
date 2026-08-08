@@ -1759,10 +1759,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
   </div>
 
-  <div class="chat" id="chat" aria-label="Live call with Chloe" role="dialog" aria-modal="true">
+  <div class="chat" id="chat" aria-label="Chat with Chloe" role="dialog" aria-modal="true">
     <div class="call-card">
       <div class="call-stage" id="callStage">
-        <div class="stage-tag"><i></i>Live call</div>
+        <!-- Not a live call: the real voice session opens in its own modal. Saying
+             "Live call" and "Listening" here claimed a microphone that is not open. -->
+        <div class="stage-tag"><i></i>Chloe</div>
         <div class="orb-wrap">
           <div class="orb-glow"></div>
           <div class="orb"></div>
@@ -1771,7 +1773,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="stage-id">
           <div class="nm">Chloe</div>
-          <div class="rl">Sales Engineer · <b id="stageState">Listening</b></div>
+          <div class="rl">Sales Engineer<b id="stageState"></b></div>
         </div>
       </div>
       <aside class="call-chat">
@@ -1940,13 +1942,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          addSlides, PANEL_REPLIES) is left in place, unreferenced, ready to come back
          when POST /session/{id}/turn exists. */
       var MAILTO = 'mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request';
+      function isGreeting(t) {
+        return /^(hi|hey|hello|yo|hiya|hola|namaste|sup|good (morning|afternoon|evening))([\s,]*(there|chloe))?[\s!.,?]*$/i.test(String(t || '').trim());
+      }
       function voiceIntro(userText) {
         addMsg('chloe', GREET, .2);
         if (userText) addMsg('user', userText, 1.0);
+        var hi = isGreeting(userText) || !userText;
+        var lead = hi
+          ? 'Good to meet you. Fair warning though — I am much better out loud than I am in text.'
+          : 'Straight answer — that one lands far better out loud than in text.';
         if (liveReady()) {
-          maybeAskEmail('Straight answer — I am much better out loud than in text. What is your work email? I will pick up as soon as you send it.', 1.9);
+          maybeAskEmail(lead + ' What is your work email? I will pick up as soon as you send it.', 1.9);
         } else {
-          addMsg('chloe', 'Straight answer — this lands far better out loud than in text. Book thirty minutes and I will run a real discovery call on your own website. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.9);
+          addMsg('chloe', lead + ' Book thirty minutes and I will run a real discovery call on your own website. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.9);
         }
       }
       function voiceFollowup(userText) {
@@ -2769,14 +2778,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var callStage = document.getElementById('callStage');
       var stageState = document.getElementById('stageState');
+      /* She is composing a message, not talking. The label has to say that. */
       function speak(ms) {
         if (!callStage) return;
         callStage.classList.add('speaking');
-        if (stageState) stageState.textContent = 'Speaking…';
+        if (stageState) stageState.textContent = ' \u00b7 Typing\u2026';
         clearTimeout(speak._t);
         speak._t = setTimeout(function () {
           callStage.classList.remove('speaking');
-          if (stageState) stageState.textContent = 'Listening';
+          if (stageState) stageState.textContent = '';
         }, ms || 2000);
       }
       /* Entry points: in the fold, Chloe is already there — focus her input.

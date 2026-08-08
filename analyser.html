@@ -92,20 +92,38 @@
     .nav-drop { position: relative; }
     .nav-drop > a { display: inline-flex; align-items: center; gap: 6px; }
     .nav-drop .chev { transition: transform .22s ease; margin-top: 1px; }
-    .nav-drop:hover .chev { transform: rotate(180deg); }
+    .nav-drop:hover .chev, .nav-drop:focus-within .chev { transform: rotate(180deg); transition-delay: var(--drop-wait, 0s); }
     .drop {
       position: absolute; top: calc(100% + 14px); left: 50%;
       transform: translateX(-50%) translateY(8px);
       width: 600px; max-width: calc(100vw - 32px);
       background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 8px;
       box-shadow: 0 24px 60px rgba(42, 42, 42, .16);
-      opacity: 0; visibility: hidden; transition: opacity .22s ease, transform .22s ease, visibility .22s;
+      opacity: 0; visibility: hidden;
+      /* closing is immediate; opening is delayed below — see the hover-intent note */
+      transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
       z-index: 130; display: grid; grid-template-columns: 200px 1fr; gap: 8px;
     }
     .drop::before { content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
-    .nav-drop:hover .drop, .nav-drop:focus-within .drop {
+    /* ---- Hover intent ----
+       "Agents" sits directly below the browser tab bar, so a cursor on its way to a tab
+       or the address bar crosses it constantly. Without a wait, each of those trips
+       opened a 600px panel over the headline. The delay lives on the OPENING transition
+       only: a pass-through never reaches the 160ms mark, so the panel never starts to
+       appear, while a deliberate hover pays a delay nobody notices. Closing stays
+       instant. Keyboard focus is exempt — tabbing to the link opens it immediately. */
+    .nav-drop { --drop-wait: 160ms; }
+    .nav-drop:hover .drop {
       opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+      transition: opacity .2s ease var(--drop-wait), transform .2s ease var(--drop-wait),
+                  visibility 0s linear var(--drop-wait);
     }
+    /* focus must never wait, and must win over the hover rule above */
+    .nav-drop:focus-within .drop {
+      opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+      transition: opacity .16s ease, transform .16s ease, visibility 0s linear;
+    }
+    .nav-drop:focus-within .chev { transition-delay: 0s; }
     /* left rail */
     .dl { display: flex; flex-direction: column; gap: 2px; }
     .drop .b {

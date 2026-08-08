@@ -518,8 +518,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- Chloe follows the visitor across every page -->
   <style>
     .mlw-dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 150; font-family: 'Poppins', sans-serif; }
-    .mlw-pill { position: relative; display: flex; align-items: center; background: transparent; border-radius: 100px; padding: 0; transition: background .5s ease, padding .5s ease, box-shadow .5s ease; }
-    .mlw-pill:hover, .mlw-pill:focus-within { background: rgba(255, 255, 255, .95); box-shadow: 0 18px 50px rgba(42, 42, 42, .18); padding: 8px 10px 8px 8px; }
+    /* Open by default, same as Chloe on the homepage — an orb alone reads as a
+       closed chat bubble the visitor has to discover. The bar is the invitation. */
+    .mlw-pill { position: relative; display: flex; align-items: center; background: rgba(255, 255, 255, .95); border-radius: 100px; padding: 8px 10px 8px 8px; box-shadow: 0 18px 50px rgba(42, 42, 42, .18); transition: box-shadow .35s ease; }
+    .mlw-pill:hover, .mlw-pill:focus-within { box-shadow: 0 18px 50px rgba(42, 42, 42, .18), 0 0 0 3px rgba(232, 152, 90, .18); }
     .mlw-orb {
       width: 58px; height: 58px; border-radius: 50%; flex: none; cursor: pointer; border: none; padding: 0;
       background: radial-gradient(circle at 33% 28%, #F8CD9F 0%, #E8985A 46%, #C4691F 100%);
@@ -527,8 +529,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       animation: mlwIdle 4.8s ease-in-out infinite;
     }
     @keyframes mlwIdle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
-    .mlw-expand { display: flex; align-items: center; gap: 8px; max-width: 0; opacity: 0; overflow: hidden; margin-left: 0; transition: max-width .75s cubic-bezier(.22, 1, .36, 1), opacity .5s ease, margin-left .75s cubic-bezier(.22, 1, .36, 1); }
-    .mlw-pill:hover .mlw-expand, .mlw-pill:focus-within .mlw-expand { max-width: 420px; opacity: 1; margin-left: 10px; }
+    .mlw-expand { display: flex; align-items: center; gap: 8px; max-width: 420px; opacity: 1; overflow: hidden; margin-left: 10px; }
+    /* (the bar no longer needs revealing — it is open from the start) */
     .mlw-expand input { width: 240px; border: 1.5px solid rgba(42, 42, 42, .16); border-radius: 100px; background: #fff; color: #2A2A2A; padding: 11px 16px; font-family: inherit; font-size: 13.5px; outline: none; transition: border-color .15s ease; }
     .mlw-expand input:focus { border-color: #D9843F; }
     .mlw-send { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; background: #E8985A; color: #2A2A2A; display: flex; align-items: center; justify-content: center; flex: none; transition: background .15s ease; }
@@ -581,7 +583,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .consent-btn:hover { border-color: var(--terracotta-deep); color: var(--terracotta-deep); background: var(--cream-soft); }
     .consent-btn:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
     /* Chloe sits bottom-centre — lift her clear of the bar while it's up */
-    body.consent-open .dock { bottom: calc(22px + var(--consent-h, 84px)); }
+    body.consent-open .dock,
+    body.consent-open .mlw-dock { bottom: calc(22px + var(--consent-h, 84px)); }
     @media (max-width: 720px) {
       .consent-in { padding: 14px 16px 15px; gap: 12px; }
       .consent-btns { width: 100%; }

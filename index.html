@@ -1272,7 +1272,8 @@
     .consent-btn:hover { border-color: var(--terracotta-deep); color: var(--terracotta-deep); background: var(--cream-soft); }
     .consent-btn:focus-visible { outline: 2px solid var(--terracotta-deep); outline-offset: 3px; }
     /* Chloe sits bottom-centre — lift her clear of the bar while it's up */
-    body.consent-open .dock { bottom: calc(22px + var(--consent-h, 84px)); }
+    body.consent-open .dock,
+    body.consent-open .mlw-dock { bottom: calc(22px + var(--consent-h, 84px)); }
     @media (max-width: 720px) {
       .consent-in { padding: 14px 16px 15px; gap: 12px; }
       .consent-btns { width: 100%; }

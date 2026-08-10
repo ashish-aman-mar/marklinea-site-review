@@ -284,7 +284,11 @@
     .cta { text-align: center; }
     .cta .lede { margin: 0 auto 36px; }
 
-    footer { background: var(--charcoal); color: var(--cream); padding: 40px 0; }
+    /* The Chloe widget is position:fixed, bottom:22px, ~74px tall, so it owns the
+     bottom ~96px of the viewport. At 40px the footer links land inside that band
+     and cannot be tapped at all on a phone. blog.html and privacy.html already use
+     96px, which is why their footers work. Matching them. */
+  footer { background: var(--charcoal); color: var(--cream); padding: 40px 0 96px; }
     .foot-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .foot-inner img { height: 44px; width: auto; }
     .foot-inner p { font-size: 13px; color: var(--muted-light); }

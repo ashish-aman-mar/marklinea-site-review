@@ -3194,10 +3194,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          out of `!callStarted`, which was wrong in both directions: it fired MID-call
          (Ashish's "Talk to me now" during a live conversation), and it stopped firing the
          moment ensurePanel() started setting the flag honestly. So say it directly. */
+      var handoffPending = false;
       function offerResume() {
         if (lkLive || !callEnded || !IDENT.email || !liveReady()) return;
+        /* Arriving from an agent page with a question: that question is the opening line.
+           "Want to pick that back up?" on top of it says two things at once. One-shot. */
+        if (handoffPending) { handoffPending = false; return; }
         if (body.querySelector('.quick')) return;     /* one offer, not one per reopen */
-        offerLive(.8, 'Want to pick that back up?');
+        /* "Want to pick that back up?" after SHE was cut off by a page change reads as
+           though he hung up. Name what happened. */
+        var lead = navDropped
+          ? (IDENT.first ? 'We got cut off when the page changed, ' + IDENT.first + '.'
+                         : 'We got cut off when the page changed.')
+          : 'Want to pick that back up?';
+        navDropped = false;
+        offerLive(.8, lead);
       }
       function clearQuick() {
         /* Remove the node, do not hide it: addQuick() reveals on a timer, so a button
@@ -3297,6 +3308,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            "Good to meet you"; arriving from an unanswered question does not — that
            was the greeting non-sequitur again, one step further along. */
         var open = lead || (IDENT.first ? 'Good to meet you, ' + IDENT.first + '.' : 'Perfect.');
+        /* One offer at a time. Two paths can both decide to offer within the same second —
+           a restored session and an incoming ?ask= did exactly that — and two identical
+           buttons under two different sentences is not a choice, it is a bug. */
+        clearQuick();
         addMsg('chloe', open + ' Tap below and I will pick up — your browser will ask to use the microphone.', d);
         addQuick([{ label: 'Talk to me now', action: function () { (nativeReady() ? startLiveCall : openLive)(); } }], d + 0.9);
       }
@@ -3713,7 +3728,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
       });
       /* Closing the tab mid-call should release the room and the microphone. */
-      window.addEventListener('pagehide', function () { if (lkLive) teardownLive(); });
+      window.addEventListener('pagehide', function () {
+        /* Save BEFORE teardown: teardownLive() clears the caption and the state, and the
+           debounced observer save would never get to run. */
+        if (lkLive) { saveSession({ navDropped: true }); teardownLive(); }
+        else saveSession();
+      });
       if (heroCta) heroCta.addEventListener('click', openChat);
       var heroOrbBtn = document.getElementById('heroOrb');
       if (heroOrbBtn) heroOrbBtn.addEventListener('click', openChat);
@@ -4028,17 +4048,133 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }, { threshold: [0, 0.45] }).observe(raceEl);
       }
 
+      /* ---------- Carrying her across a page load ----------
+         This site is separate documents, not an app. Every internal link is a full load,
+         which destroys the LiveKit room and the thread with it — Chloe went quiet and came
+         back a stranger. The call genuinely cannot survive a navigation. Who she is
+         talking to can.
+
+         sessionStorage, not localStorage, deliberately: a transcript is conversation
+         content, and keeping it past the tab would be a retention claim the privacy page
+         does not make. It dies with the visit, like the call does. */
+      var STORE_KEY = 'ml_chloe1';
+      var STORE_MAX = 60000;
+      var saveTimer = null;
+      function threadSnapshot() {
+        var out = [];
+        [].forEach.call(body.children, function (el) {
+          if (!el.classList || !el.classList.contains('msg')) return;
+          if (el.classList.contains('interim')) return;   /* half a spoken word is not a message */
+          if (el.querySelector('.tdots')) return;         /* still typing — nothing to keep yet */
+          var html = el.innerHTML;
+          if (!html || !html.trim()) return;
+          out.push({ w: el.classList.contains('user') ? 'user' : 'chloe', h: html });
+        });
+        return out;
+      }
+      function saveSession(extra) {
+        try {
+          var thread = threadSnapshot().slice(-40);
+          var d = {
+            v: 1,
+            email: IDENT.email || '', first: IDENT.first || '', last: IDENT.last || '',
+            company: IDENT.company || '', nameAsks: IDENT.nameAsks || 0,
+            navDropped: !!(extra && extra.navDropped),
+            thread: thread
+          };
+          if (!d.email && !thread.length) return;
+          var out = JSON.stringify(d);
+          /* Drop from the top rather than refusing to save: the tail is the part she needs. */
+          while (out.length > STORE_MAX && d.thread.length > 1) {
+            d.thread = d.thread.slice(1);
+            out = JSON.stringify(d);
+          }
+          sessionStorage.setItem(STORE_KEY, out);
+        } catch (e) {}
+      }
+      function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(saveSession, 400); }
+      /* One observer instead of a save call at every site that writes a message. The last
+         two bugs in this file were both a guard added to some call sites and not others. */
+      try { new MutationObserver(saveSoon).observe(body, { childList: true, subtree: true, characterData: true }); } catch (e) {}
+
+      var navDropped = false, restored = false;
+      (function restoreSession() {
+        var raw = null;
+        try { raw = sessionStorage.getItem(STORE_KEY); } catch (e) {}
+        if (!raw) return;
+        var d = null;
+        try { d = JSON.parse(raw); } catch (e) {}
+        if (!d || d.v !== 1) return;
+        var thread = d.thread || [];
+        if (!d.email && !thread.length) return;
+        restored = true;
+        navDropped = !!d.navDropped;
+        if (d.email) IDENT.email = d.email;
+        if (d.first) IDENT.first = d.first;
+        if (d.last) IDENT.last = d.last;
+        if (d.company) IDENT.company = d.company;
+        if (d.nameAsks) IDENT.nameAsks = d.nameAsks;
+        /* She has met this person, so she does not re-introduce herself. But only an
+           address earns the gate being lowered — restoring a thread of two rejected
+           attempts and then never asking again would hand out the call for free. */
+        callStarted = true;
+        if (d.email) { callEnded = true; gateOpen = false; setEmailMode(false); }
+        thread.forEach(function (m) {
+          var el = document.createElement('div');
+          el.className = 'msg ' + (m.w === 'user' ? 'user' : 'chloe');
+          el.innerHTML = m.h;
+          /* .msg starts at opacity 0 and is revealed by popIn(). A restored message has no
+             popIn to run, so it would be present, 42px tall, and invisible. */
+          el.style.opacity = '1'; el.style.transform = 'none';
+          body.appendChild(el);
+        });
+        body.scrollTop = body.scrollHeight;
+      })();
+
+      /* While she is on the line, an internal link would tear the room down. Open it
+         beside us and keep talking. Saying so matters: a tab appearing by itself is its
+         own small mystery. */
+      var navNoteShown = false;
+      document.addEventListener('click', function (e) {
+        if (!lkLive) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        var a = e.target && e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (a.target === '_blank' || a.hasAttribute('download')) return;
+        if (href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+        var u = null;
+        try { u = new URL(a.href, location.href); } catch (err) { return; }
+        if (u.origin !== location.origin) return;                 /* off-site already leaves us */
+        if (u.pathname === location.pathname && u.hash) return;   /* same page — let it scroll */
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(a.href, '_blank', 'noopener');
+        if (!navNoteShown) {
+          navNoteShown = true;
+          addMsg('chloe', 'Opened that in a new tab so we do not lose the call.', .2);
+        }
+      }, true);
+
       // arriving from an agent page with a message for Chloe
       try {
         var qsIn = new URLSearchParams(location.search);
         var askIn = qsIn.get('ask');
         if (askIn || qsIn.get('talk')) {
+          /* Only a QUESTION is its own opening line. Bare ?talk=1 is the visitor asking to
+             talk, which is exactly what offerResume() answers — suppressing it there left
+             them on a restored thread with nothing to tap. */
+          handoffPending = !!askIn;
           setTimeout(function () {
             openCall();
             if (!callStarted) {
               callStarted = true;
               if (askIn) { scriptIntroReplied(askIn.replace(/</g, '&lt;')); }
               else { scriptIntro(); }
+            } else if (askIn) {
+              /* She already knows them — answering as a follow-up, not an introduction.
+                 Without this the question typed on the agent page vanished. */
+              voiceFollowup(askIn.replace(/</g, '&lt;'));
             }
           }, 650);
         }

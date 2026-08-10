@@ -1948,15 +1948,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          when POST /session/{id}/turn exists. */
       var MAILTO = 'mailto:ashish.aman@marklinea.com?subject=Marklinea%20demo%20request';
       function isGreeting(t) {
-        return /^(hi|hey|hello|yo|hiya|hola|namaste|sup|good (morning|afternoon|evening))([\s,]*(there|chloe))?[\s!.,?]*$/i.test(String(t || '').trim());
+        return /^(hi+|hey+|hello|yo|hiya|hola|namaste|sup|greetings|good (morning|afternoon|evening|day)|how are you( doing)?( today)?|how('s| is|s) it going|what('s| is|s) up)([\s,]*(there|chloe))?[\s!.,?]*$/i.test(String(t || '').trim());
+      }
+      /* Her recorded greeting ends in "How are you doing today?", so the most natural
+         thing a visitor types back is "good" — an answer, not a question. Treating it as
+         a question made her brush off the question she had just asked. */
+      function isPleasantry(t) {
+        var s = String(t || '').trim().toLowerCase().replace(/[!.,?\s]+$/, '');
+        if (!s || s.length > 44) return false;
+        if (/^(thanks|thank you|thanks a lot|thx|ty|cool|nice|nice one|got it|sure|okay|ok|k|yeah|yep|yup|yes|no|nope|hmm|lol|haha|great|awesome)$/.test(s)) return true;
+        s = s.replace(/[\s,]*(and\s+)?(you|u|yourself|urself)$/, '');
+        s = s.replace(/[\s,]*(thanks|thank you|thx|ty)$/, '');
+        s = s.replace(/^(and\s+)?(i am|i'm|im|we are|we're)\s+/, '');
+        s = s.replace(/^(doing|feeling|going)\s+/, '');
+        s = s.replace(/^(pretty|very|really|quite|all|so|super|just)\s+/, '');
+        s = s.replace(/[!.,?\s]+$/, '');
+        return /^(good|great|fine|ok|okay|well|alright|all right|not bad|no complaints|cannot complain|can't complain|awesome|excellent|amazing|wonderful|tired|busy|hanging in there|same old|nothing much|nothing|meh|could be better|been better)$/.test(s);
       }
       function voiceIntro(userText) {
         addMsg('chloe', GREET, .2);
         if (userText) addMsg('user', userText, 1.0);
-        var hi = isGreeting(userText) || !userText;
-        var lead = hi
-          ? 'Good to meet you. Fair warning though — I am much better out loud than I am in text.'
-          : 'Straight answer — that one lands far better out loud than in text.';
+        var soft = isPleasantry(userText);
+        var hi = soft || isGreeting(userText) || !userText;
+        var lead = soft
+          ? 'Fair warning — I am much better out loud than I am in text.'
+          : hi
+            ? 'Good to meet you. Fair warning though — I am much better out loud than I am in text.'
+            : 'Straight answer — that one lands far better out loud than in text.';
         if (liveReady()) {
           maybeAskEmail(lead + ' What is your work email? I will pick up as soon as you send it.', 1.9);
         } else {
@@ -1965,12 +1983,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       function voiceFollowup(userText) {
         addMsg('user', userText);
+        /* Not everything typed is a question. Calling "thanks" a question is a brush-off. */
+        var soft = isPleasantry(userText) || isGreeting(userText);
         if (liveReady()) {
           if (IDENT.email) { offerLive(.8); return; }
-          maybeAskEmail('That one is much better answered out loud. What is your work email? I will pick up as soon as you send it.', .9);
-        } else {
-          addMsg('chloe', 'That is a better question out loud than in text. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a> and I will answer it on your own website.', .9);
+          maybeAskEmail((soft
+            ? 'Text is where I am at my worst.'
+            : 'That one is much better answered out loud.')
+            + ' What is your work email? I will pick up as soon as you send it.', .9);
+          return;
         }
+        var lead = soft
+          ? 'Text is where I am at my worst.'
+          : 'That is a better question out loud than in text.';
+        var tail = soft
+          ? ' and you will hear the real thing.'
+          : ' and I will answer it on your own website.';
+        addMsg('chloe', lead + ' <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>' + tail, .9);
       }
       function scriptIntro() { voiceIntro(null); }
       function scriptIntroReplied(userText) { voiceIntro(userText); }

@@ -830,6 +830,40 @@
     .dock-toast[hidden] { display: none; }
     .dock-toast b { display: block; font-family: var(--font-head); font-size: 11.5px; font-weight: 700; color: var(--terracotta-deep); margin-bottom: 3px; }
     .dock-toast #dockToastText { display: block; font-size: 13.5px; line-height: 1.5; color: var(--charcoal); }
+    /* Minimising is the point of her being in the page, but a call you cannot see is a
+       call you cannot follow. This is NOT a transient toast: it stays for the whole call,
+       because hiding it restores exactly the problem it exists to fix. */
+    .dock-cap {
+      position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
+      width: 300px; max-width: calc(100vw - 40px); text-align: left;
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-edge); border-radius: 16px;
+      padding: 10px 15px 12px; box-shadow: var(--glass-shadow), var(--glass-inner);
+    }
+    .dock-cap[hidden] { display: none; }
+    .dock-cap b {
+      display: flex; align-items: center; gap: 6px; font-family: var(--font-head);
+      font-size: 11.5px; font-weight: 700; color: var(--terracotta-deep); margin-bottom: 3px;
+    }
+    .dock-cap b i { width: 6px; height: 6px; border-radius: 50%; background: #46C06B; flex: none; }
+    .dock-cap.you b { color: var(--muted); }
+    .dock-cap.you b i { background: var(--muted); }
+    /* --muted, not --muted-light: 5.26:1 on cream, where --muted-light is 1.93:1 */
+    .dock-cap #dockCapText {
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+      font-size: 13.5px; line-height: 1.5; color: var(--charcoal); min-height: 20px;
+    }
+    .dock-cap.you #dockCapText { color: var(--muted); }
+    .dock-cap .cap-wait { display: inline-flex; gap: 4px; align-items: center; height: 20px; }
+    .dock-cap .cap-wait span {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--muted);
+      animation: capDot 1.1s ease-in-out infinite;
+    }
+    .dock-cap .cap-wait span:nth-child(2) { animation-delay: .16s; }
+    .dock-cap .cap-wait span:nth-child(3) { animation-delay: .32s; }
+    @keyframes capDot { 0%, 100% { opacity: .28; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+    @media (prefers-reduced-motion: reduce) { .dock-cap .cap-wait span { animation: none; opacity: .55; } }
     .dock-wave span:nth-child(2n) { animation-delay: .12s; }
     .dock-wave span:nth-child(3n) { animation-delay: .24s; }
 
@@ -1793,6 +1827,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="dock-toast" id="dockToast" hidden role="status">
       <b>Chloe</b>
       <span id="dockToastText"></span>
+    </div>
+    <div class="dock-cap" id="dockCap" hidden role="status" aria-live="polite">
+      <b><i></i><span id="dockCapWho">Chloe</span></b>
+      <span id="dockCapText"></span>
     </div>
     <div class="dock-call" id="dockCall" hidden role="dialog" aria-label="Get a call from Chloe">
       <button class="dc-x" id="dockCallX" aria-label="Close">×</button>
@@ -2772,6 +2810,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         function ensurePanel() {
           if (chat.classList.contains('open')) return;
           openCall();
+          /* openCall() alone left callStarted false, so setDocked() still believed she was
+             holding an unopened greeting and narrated it at the dock. A thread with her
+             opener in it is a started conversation. */
+          callStarted = true;
           if (!body.querySelector('.msg')) addMsg('chloe', OPEN1, 0);
         }
         if (validEmail(t)) {
@@ -2919,6 +2961,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           setTimeout(function () {
             connNoteEl.textContent = CONN_NOTES[Math.min(i, CONN_NOTES.length - 1)];
             connNoteEl.classList.add('on');
+            capNote(connNoteEl.textContent);
             i++;
           }, 220);
         }
@@ -2933,6 +2976,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (stageTagEl) stageTagEl.textContent = CALL_LABEL[st] || 'Chloe';
         stageSay(st === 'live' ? 'Live' : st === 'muted' ? 'Muted' : st === 'connecting' ? 'Connecting…' : '');
         connNotes(st === 'connecting');
+        /* She is on the line but has not spoken yet — back to the waiting dots, not a
+           stale "almost there" that would now be a lie. */
+        if (st === 'live') capNote(null);
+      }
+
+      /* ---------- The caption above the minimised dock ----------
+         Her words appear here as she says them while the panel is shut, and the visitor's
+         own words too — which is also the only confirmation that the microphone is being
+         heard. Without this, minimising means a call with nothing on screen at all. */
+      var dockCap = null, dockCapWho = null, dockCapText = null, capWho = '', capTalkTimer = null;
+      var CAP_WAIT = '<span class="cap-wait"><span></span><span></span><span></span></span>';
+      function capEls() {
+        if (!dockCap) {
+          dockCap = document.getElementById('dockCap');
+          dockCapWho = document.getElementById('dockCapWho');
+          dockCapText = document.getElementById('dockCapText');
+        }
+        return dockCap && dockCapWho && dockCapText;
+      }
+      function capVisible() { return lkLive && !chat.classList.contains('open'); }
+      function capWait() {
+        capWho = '';
+        dockCapWho.textContent = 'Chloe';
+        dockCap.classList.remove('you');
+        dockCapText.innerHTML = CAP_WAIT;
+      }
+      function syncDockCap() {
+        if (!capEls()) return;
+        if (!capVisible()) { dockCap.hidden = true; return; }
+        if (!dockCapText.innerHTML) capWait();
+        dockCap.hidden = false;
+      }
+      /* The connecting line is mirrored here, so a visitor who minimises before she
+         answers still sees progress rather than an empty pill. */
+      function capNote(text) {
+        if (!capEls() || !capVisible()) return;
+        if (text) {
+          capWho = '';
+          dockCapWho.textContent = 'Chloe';
+          dockCap.classList.remove('you');
+          dockCapText.textContent = text;
+        } else if (!capWho) { capWait(); }
+        dockCap.hidden = false;
+      }
+      function capSay(who, text) {
+        if (!capEls() || !capVisible()) return;
+        if (who !== capWho) {
+          capWho = who;
+          dockCapWho.textContent = who === 'user' ? 'You' : 'Chloe';
+          dockCap.classList.toggle('you', who === 'user');
+        }
+        dockCapText.textContent = text;
+        dockCap.hidden = false;
+        if (who !== 'user' && pill) {
+          pill.classList.add('talking');
+          clearTimeout(capTalkTimer);
+          capTalkTimer = setTimeout(function () { pill.classList.remove('talking'); }, 1400);
+        }
+      }
+      function capReset() {
+        clearTimeout(capTalkTimer);
+        if (!capEls()) return;
+        capWho = '';
+        dockCapText.innerHTML = '';
+        dockCap.classList.remove('you');
+        dockCap.hidden = true;
+        if (pill) pill.classList.remove('talking');
       }
 
       /* One bubble per transcript segment, rewritten in place as the words firm up —
@@ -2948,6 +3058,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         d.textContent = text;
         if (isFinal) d.classList.remove('interim');
         body.scrollTop = body.scrollHeight;
+        capSay(who, text);
       }
 
       /* The API's real field names. firstName/lastName/email/company are the IFRAME's
@@ -3001,6 +3112,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       function teardownLive() {
         setDockOnCall(false);
+        capReset();
         clearTimeout(lkJoinTimer);
         lkLive = false; lkMuted = false;
         liveBarMode(false);
@@ -3326,6 +3438,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             { duration: .55, ease: [0.22, 1, 0.36, 1] });
         }
         try { input.focus(); } catch (e) {}
+        syncDockCap();     /* panel open — the caption is the panel's job now */
       }
       function cpSubmit() {
         var t = cpText.value.trim();
@@ -3551,6 +3664,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           chat.classList.remove('open'); chat.style.opacity = '';
           document.body.style.overflow = '';
           updateDock();
+          syncDockCap();
         }
         if (M && !reduced) {
           M.animate(chat, { opacity: 0 }, { duration: .25, ease: 'easeIn' }).finished.then(done);
@@ -3622,6 +3736,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var toastTimer = null;
       function showDockToast(text) {
         if (!dockToast) return;
+        /* Never a recorded greeting over a live call. The guard belongs HERE and not at
+           the call sites: showPop() had one, setDocked() did not, and that second path is
+           exactly what Ashish hit — minimise mid-call, scroll, and she introduces herself
+           to the person she is already talking to. One choke point, no site can miss it. */
+        if (lkLive) return;
         clearTimeout(toastTimer);
         dockToast.hidden = false;
         if (M && !reduced) {

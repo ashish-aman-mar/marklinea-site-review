@@ -2958,6 +2958,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var dockCallErr = document.getElementById('dockCallErr');
       var dockCallNum = document.getElementById('dockCallNum');
       var dockCallQa = document.getElementById('dockCallQa');
+
+      /* The callback needs a real endpoint to place a call with. Until
+         MARKLINEA_CALLBACK_ENDPOINT is set there is none, so do not ask for a phone
+         number at all: a form that collects a number it cannot use is worse than no
+         form, and the privacy notice would have to describe data we never meant to
+         keep. Setting the endpoint brings this back on its own — no code change. */
+      function callbackReady() { return !!window.MARKLINEA_CALLBACK_ENDPOINT; }
+      if (!callbackReady()) {
+        if (dockAlt) { dockAlt.hidden = true; dockAlt.disabled = true; dockAlt.setAttribute('aria-hidden', 'true'); }
+        if (dockCall) dockCall.hidden = true;
+      }
       var DEFAULT_CC = '+91';
       /* E.164 or nothing — the dialler will reject anything else, so catch it here */
       function normalisePhone(raw) {
@@ -2970,7 +2981,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return null;
       }
       function openCallback() {
-        if (!dockCall) return;
+        if (!dockCall || !callbackReady()) return;
         hideDockToast();
         dockCall.hidden = false;
         if (dockAlt) dockAlt.hidden = true;
@@ -2980,7 +2991,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!dockCall) return;
         dockCall.hidden = true;
         dockCall.classList.remove('invalid');
-        if (dockAlt && !dockCall.classList.contains('done')) dockAlt.hidden = false;
+        if (dockAlt && callbackReady() && !dockCall.classList.contains('done')) dockAlt.hidden = false;
       }
       if (dockAlt) dockAlt.addEventListener('click', function (e) { e.stopPropagation(); openCallback(); });
       var dockCallX = document.getElementById('dockCallX');

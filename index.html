@@ -1276,6 +1276,25 @@
     30%, 50%, 70% { transform: translateX(-5px); }
     40%, 60% { transform: translateX(5px); }
   }
+  /* She has asked for something and is waiting. The caption read "what's your work
+     email?" and the box looked exactly as idle as it had a second earlier — so the box
+     says it too. The ring lives on ::after, not on the box, so it cannot collide with
+     .email-bad's shake, which owns `animation` on the box itself. */
+  .bar-asking { position: relative; }
+  .bar-asking::after {
+    content: ''; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+    box-shadow: 0 0 0 1.5px var(--terracotta);
+    animation: barAsk 2.2s ease-out infinite;
+  }
+  @keyframes barAsk {
+    0%, 100% { box-shadow: 0 0 0 1.5px var(--terracotta), 0 0 0 0 rgba(232, 152, 90, .34); }
+    55%      { box-shadow: 0 0 0 1.5px var(--terracotta), 0 0 0 8px rgba(232, 152, 90, 0); }
+  }
+  /* one signal at a time: a red rejection outranks a waiting ring */
+  .email-bad::after { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .bar-asking::after { animation: none; box-shadow: 0 0 0 2px var(--terracotta); }
+  }
   .email-bad { animation: mlShake .5s cubic-bezier(.36, .07, .19, .97) both; }
   .email-bad, .email-bad.cp-input, .email-bad.call-bar {
     box-shadow: 0 0 0 2px rgba(197, 68, 62, .5), 0 18px 50px rgba(42, 42, 42, .18) !important;
@@ -2131,6 +2150,65 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }, 6000);
       })();
       var REJECT_HINT = 'Email address only, for now';
+
+      /* ---- One owner for the message-bar placeholder ----
+         FIVE things were writing this property: the email gate, the name ask, the
+         live-call bar, this red reject hint, and paintMic() — which cached the original
+         in dataset.ph and restored it on every paint. So the caption asked Ashish for his
+         address while the box still said "Ask me anything…": his microphone resolved to
+         denied a moment after the ask, paintMic() ran, and the gate's placeholder was
+         gone. Seventh time in this file that two owners have fought over one property.
+
+         Nobody writes el.placeholder any more. They set state and call refreshBars(). */
+      var BAR_IDS = ['chatText', 'cpText', 'dkText', 'hsText'];
+      var NAME_WANT_CO = false, rejectUntil = 0;
+      function barBase(el) {
+        if (el.dataset.ph === undefined) el.dataset.ph = el.placeholder || '';
+        return el.dataset.ph;
+      }
+      function barPlaceholder(el) {
+        var base = barBase(el);
+        /* Order is the product decision. The address is the one thing that blocks the
+           call, so it outranks the microphone telling you it is listening. */
+        if (rejectUntil > Date.now()) return REJECT_HINT;
+        if (AWAIT_EMAIL) return 'Enter your email';
+        if (AWAIT_NAME) return NAME_WANT_CO ? 'Your name and company' : 'Your name';
+        if (el.id === 'chatText' && lkLive) {
+          /* "Chloe is listening" while the dot still says Connecting is a lie, and it is
+             the one Ashish caught in the screenshot. She is not listening yet. */
+          return lkJoined ? 'Chloe is listening — just talk' : 'Connecting you both…';
+        }
+        if (MIC.state === 'on') return 'Listening… or type instead';
+        return base;
+      }
+      function refreshBars() {
+        BAR_IDS.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var want = barPlaceholder(el);
+          if (el.placeholder !== want) el.placeholder = want;
+        });
+        /* Derived here too, for the same reason. liveBarMode(true) runs when the dial
+           starts, which is BEFORE askName() sets AWAIT_NAME — so the bar was disabled and
+           setNameMode() never re-enabled it. Her name question was unanswerable, and my
+           own check for that path passed only because the harness never typed into it. */
+        var inp = document.getElementById('chatText');
+        if (inp) inp.disabled = lkLive && !AWAIT_NAME;
+        var snd = document.getElementById('chatSend');
+        if (snd) snd.disabled = lkLive && !AWAIT_NAME;
+        setBarAsking();
+      }
+      /* Derived, never passed in: setEmailMode(false) followed by setNameMode(true) would
+         otherwise turn the ring off and on depending which ran last. */
+      function setBarAsking() {
+        var on = (AWAIT_EMAIL || AWAIT_NAME) && !lkJoined;
+        BAR_IDS.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var box = el.closest('.call-bar, .cp-input, .dock-expand, .dock-pill') || el.parentElement;
+          if (box) box.classList.toggle('bar-asking', on);
+        });
+      }
       function emailReject() {
         emailInputs().forEach(function (el) {
           if (!el.offsetParent) return;                     /* only the surface in view */
@@ -2140,10 +2218,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           void box.offsetWidth;                             /* restart the animation */
           box.classList.add('email-bad');
           setTimeout(function () { box.classList.remove('email-bad'); }, 1500);
-          var was = el.placeholder;
-          el.placeholder = REJECT_HINT;
-          setTimeout(function () { if (el.placeholder === REJECT_HINT) el.placeholder = was; }, 1700);
         });
+        rejectUntil = Date.now() + 1700;
+        refreshBars();
+        setTimeout(refreshBars, 1750);
       }
       function focusChatBox() {
         var el = document.getElementById('chatText');
@@ -2714,17 +2792,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var AWAIT_NAME = false;
       function setNameMode(on, wantCompany) {
         AWAIT_NAME = on;
+        NAME_WANT_CO = !!wantCompany;
         if (!on) IDENT.pending = false;
         emailInputs().forEach(function (el) {
-          if (on) {
-            if (PH_WAS[el.id] === undefined) PH_WAS[el.id] = el.placeholder;
-            el.placeholder = wantCompany ? 'Your name and company' : 'Your name';
-            el.setAttribute('autocomplete', wantCompany ? 'off' : 'name');
-          } else {
-            if (PH_WAS[el.id] !== undefined) el.placeholder = PH_WAS[el.id];
-            el.removeAttribute('inputmode'); el.removeAttribute('autocomplete');
-          }
+          barBase(el);
+          if (on) el.setAttribute('autocomplete', wantCompany ? 'off' : 'name');
+          else { el.removeAttribute('inputmode'); el.removeAttribute('autocomplete'); }
         });
+        refreshBars();
       }
       function askName() {
         if (IDENT.nameAsks >= 1 || AWAIT_NAME) return;
@@ -2774,16 +2849,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         AWAIT_EMAIL = on;
         if (!on) IDENT.pending = false;
         emailInputs().forEach(function (el) {
+          barBase(el);
           if (on) {
-            if (PH_WAS[el.id] === undefined) PH_WAS[el.id] = el.placeholder;
-            el.placeholder = 'Enter your email';
             el.setAttribute('inputmode', 'email');
             el.setAttribute('autocomplete', 'email');
           } else {
-            if (PH_WAS[el.id] !== undefined) el.placeholder = PH_WAS[el.id];
             el.removeAttribute('inputmode'); el.removeAttribute('autocomplete');
           }
         });
+        refreshBars();
       }
       /* She asks in her own words, in her own message bubble, and the message bar the
          visitor is already using becomes the email field. No second widget to notice. */
@@ -2910,7 +2984,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       ];
       var LIVE_JOIN_WAIT = 15000;
       var lkRoom = null, lkAudioEl = null, lkJoinTimer = null, lkSegs = {}, lkMuted = false, lkLive = false;
-      var callEnded = false;
+      var callEnded = false, lkJoined = false;
 
       function liveMode() { var c = liveCfg(); return (c && c.mode) || 'iframe'; }
       function liveApiBase() { var c = liveCfg(); return (c && c.api) || ''; }
@@ -3084,18 +3158,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
 
       function liveBarMode(on) {
-        if (input) {
-          if (on) {
-            if (input.dataset.phWas === undefined) input.dataset.phWas = input.placeholder;
-            /* Still waiting on a name? Then the bar has to stay typeable, or the
-               question she just asked cannot be answered. */
-            input.placeholder = AWAIT_NAME ? 'Your name' : 'Chloe is listening — just talk';
-            input.disabled = !AWAIT_NAME;
-          } else {
-            input.disabled = false;
-            if (input.dataset.phWas !== undefined) { input.placeholder = input.dataset.phWas; delete input.dataset.phWas; }
-          }
-        }
+        /* The bar's text and its enabled state are both derived in refreshBars() now,
+           from lkLive / lkJoined / AWAIT_NAME / AWAIT_EMAIL. `on` is no longer a separate
+           source of truth — teardownLive() clears lkLive before calling this. */
+        refreshBars();
         var send = document.getElementById('chatSend');
         if (send) send.disabled = on && !AWAIT_NAME;
         var mic = document.getElementById('cbMic');
@@ -3118,7 +3184,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         capReset();
         callEnded = true;
         clearTimeout(lkJoinTimer);
-        lkLive = false; lkMuted = false;
+        lkLive = false; lkMuted = false; lkJoined = false;
         liveBarMode(false);
         setCallState('ended');
         if (callStage) callStage.classList.remove('speaking');
@@ -3147,8 +3213,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var joined = false;
         function markJoined() {
           if (joined) return;
-          joined = true;
+          joined = true; lkJoined = true;
           clearTimeout(lkJoinTimer);
+          liveBarMode(true);          /* "connecting you both" becomes "just talk" */
           setCallState('live');
           if (callStage) callStage.classList.add('speaking');
         }
@@ -3218,7 +3285,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function startLiveCall() {
         if (lkLive) return;
         lkLive = true; lkSegs = {}; lkMuted = false;
-        callEnded = false;
+        callEnded = false; lkJoined = false;
         clearQuick();
         setCallState('connecting');
         liveBarMode(true);
@@ -3552,10 +3619,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             MIC.state === 'unsupported' ? 'This browser cannot use the microphone here' :
             'Turn on your microphone');
         });
-        document.querySelectorAll('.cp-input input, .dock-expand input, #chatText').forEach(function (inp) {
-          if (!inp.dataset.ph) inp.dataset.ph = inp.placeholder;
-          inp.placeholder = MIC.state === 'on' ? 'Listening… or type instead' : inp.dataset.ph;
-        });
+        /* This used to write the placeholder itself, from its own cached copy, and that
+           is what wiped "Enter your email". It now only reports state. */
+        refreshBars();
       }
       function micLive() {
         return !!MIC.stream && MIC.stream.getTracks().some(function (t) { return t.readyState === 'live'; });

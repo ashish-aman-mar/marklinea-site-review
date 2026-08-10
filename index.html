@@ -1891,7 +1891,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- Chloe's recorded greeting: two beats, so the words and her voice stay in step.
        If the files are absent, the greeting silently falls back to visual-only. -->
   <audio id="cgA1" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-1.mp3" type="audio/mpeg"></audio>
-  <audio id="cgA2" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-2.mp3" type="audio/mpeg"></audio>
+  <!-- Beat 2 is the email ask, not the retired second greeting line. Same element, so the
+       mute button and the pause-on-unmute machinery keep working untouched; new file. -->
+  <audio id="cgA2" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-ask-email.mp3" type="audio/mpeg"></audio>
 
   <!-- Chloe dock: now-playing pill that expands into a chat -->
   <div class="dock" id="dock">
@@ -2222,14 +2224,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function heroAskEmail() {
         if (heroAsked || IDENT.email || !EMAIL_GATE_ON || !liveReady()) return;
         heroAsked = true;
-        SURFACES.forEach(function (pr) {
-          if (!pr[0] || !pr[1]) return;
-          pr[0].className = 'cp-line done';
-          pr[1].className = 'cp-line active';
-          fillWords(pr[1], HERO_ASK, 0.15, 0.13);
-        });
+        /* The gate opens SYNCHRONOUSLY, before any audio is attempted. The words and the
+           sound can be late; the field must not be. A visitor who types the instant the
+           caption changes has to land in email mode either way. */
         gateOpen = true; gateNudges = 0;
         setEmailMode(true);
+
+        /* Her voice for the ask — beat 2, which has been silent since the second greeting
+           line was retired and this took its slot on screen.
+           This does NOT revive the GREET2 branch in speakGreeting(). GREET2 stays empty on
+           purpose: two functions writing the same caption line is the bug that has already
+           cost this file a deploy, so the ask owns its words AND its sound, alone. */
+        setTalking(true);
+        /* The words must NEVER wait on the audio, and "wait" includes waiting forever. I
+           wrote this as a plain .then() first and measured a 404 on the mp3: Chrome leaves
+           the play() promise UNSETTLED, so the ask simply never appeared — the entire email
+           gate silent and blank because one file was missing. `.catch()` does not save you
+           from a promise that never settles.
+           So it is a race with a hard ceiling. If the audio starts normally play() resolves
+           in a few milliseconds and the paced reveal wins; if it hangs, the words land
+           350ms later at the fixed step. Either way they land. */
+        var wroteAsk = false, playSettled = false;
+        function writeAsk(dur) {
+          if (wroteAsk) return;
+          wroteAsk = true;
+          /* Pace the reveal to the real length of the take, so the sentence and her voice
+             finish together; fall back to the fixed step with no usable duration. */
+          var step = dur ? VOICE.stepFor(dur, HERO_ASK) : 0.13;
+          SURFACES.forEach(function (pr) {
+            if (!pr[0] || !pr[1]) return;
+            pr[0].className = 'cp-line done';
+            pr[1].className = 'cp-line active';
+            fillWords(pr[1], HERO_ASK, 0.15, step);
+          });
+          var t = Math.max(0.15 + HERO_ASK.split(' ').length * step, dur || 0);
+          setTimeout(function () {
+            if (lkLive) return;              /* a call started meanwhile — leave its state alone */
+            setTalking(false);
+          }, (t + 0.4) * 1000);
+        }
+        VOICE.play(VOICE.a2).then(function (r) {
+          playSettled = true;
+          writeAsk(r.ok ? r.dur : 0);
+        });
+        setTimeout(function () { if (!playSettled) writeAsk(0); }, 350);
       }
       /* Belt and braces, for the case where the greeting never runs at all — muted,
          blocked, or a 404 on the audio. It must NOT fire while she is mid-sentence:
@@ -2616,11 +2654,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var cpInputWrap = document.getElementById('cpInput');
       var cpText = document.getElementById('cpText');
       var GREET1 = "Hi, I'm Chloe — nice to meet you!";
-      /* Second line retired. The live agent opens with its own "How are you doing
-         today?", so the recording asked the same question twice about ten seconds
-         apart — one Chloe should ask once. chloe-greet-2.mp3 stays on disk and in the
-         markup so the line can come back if the agent stops opening with it; nothing
-         plays it while GREET2 is empty. */
+      /* Second GREETING line retired. The live agent opens with its own "How are you doing
+         today?", so the recording asked the same question twice about ten seconds apart —
+         one Chloe should ask once. GREET2 stays empty, which keeps the two-beat branch in
+         speakGreeting() switched off.
+         Beat 2 is not gone, though: #cgA2 now carries chloe-ask-email.mp3 and is played by
+         heroAskEmail(), which owns that line's words and its sound together. The old
+         chloe-greet-2.mp3 is no longer referenced anywhere. */
       var GREET2 = '';
       var GREET = GREET2 ? GREET1 + ' ' + GREET2 : GREET1;
       /* The spoken greeting and the written opener are different moments and different

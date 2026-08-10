@@ -1181,6 +1181,22 @@
      overflow:hidden, and .chat-body reported scrollHeight === clientHeight — a
      scroller that never scrolls. The visible cost was that "Talk to me now" sat
      underneath the message bar and could not be clicked at all. */
+  /* ---- "email only, for now" ----
+     A shake plus red on the bar itself, instead of a chat message. Rejecting a typo
+     is interface feedback, not conversation — she should not say a sentence about it. */
+  @keyframes mlShake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+  .email-bad { animation: mlShake .5s cubic-bezier(.36, .07, .19, .97) both; }
+  .email-bad, .email-bad.cp-input, .email-bad.call-bar {
+    box-shadow: 0 0 0 2px rgba(197, 68, 62, .5), 0 18px 50px rgba(42, 42, 42, .18) !important;
+  }
+  .email-bad input { color: #C5443E !important; }
+  .email-bad input::placeholder { color: rgba(197, 68, 62, .8) !important; }
+  @media (prefers-reduced-motion: reduce) { .email-bad { animation: none; } }
   /* ---- Live transcript bubbles ----
      .msg starts at opacity:0 by design; popIn() reveals it. liveSay() builds bubbles
      directly and never calls popIn(), so .interim's opacity was the ONLY thing making
@@ -2011,10 +2027,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         gateOpen = true; gateNudges = 0;
         setEmailMode(true);
       }
-      /* Belt and braces: the greeting calls this when it finishes, but if the audio is
-         muted or blocked the greeting may never run its course — the ask must not
-         depend on sound playing. */
-      setTimeout(heroAskEmail, 5200);
+      /* Belt and braces, for the case where the greeting never runs at all — muted,
+         blocked, or a 404 on the audio. It must NOT fire while she is mid-sentence:
+         a fixed 5.2s timer collided with the greeting finishing at ~5.1s and both lines
+         appeared at once. So it waits for her to stop talking and re-checks. */
+      (function armHeroAsk() {
+        setTimeout(function () {
+          if (heroAsked || IDENT.email) return;
+          if (VOICE.running) { armHeroAsk(); return; }
+          heroAskEmail();
+        }, 6000);
+      })();
+      var REJECT_HINT = 'Email address only, for now';
+      function emailReject() {
+        emailInputs().forEach(function (el) {
+          if (!el.offsetParent) return;                     /* only the surface in view */
+          var box = el.closest('.call-bar, .cp-input, .dock-expand, .dock-pill') || el.parentElement;
+          if (!box) return;
+          box.classList.remove('email-bad');
+          void box.offsetWidth;                             /* restart the animation */
+          box.classList.add('email-bad');
+          setTimeout(function () { box.classList.remove('email-bad'); }, 1500);
+          var was = el.placeholder;
+          el.placeholder = REJECT_HINT;
+          setTimeout(function () { if (el.placeholder === REJECT_HINT) el.placeholder = was; }, 1700);
+        });
+      }
       function focusChatBox() {
         var el = document.getElementById('chatText');
         if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
@@ -2649,16 +2687,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function handleEmailReply(text) {
         if (!AWAIT_EMAIL) return false;
         var t = String(text || '').trim();
-        /* The ask can now come from the hero bar, where there is no thread. Everything
-           below answers with addMsg, which writes into the panel — so open it first or
-           she is talking to a closed door. Seed her opener too, or the thread starts
-           mid-conversation with no idea who is speaking. That thread is also where the
-           call transcript lands, so it should read from the top. */
-        if (!chat.classList.contains('open')) {
+        /* Only the branches that actually SAY something need the panel. A red flash on
+           the bar should not fling a modal open. Seed her opener when it does open, or
+           the thread starts mid-conversation with no idea who is speaking — that thread
+           is also where the call transcript lands, so it should read from the top. */
+        function ensurePanel() {
+          if (chat.classList.contains('open')) return;
           openCall();
           if (!body.querySelector('.msg')) addMsg('chloe', OPEN1, 0);
         }
         if (validEmail(t)) {
+          ensurePanel();
           IDENT.email = t; gateOpen = false; setEmailMode(false);
           addMsg('user', t.replace(/</g, '&lt;'));
           /* No claim that anything was sent: there is no email backend. The address
@@ -2672,6 +2711,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           return true;
         }
         if (t.indexOf('@') > -1) {
+          /* Nearly an address — worth a word rather than just a flash. */
+          ensurePanel();
+          emailReject();
           addMsg('user', t.replace(/</g, '&lt;'));
           addMsg('chloe', 'That address does not look quite right \u2014 mind checking it?', .7);
           return true;
@@ -2681,14 +2723,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            first carries a real way out. Three escalating replies, then the short one, so
            she does not repeat herself like a form validator. */
         if (!gateOpen) { setEmailMode(false); return false; }
-        addMsg('user', t.replace(/</g, '&lt;'));
         gateNudges++;
-        var book = ' <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>';
-        addMsg('chloe', gateNudges === 1
-          ? 'Happy to get into that \u2014 I just need your work email first, then I will pick up and we can talk it through properly.'
-          : gateNudges === 2
-            ? 'I know it is a hoop. It is the only thing I need. If you would rather not, book thirty minutes instead and I will come to you.' + book
-            : 'Just your work email and I am on the line.' + book, .7);
+        emailReject();
+        /* First two attempts: the red flash says it. She does not narrate a rejection —
+           that is what an interface is for, and a sentence every time reads as nagging.
+           By the third she offers a real way out, so it never becomes a dead end. */
+        if (gateNudges < 3) return true;
+        ensurePanel();
+        addMsg('user', t.replace(/</g, '&lt;'));
+        addMsg('chloe', 'Only an email address for now, I am afraid \u2014 it is the one thing I need. If you would rather not, book thirty minutes instead and I will come to you. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', .7);
         return true;
       }
 

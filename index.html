@@ -2150,6 +2150,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
       }
       function voiceIntro(userText) {
+        /* Mid-call there is nothing to introduce and nothing to offer. */
+        if (lkLive) { if (userText) addMsg('user', userText, .1); return; }
         /* She already knows this person. Re-introducing herself after a finished call is
            what made the thread read out of order: "How did that go?" followed by "Hi,
            I'm Chloe". Check before speaking, not after. */
@@ -2908,6 +2910,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       ];
       var LIVE_JOIN_WAIT = 15000;
       var lkRoom = null, lkAudioEl = null, lkJoinTimer = null, lkSegs = {}, lkMuted = false, lkLive = false;
+      var callEnded = false;
 
       function liveMode() { var c = liveCfg(); return (c && c.mode) || 'iframe'; }
       function liveApiBase() { var c = liveCfg(); return (c && c.api) || ''; }
@@ -3113,6 +3116,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function teardownLive() {
         setDockOnCall(false);
         capReset();
+        callEnded = true;
         clearTimeout(lkJoinTimer);
         lkLive = false; lkMuted = false;
         liveBarMode(false);
@@ -3186,9 +3190,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
       }
 
+      /* Reopening her after a finished call should offer to resume it. That used to fall
+         out of `!callStarted`, which was wrong in both directions: it fired MID-call
+         (Ashish's "Talk to me now" during a live conversation), and it stopped firing the
+         moment ensurePanel() started setting the flag honestly. So say it directly. */
+      function offerResume() {
+        if (lkLive || !callEnded || !IDENT.email || !liveReady()) return;
+        if (body.querySelector('.quick')) return;     /* one offer, not one per reopen */
+        offerLive(.8, 'Want to pick that back up?');
+      }
+      function clearQuick() {
+        /* Remove the node, do not hide it: addQuick() reveals on a timer, so a button
+           scheduled just before the dial would otherwise pop in during the call. */
+        [].forEach.call(body.querySelectorAll('.quick'), function (q) { q.remove(); });
+      }
       function startLiveCall() {
         if (lkLive) return;
         lkLive = true; lkSegs = {}; lkMuted = false;
+        callEnded = false;
+        clearQuick();
         setCallState('connecting');
         liveBarMode(true);
 
@@ -3267,6 +3287,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       /* offered only once she has the email — voice is the tier identity actually gates */
       function offerLive(delay, lead) {
         if (!liveReady()) return;
+        /* She is on the line. Offering to pick up is an offer to do the thing already
+           happening, and handleNameReply() was guarding this one case by hand — which is
+           why it survived everywhere else. Every "Talk to me now" comes from here, so the
+           guard belongs here. */
+        if (lkLive) return;
         var d = delay || 0.8;
         /* The lead depends on why we are here. Arriving from the name question earns
            "Good to meet you"; arriving from an unanswered question does not — that
@@ -3439,6 +3464,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
         try { input.focus(); } catch (e) {}
         syncDockCap();     /* panel open — the caption is the panel's job now */
+        offerResume();     /* every way back in, not just the dock */
       }
       function cpSubmit() {
         var t = cpText.value.trim();

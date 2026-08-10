@@ -1976,11 +1976,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function voiceIntro(userText) {
         addMsg('chloe', GREET, .2);
         if (userText) addMsg('user', userText, 1.0);
-        var soft = isPleasantry(userText);
-        var hi = soft || isGreeting(userText) || !userText;
-        var lead = soft
+        var kind = smallTalkKind(userText);
+        var lead = kind === 'soft'
           ? 'Fair warning — I am much better out loud than I am in text.'
-          : hi
+          : (kind === 'greet' || !userText)
             ? 'Good to meet you. Fair warning though — I am much better out loud than I am in text.'
             : 'Straight answer — that one lands far better out loud than in text.';
         if (liveReady()) {
@@ -1992,7 +1991,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function voiceFollowup(userText) {
         addMsg('user', userText);
         /* Not everything typed is a question. Calling "thanks" a question is a brush-off. */
-        var soft = isPleasantry(userText) || isGreeting(userText);
+        var soft = !!smallTalkKind(userText);
         if (liveReady()) {
           if (IDENT.email) { offerLive(.8, 'That one is much better answered out loud.'); return; }
           maybeAskEmail((soft
@@ -2454,6 +2453,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           last: words.length > 1 ? words.slice(1).map(clean).join(' ') : '',
           company: company ? titleCase(company) : ''
         };
+      }
+      /* ---- Small talk can be more than one clause ----
+         She opens with TWO things: "nice to meet you!" and "How are you doing today?"
+         So the most natural reply is two clauses — "Hey. I am good" — and the single
+         most common answer to her own greeting was being classified as a question and
+         getting "Straight answer — that one lands far better out loud". A brush-off,
+         to the one reply she invited. isGreeting and isPleasantry each only ever saw
+         one clause, so every combined form failed: "Hi. I am good", "Hey! Good thanks",
+         "hi. doing well".
+         Split into clauses and require ALL of them to be small talk, so
+         "Hey. Can you help me with pricing?" is still a question. */
+      function smallTalkKind(text) {
+        var raw = String(text || '').trim();
+        if (!raw || raw.length > 60) return null;
+        var parts = raw.split(/[.!?;,]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+        if (!parts.length || parts.length > 3) return null;
+        var soft = false, ok = true;
+        for (var i = 0; i < parts.length; i++) {
+          if (isPleasantry(parts[i])) { soft = true; continue; }
+          if (isGreeting(parts[i])) continue;
+          /* "Pretty good, you?" splits to [.., "you"] — the mirror-back is its own
+             clause once you split on commas, and it is still small talk. */
+          if (/^(?:and\s+)?(?:you|u|yourself|urself)$/i.test(parts[i])) { soft = true; continue; }
+          ok = false; break;
+        }
+        if (ok) return soft ? 'soft' : 'greet';
+        /* no punctuation at all: "hey i am good" */
+        var m = raw.match(/^(?:hi+|hey+|hello|yo|hiya|hola|namaste|sup|greetings|good (?:morning|afternoon|evening|day))[\s,]+(.+)$/i);
+        if (m && m[1]) {
+          if (isPleasantry(m[1])) return 'soft';
+          if (isGreeting(m[1])) return 'greet';
+        }
+        return null;
       }
       var AWAIT_NAME = false;
       function setNameMode(on, wantCompany) {

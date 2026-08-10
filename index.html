@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Live call with the real QA Chloe. SWITCHED OFF.
-       Rolled back 10 Aug 2026. The website integration is correct: the URL is accepted,
-       the QA app loads and begins its connect sequence. But it hangs forever on
-       "Connecting you to Chloe…" — and it hangs identically in a plain browser tab, so
-       the fault is in the QA frontend or the create-discovery-call API, not here.
-       Do NOT switch this back on until a plain tab completes a call. A button that
-       hangs with no way out is worse than no button.
+  <!-- Live call with the real QA Chloe. SWITCHED ON, 10 Aug 2026.
+       It hung all day on "Connecting you to Chloe…" because create-discovery-call was
+       rejecting requests that carried only an email. RocketPay's working URL sends
+       firstName, lastName and company too; we now send all four, derived from the
+       address plus one question, and a real call completed — room
+       discovery-call-ashish-aman-marklinea-com-47b37145, agent audio, live transcript.
+
+       Two things to know before sharing this URL:
+         * one call is one LiveKit worker, and the QA box handles roughly 1-2 at a time
+           with a documented memory leak. Do not load-test it and do not circulate it.
+         * rollback is commenting this block out again. Nothing else changes. -->
   <script>
     window.MARKLINEA_LIVE = {
       base: 'https://qa.marklinea.com/',
@@ -17,7 +21,6 @@
       // clientid / firstName / lastName / company are optional and only sent if set
     };
   </script>
-  -->
   <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -2236,8 +2239,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var cpInputWrap = document.getElementById('cpInput');
       var cpText = document.getElementById('cpText');
       var GREET1 = "Hi, I'm Chloe — nice to meet you!";
-      var GREET2 = 'How are you doing today?';
-      var GREET = GREET1 + ' ' + GREET2;
+      /* Second line retired. The live agent opens with its own "How are you doing
+         today?", so the recording asked the same question twice about ten seconds
+         apart — one Chloe should ask once. chloe-greet-2.mp3 stays on disk and in the
+         markup so the line can come back if the agent stops opening with it; nothing
+         plays it while GREET2 is empty. */
+      var GREET2 = '';
+      var GREET = GREET2 ? GREET1 + ' ' + GREET2 : GREET1;
       /* If the consent bar is up, hold her back: the click that answers it is the
          gesture that unlocks audio, so waiting means she can actually be heard.
          8s is the ceiling for a visitor who ignores the bar entirely. */
@@ -2681,7 +2689,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         VOICE.running = true;
         /* Beat 1: she leans back to make room — nothing else moves */
         setTalking(true);
-        sizeOrbFor(GREET1 + ' ' + GREET2);
+        sizeOrbFor(GREET);
         var lead = fast ? 0 : 500;
         /* on the gesture path the audio must start in the same tick as the click */
         var first = fast ? VOICE.play(VOICE.a1) : null;
@@ -2696,6 +2704,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               fillWords(p[0], GREET1, 0.05, s1);
             });
             var t1 = Math.max(0.05 + GREET1.split(' ').length * s1, r1.ok ? r1.dur : 0);
+            if (!GREET2) {                      /* one line only: rest after beat 1 */
+              setTimeout(function () {
+                VOICE.running = false;
+                if (r1.ok) VOICE.done = true;
+                setTalking(false);
+                if (!heroOut) setBtnState('resume', GREET1);
+              }, (t1 + 0.5) * 1000);
+              return;
+            }
             setTimeout(function () {
               VOICE.play(r1.ok ? VOICE.a2 : null).then(function (r2) {
                 var s2 = r2.ok ? VOICE.stepFor(r2.dur, GREET2) : 0.13;

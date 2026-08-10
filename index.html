@@ -2294,8 +2294,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            what made the thread read out of order: "How did that go?" followed by "Hi,
            I'm Chloe". Check before speaking, not after. */
         if (IDENT.email && liveReady()) {
-          if (userText) addMsg('user', userText, .1);
-          offerLive(1.0, 'Want to pick that back up?');
+          /* She knows this person and can call them. Opening with an offer to call is a
+             message about a message. Their words dial; silence stays silent. */
+          if (userText) { voiceFollowup(userText); return; }
           return;
         }
         addMsg('chloe', OPEN1, .2);
@@ -2327,7 +2328,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         /* Not everything typed is a question. Calling "thanks" a question is a brush-off. */
         var soft = !!smallTalkKind(userText);
         if (liveReady()) {
-          if (IDENT.email) { offerLive(.8, 'That one is much better answered out loud.'); return; }
+          if (IDENT.email) {
+            /* She has the address and a line is available, so a paragraph plus a button
+               between the question and the answer is two extra beats and one extra click
+               for something already decided. Call, and say nothing about calling.
+               Pure small talk gets neither — "thanks" should not summon a phone call. */
+            if (!soft) startLiveCall();
+            return;
+          }
           maybeAskEmail((soft
             ? 'Text is where I am at my worst.'
             : 'That one is much better answered out loud.')
@@ -3356,21 +3364,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          out of `!callStarted`, which was wrong in both directions: it fired MID-call
          (Ashish's "Talk to me now" during a live conversation), and it stopped firing the
          moment ensurePanel() started setting the flag honestly. So say it directly. */
-      var handoffPending = false;
+      /* Reopening her is not a question and does not need an answer. "How did that go?"
+         followed by "Want to pick that back up?" stacked two unprompted messages on a
+         thread the visitor had just come back to read, and the second carried a button for
+         something typing already does. So: nothing on a reopen.
+         The one exception earns its line — a call killed by a page change is the only case
+         where the visitor is owed an explanation for why she stopped talking, and it is a
+         statement rather than an offer. No button either way: typing dials. */
       function offerResume() {
         if (lkLive || !callEnded || !IDENT.email || !liveReady()) return;
-        /* Arriving from an agent page with a question: that question is the opening line.
-           "Want to pick that back up?" on top of it says two things at once. One-shot. */
-        if (handoffPending) { handoffPending = false; return; }
-        if (body.querySelector('.quick')) return;     /* one offer, not one per reopen */
-        /* "Want to pick that back up?" after SHE was cut off by a page change reads as
-           though he hung up. Name what happened. */
-        var lead = navDropped
-          ? (IDENT.first ? 'We got cut off when the page changed, ' + IDENT.first + '.'
-                         : 'We got cut off when the page changed.')
-          : 'Want to pick that back up?';
+        if (!navDropped) return;
         navDropped = false;
-        offerLive(.8, lead);
+        addMsg('chloe', IDENT.first
+          ? 'We got cut off when the page changed, ' + IDENT.first + '. Ask me anything and I will pick up.'
+          : 'We got cut off when the page changed. Ask me anything and I will pick up.', .8);
       }
       function clearQuick() {
         /* Remove the node, do not hide it: addQuick() reveals on a timer, so a button
@@ -3385,15 +3392,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         setCallState('connecting');
         liveBarMode(true);
 
-        loadLiveKit().then(function (LK) {
-          /* Ask for the microphone before anything else: a refusal is the visitor's
-             choice and should not read as our failure. */
-          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('mic_unsupported');
-          return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
-            st.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
-            return LK;
-          }, function () { throw new Error('mic_denied'); });
-        }).then(function (LK) {
+        /* The microphone has to be asked for in the SAME TICK as the gesture that started
+           the call. The comment here used to say "before anything else" while the code
+           asked only after loadLiveKit() resolved — an async script fetch — so the request
+           landed outside the user activation. Survivable while a button press started
+           calls; not survivable now a keystroke does, and Safari is the strict one.
+           The SDK fetch is kicked off in the same tick and simply not awaited, so the two
+           run in parallel instead of the mic waiting on a CDN. */
+        var lkP = loadLiveKit();
+        lkP.catch(function () {});   /* the real handler is below; this only stops a stray unhandled rejection */
+        var micP = (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+          ? Promise.reject(new Error('mic_unsupported'))
+          : navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
+              st.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
+            }, function () { throw new Error('mic_denied'); });
+
+        micP.then(function () { return lkP; }).then(function (LK) {
           return fetch(liveApiBase().replace(/\/+$/, '') + '/create-discovery-call', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -4322,10 +4336,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var qsIn = new URLSearchParams(location.search);
         var askIn = qsIn.get('ask');
         if (askIn || qsIn.get('talk')) {
-          /* Only a QUESTION is its own opening line. Bare ?talk=1 is the visitor asking to
-             talk, which is exactly what offerResume() answers — suppressing it there left
-             them on a restored thread with nothing to tap. */
-          handoffPending = !!askIn;
           setTimeout(function () {
             openCall();
             if (!callStarted) {

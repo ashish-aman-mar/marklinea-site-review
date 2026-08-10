@@ -1993,6 +1993,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         s = s.replace(/[!.,?\s]+$/, '');
         return /^(good|great|fine|ok|okay|well|alright|all right|not bad|no complaints|cannot complain|can't complain|awesome|excellent|amazing|wonderful|tired|busy|hanging in there|same old|nothing much|nothing|meh|could be better|been better)$/.test(s);
       }
+      /* ---- The ask arrives WITH the greeting, not in reply to it ----
+         She introduces herself and asks for the email before the visitor has typed
+         anything. The second caption line — freed when GREET2 was retired — carries
+         the ask, and the bar underneath becomes the email field straight away. */
+      var HERO_ASK = "Before we get started \u2014 what's your work email?";
+      var heroAsked = false;
+      function heroAskEmail() {
+        if (heroAsked || IDENT.email || !EMAIL_GATE_ON || !liveReady()) return;
+        heroAsked = true;
+        SURFACES.forEach(function (pr) {
+          if (!pr[0] || !pr[1]) return;
+          pr[0].className = 'cp-line done';
+          pr[1].className = 'cp-line active';
+          fillWords(pr[1], HERO_ASK, 0.15, 0.13);
+        });
+        gateOpen = true; gateNudges = 0;
+        setEmailMode(true);
+      }
+      /* Belt and braces: the greeting calls this when it finishes, but if the audio is
+         muted or blocked the greeting may never run its course — the ask must not
+         depend on sound playing. */
+      setTimeout(heroAskEmail, 5200);
       function focusChatBox() {
         var el = document.getElementById('chatText');
         if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
@@ -2627,6 +2649,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function handleEmailReply(text) {
         if (!AWAIT_EMAIL) return false;
         var t = String(text || '').trim();
+        /* The ask can now come from the hero bar, where there is no thread. Everything
+           below answers with addMsg, which writes into the panel — so open it first or
+           she is talking to a closed door. Seed her opener too, or the thread starts
+           mid-conversation with no idea who is speaking. That thread is also where the
+           call transcript lands, so it should read from the top. */
+        if (!chat.classList.contains('open')) {
+          openCall();
+          if (!body.querySelector('.msg')) addMsg('chloe', OPEN1, 0);
+        }
         if (validEmail(t)) {
           IDENT.email = t; gateOpen = false; setEmailMode(false);
           addMsg('user', t.replace(/</g, '&lt;'));
@@ -2988,6 +3019,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (r1.ok) VOICE.done = true;
                 setTalking(false);
                 if (!heroOut) setBtnState('resume', GREET1);
+                heroAskEmail();                  /* she asks as she finishes saying hello */
               }, (t1 + 0.5) * 1000);
               return;
             }

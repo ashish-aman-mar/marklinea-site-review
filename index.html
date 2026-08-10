@@ -1890,6 +1890,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Chloe's recorded greeting: two beats, so the words and her voice stay in step.
        If the files are absent, the greeting silently falls back to visual-only. -->
+  <!-- The call has five serial steps and three of them are network. Warm DNS + TLS for all
+       of them now, while the visitor is still reading the fold, so none of it lands on the
+       critical path between "here is my email" and her first sentence. -->
+  <link rel="preconnect" href="https://qa-api.marklinea.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://unpkg.com">
+
   <audio id="cgA1" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-greet-1.mp3" type="audio/mpeg"></audio>
   <!-- Beat 2 is the email ask, not the retired second greeting line. Same element, so the
        mute button and the pause-on-unmute machinery keep working untouched; new file. -->
@@ -3022,6 +3029,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
         });
         refreshBars();
+        /* ---- Start fetching the call SDK NOW ----
+           The moment the box turns into an email field, a call is the overwhelmingly likely
+           next event, and the visitor is about to spend several seconds typing. loadLiveKit()
+           memoises on its own promise, so startLiveCall() will find it already resolved
+           instead of waiting on a CDN round-trip it could have done for free. Fire and
+           forget: a failure here changes nothing, because startLiveCall() calls it again and
+           owns the error path. */
+        if (on && liveReady()) { try { loadLiveKit().catch(function () {}); } catch (e) {} }
       }
       /* She asks in her own words, in her own message bubble, and the message bar the
          visitor is already using becomes the email field. No second widget to notice. */
@@ -3074,7 +3089,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           addMsg('chloe', IDENT.first
             ? 'Thanks ' + IDENT.first + ' — calling you now.'
             : 'Thanks — calling you now.', .5);
-          setTimeout(function () { startLiveCall(); }, 900);
+          /* Was 900ms. That was there so her "calling you now" landed before the microphone
+             prompt covered it, but addMsg() already delays its own reveal and the prompt is
+             a browser sheet, not a page element — so most of it was just latency we chose.
+             250ms keeps the line legible first and gives back two thirds of a second on a
+             page that promises thirty. */
+          setTimeout(function () { startLiveCall(); }, 250);
           if (!IDENT.first) askName();
           return true;
         }
@@ -3413,6 +3433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         function markJoined() {
           if (joined) return;
           joined = true; lkJoined = true;
+          T.mark('agent'); T.report('joined');
           clearTimeout(lkJoinTimer);
           liveBarMode(true);          /* "connecting you both" becomes "just talk" */
           setCallState('live');
@@ -3446,10 +3467,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            bounded time and then says so. Never an unbounded spinner again. */
         lkJoinTimer = setTimeout(function () {
           if (joined) return;
+          T.report('no_agent');
           liveFail('no_agent', 'Nobody is free to take the call this second — that is our side, not yours.');
         }, LIVE_JOIN_WAIT);
 
         return room.connect(j.livekit_url, j.token).then(function () {
+          T.mark('ws');
           return room.localParticipant.setMicrophoneEnabled(true);
         }).then(function () {
           if (room.remoteParticipants && room.remoteParticipants.size > 0) markJoined();
@@ -3480,8 +3503,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            scheduled just before the dial would otherwise pop in during the call. */
         [].forEach.call(body.querySelectorAll('.quick'), function (q) { q.remove(); });
       }
+      /* ---- Where the seconds actually go ----
+         "Connecting takes too long and sometimes fails" is not fixable by guessing which of
+         five serial steps is the slow one. Each phase stamps itself in ms from the dial, the
+         set prints once on join or on failure, and it stays on window.__chloeTiming so a
+         screenshot of the console is enough to tell us. mic/sdk/api/ws are ours; `agent` is
+         the wait for a worker to accept the dispatch, which is upstream. */
+      var T = { marks: null, t0: 0 };
+      T.start = function () { T.t0 = performance.now(); T.marks = {}; };
+      T.mark = function (k) { if (T.marks) T.marks[k] = Math.round(performance.now() - T.t0); };
+      T.report = function (outcome) {
+        if (!T.marks) return;
+        T.marks.outcome = outcome;
+        T.marks.total = Math.round(performance.now() - T.t0);
+        window.__chloeTiming = T.marks;
+        if (window.console && console.info) console.info('[chloe] connect timing', JSON.stringify(T.marks));
+        T.marks = null;                 /* one report per attempt */
+      };
+
       function startLiveCall() {
         if (lkLive) return;
+        T.start();
         lkLive = true; lkSegs = {}; lkMuted = false;
         callEnded = false; lkJoined = false;
         clearQuick();
@@ -3496,11 +3538,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            The SDK fetch is kicked off in the same tick and simply not awaited, so the two
            run in parallel instead of the mic waiting on a CDN. */
         var lkP = loadLiveKit();
-        lkP.catch(function () {});   /* the real handler is below; this only stops a stray unhandled rejection */
+        lkP.then(function () { T.mark('sdk'); }, function () {});   /* also stops a stray unhandled rejection */
         var micP = (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
           ? Promise.reject(new Error('mic_unsupported'))
           : navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
               st.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
+              T.mark('mic');
             }, function () { throw new Error('mic_denied'); });
 
         micP.then(function () { return lkP; }).then(function (LK) {
@@ -3509,6 +3552,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(callPayload())
           }).then(function (r) {
+            T.mark('api');
             if (r.status === 422) throw new Error('bad_fields');
             if (r.status === 429) throw new Error('rate_limited');
             if (!r.ok) throw new Error('api_' + r.status);
@@ -3519,6 +3563,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           });
         }).catch(function (e) {
           var m = String((e && e.message) || e);
+          T.report(m);
           if (m === 'mic_denied' || m === 'mic_unsupported')
             return liveFail(m, 'I need your microphone to talk. Allow it in your browser and tap again, or');
           if (m === 'bad_fields')

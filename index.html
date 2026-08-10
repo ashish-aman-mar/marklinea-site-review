@@ -1993,20 +1993,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         s = s.replace(/[!.,?\s]+$/, '');
         return /^(good|great|fine|ok|okay|well|alright|all right|not bad|no complaints|cannot complain|can't complain|awesome|excellent|amazing|wonderful|tired|busy|hanging in there|same old|nothing much|nothing|meh|could be better|been better)$/.test(s);
       }
+      function focusChatBox() {
+        var el = document.getElementById('chatText');
+        if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
+      }
       function voiceIntro(userText) {
-        addMsg('chloe', GREET, .2);
+        addMsg('chloe', OPEN1, .2);
         if (userText) addMsg('user', userText, 1.0);
-        var kind = smallTalkKind(userText);
-        var lead = kind === 'soft'
-          ? 'Fair warning — I am much better out loud than I am in text.'
-          : (kind === 'greet' || !userText)
-            ? 'Good to meet you. Fair warning though — I am much better out loud than I am in text.'
-            : 'Straight answer — that one lands far better out loud than in text.';
-        if (liveReady()) {
-          maybeAskEmail(lead + ' What is your work email? I will pick up as soon as you send it.', 1.9);
-        } else {
-          addMsg('chloe', lead + ' Book thirty minutes and I will run a real discovery call on your own website. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.9);
+
+        if (!liveReady()) {
+          /* No call to unlock, so asking for an address would be collecting for nothing. */
+          addMsg('chloe', 'I am much better out loud than I am in text. Book thirty minutes and I will run a real discovery call on your own website. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.9);
+          return;
         }
+        /* A real question gets acknowledged — she just cannot answer it here. But
+           "I will answer it properly" already says she is here to help, so the full
+           opener on top of it says the same thing twice. Shorter second half. */
+        var asked = !!(userText && !smallTalkKind(userText));
+        addMsg('chloe', asked
+          ? 'Good question, and I will answer it properly once we are talking. Before we get started though \u2014 can you share your email address?'
+          : OPEN2, 1.9);
+        setTimeout(function () {
+          if (IDENT.email) return;
+          gateOpen = EMAIL_GATE_ON;
+          gateNudges = 0;
+          setEmailMode(true);
+          focusChatBox();
+        }, 2900);
       }
       function voiceFollowup(userText) {
         addMsg('user', userText);
@@ -2263,6 +2276,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          plays it while GREET2 is empty. */
       var GREET2 = '';
       var GREET = GREET2 ? GREET1 + ' ' + GREET2 : GREET1;
+      /* The spoken greeting and the written opener are different moments and different
+         lengths. The orb says one short line out loud; the thread can carry more. So
+         these are NOT tied to GREET1 — chloe-greet-1.mp3 stays exactly as approved. */
+      var OPEN1 = "Hi, I'm Chloe — AI Sales Engineer at Marklinea. How are you doing today?";
+      var OPEN2 = "I'm here to help with any questions and get you to the next step. Before we get started, can you share your email address?";
       /* If the consent bar is up, hold her back: the click that answers it is the
          gesture that unlocks audio, so waiting means she can actually be heard.
          8s is the ceiling for a visitor who ignores the bar entirely. */
@@ -2405,6 +2423,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       /* Centralised so every path she answers on is covered — there are six, and
          hand-placing the call missed four of them. The length test IS the value-first
          rule: a greeting or an acknowledgement is short and never earns an ask. */
+      /* ---- The email gate ----
+         The ADR says in bold that email must never gate the conversation. That was
+         written when a Tier-1 text endpoint was planned. There isn't one: Chloe cannot
+         answer anything in text, she can only route to voice, and voice needs the
+         email. So the gate costs the visitor nothing they could otherwise have.
+         THE DAY A TEXT ENDPOINT EXISTS, THIS BECOMES WRONG AGAIN — set EMAIL_GATE_ON
+         to false and the old answer-first behaviour returns. */
+      var EMAIL_GATE_ON = true;
+      var gateOpen = false, gateNudges = 0;
       var AWAIT_EMAIL = false;
       var PH_WAS = {};
       function emailInputs() {
@@ -2601,7 +2628,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!AWAIT_EMAIL) return false;
         var t = String(text || '').trim();
         if (validEmail(t)) {
-          IDENT.email = t; setEmailMode(false);
+          IDENT.email = t; gateOpen = false; setEmailMode(false);
           addMsg('user', t.replace(/</g, '&lt;'));
           /* No claim that anything was sent: there is no email backend. The address
              unlocks the call, and that is all she says it does. */
@@ -2618,9 +2645,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           addMsg('chloe', 'That address does not look quite right \u2014 mind checking it?', .7);
           return true;
         }
-        /* no @ at all: they would rather keep talking. Drop the ask, never nag. */
-        setEmailMode(false);
-        return false;
+        /* Not an address. Without the gate she drops the ask and answers instead. With
+           it she holds — but she must never become a dead end, so every nudge after the
+           first carries a real way out. Three escalating replies, then the short one, so
+           she does not repeat herself like a form validator. */
+        if (!gateOpen) { setEmailMode(false); return false; }
+        addMsg('user', t.replace(/</g, '&lt;'));
+        gateNudges++;
+        var book = ' <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>';
+        addMsg('chloe', gateNudges === 1
+          ? 'Happy to get into that \u2014 I just need your work email first, then I will pick up and we can talk it through properly.'
+          : gateNudges === 2
+            ? 'I know it is a hoop. It is the only thing I need. If you would rather not, book thirty minutes instead and I will come to you.' + book
+            : 'Just your work email and I am on the line.' + book, .7);
+        return true;
       }
 
       /* ---------- Live call with the real Chloe ----------

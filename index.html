@@ -2186,6 +2186,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          the ask, and the bar underneath becomes the email field straight away. */
       var HERO_ASK = "Before we get started \u2014 what's your work email?";
       var heroAsked = false;
+      /* ---- She has met this person already ----
+         "Hi, I'm Chloe — nice to meet you!" is a first-meeting recording, and playing it at
+         someone she spoke to five minutes ago is the same mistake as greeting over a live
+         call, one step earlier. The email ask is correctly skipped for them — she has the
+         address — but skipping it left the second caption line EMPTY, so the hero greeted a
+         stranger and then said nothing about what the box now does. Which is the whole
+         point of the last change: typing dials her. */
+      var returning = false;
+      function heroWelcomeBack() {
+        if (heroAsked) return;
+        heroAsked = true;              /* and the email ask must not land on top of this */
+        var l1 = IDENT.first ? 'Good to see you again, ' + IDENT.first + '.' : 'Good to see you again.';
+        var l2 = 'Ask me anything and I will pick up.';
+        SURFACES.forEach(function (pr) {
+          if (!pr[0] || !pr[1]) return;
+          pr[0].className = 'cp-line active'; pr[1].className = 'cp-line'; pr[1].innerHTML = '';
+          var t = fillWords(pr[0], l1, 0.05, 0.13);
+          setTimeout(function () {
+            pr[0].className = 'cp-line done';
+            pr[1].className = 'cp-line active';
+            fillWords(pr[1], l2, 0.15, 0.13);
+          }, (t + 0.35) * 1000);
+        });
+      }
       function heroAskEmail() {
         if (heroAsked || IDENT.email || !EMAIL_GATE_ON || !liveReady()) return;
         heroAsked = true;
@@ -3502,6 +3526,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function speakGreeting(fast) {
         if (VOICE.running || VOICE.done) return;
         if (lkLive) return;                 /* never a recording over a live voice call */
+        /* ...and never "nice to meet you" at someone she has already met. */
+        if (returning) {
+          VOICE.done = true;
+          if (VOICE.hideCue) VOICE.hideCue();
+          return;
+        }
         if (document.hidden && !fast) { VOICE.deferred = true; return; }
         VOICE.running = true;
         /* Beat 1: she leans back to make room — nothing else moves */
@@ -4293,7 +4323,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            address earns the gate being lowered — restoring a thread of two rejected
            attempts and then never asking again would hand out the call for free. */
         callStarted = true;
-        if (d.email) { callEnded = true; gateOpen = false; setEmailMode(false); }
+        if (d.email) {
+          callEnded = true; gateOpen = false; setEmailMode(false);
+          returning = true;
+          setTimeout(heroWelcomeBack, 700);
+        }
         thread.forEach(function (m) {
           var el = document.createElement('div');
           el.className = 'msg ' + (m.w === 'user' ? 'user' : 'chloe');

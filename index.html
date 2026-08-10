@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Live call with the real QA Chloe. SWITCHED ON.
-       The root path is the entry point RocketPay uses: the QA frontend takes the lead
-       params, calls create-discovery-call itself, mints the LiveKit room and token, and
-       redirects to /home. We must never hardcode a token — the one in a /home URL is a
-       JWT that expires in hours.
-       clientname=marklinea is confirmed to route to the Marklinea agent, not RocketPay's.
-       To switch off again, comment this block out. Nothing else changes. -->
+  <!-- Live call with the real QA Chloe. SWITCHED OFF.
+       Rolled back 10 Aug 2026. The website integration is correct: the URL is accepted,
+       the QA app loads and begins its connect sequence. But it hangs forever on
+       "Connecting you to Chloe…" — and it hangs identically in a plain browser tab, so
+       the fault is in the QA frontend or the create-discovery-call API, not here.
+       Do NOT switch this back on until a plain tab completes a call. A button that
+       hangs with no way out is worse than no button.
   <script>
     window.MARKLINEA_LIVE = {
       base: 'https://qa.marklinea.com/',
@@ -17,6 +17,7 @@
       // clientid / firstName / lastName / company are optional and only sent if set
     };
   </script>
+  -->
   <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
   <script>
     window.dataLayer = window.dataLayer || [];

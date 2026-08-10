@@ -1229,23 +1229,75 @@
 
   /* Connecting should look like progress, not like nothing happening. The rings travel
      outward instead of sitting still, and a line of text changes so the wait has a pulse. */
-  #callStage[data-state="connecting"] .orb-ring { animation: connRing 1.9s ease-out infinite; opacity: 1; }
-  #callStage[data-state="connecting"] .orb-ring.r2 { animation-delay: .95s; }
-  @keyframes connRing {
-    0%   { transform: scale(.86); opacity: .6; }
-    100% { transform: scale(1.55); opacity: 0; }
-  }
   #callStage[data-state="connecting"] .orb-glow { animation: connGlow 1.9s ease-in-out infinite; }
   @keyframes connGlow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-  .conn-note {
-    margin-top: 8px; font-family: var(--font-head); font-size: 12.5px; font-weight: 600;
-    color: var(--cream); opacity: 0; min-height: 1.3em;
-    transition: opacity .35s ease;
+
+  /* ---- The signal ring: the orb stops being decoration and becomes the indicator ----
+     Travelling rings AND a spinning arc is two motions competing for the same job, which
+     is part of why the stage did not read. The arc is the stronger one, so it is the only
+     one during a connect. The glow still breathes. */
+  .sig-ring {
+    position: absolute; inset: -26px; z-index: 1; pointer-events: none;
+    transform: rotate(-90deg);
   }
-  .conn-note.on { opacity: .72; }
+  .sr-track { fill: none; stroke: rgba(245,240,232,.10); stroke-width: 5; }
+  /* r=120, so the circumference is about 754 */
+  .sr-arc {
+    fill: none; stroke-width: 5; stroke-linecap: round;
+    stroke: rgba(245,240,232,.16); stroke-dasharray: 0 999;
+    transition: stroke .35s ease, stroke-dasharray .45s ease;
+  }
+  #callStage[data-state="idle"]       .sr-arc { stroke: rgba(245,240,232,.16); stroke-dasharray: 0 999; }
+  #callStage[data-state="connecting"] .sr-arc { stroke: #F2AE72; stroke-dasharray: 205 590; }
+  #callStage[data-state="live"]       .sr-arc { stroke: #46C06B; stroke-dasharray: 999 0; }
+  #callStage[data-state="muted"]      .sr-arc { stroke: #C5443E; stroke-dasharray: 16 20; }
+  #callStage[data-state="ended"]      .sr-arc { stroke: rgba(245,240,232,.24); stroke-dasharray: 999 0; }
+  /* The transform lives on the <svg>, NEVER on the <circle>: an SVG child rotates about
+     the SVG's own (0,0) rather than its centre, which swings the arc clean off the
+     canvas and leaves only the track visible. Cost me a render to find. */
+  #callStage[data-state="connecting"] .sig-ring { animation: sigSpin 1.3s linear infinite; }
+  @keyframes sigSpin { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
+
+  /* The state gets her size of type, instead of a suffix after her job title. */
+  .stage-id .nm { transition: color .3s ease; }
+  #callStage[data-state="connecting"] .stage-id .nm { color: var(--terracotta); }
+  #callStage[data-state="live"]       .stage-id .nm { color: #6FD68F; }
+  #callStage[data-state="muted"]      .stage-id .nm { color: #E88A85; }
+  #callStage[data-state="ended"]      .stage-id .nm { color: var(--muted-light); }
+
+  /* ---- The three connect steps ----
+     One rotating line gave the wait a pulse but never said it was PROGRESSING, and a
+     fifteen-second wait with nothing ticking off reads as a hang. */
+  .conn-steps {
+    list-style: none; margin: 14px 0 0; padding: 0; text-align: left;
+    display: inline-flex; flex-direction: column; gap: 8px;
+    opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility .5s;
+  }
+  .conn-steps.on { opacity: 1; visibility: visible; }
+  .conn-steps li {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12.5px; color: var(--muted-light); opacity: .40;
+    transition: opacity .3s ease, color .3s ease;
+  }
+  .conn-steps li.on   { opacity: 1; color: var(--cream); }
+  .conn-steps li.done { opacity: .74; }
+  .conn-steps li i {
+    width: 14px; height: 14px; border-radius: 50%; flex: none; position: relative;
+    border: 1.5px solid var(--muted-light);
+    transition: background .3s ease, border-color .3s ease;
+  }
+  .conn-steps li.done i { background: #46C06B; border-color: #46C06B; }
+  .conn-steps li.done i::after {
+    content: ""; position: absolute; left: 4px; top: 2.5px; width: 3px; height: 6px;
+    border: solid #12351d; border-width: 0 1.6px 1.6px 0; transform: rotate(45deg);
+  }
+  .conn-steps li.on i { border-color: var(--terracotta); animation: dotBlink 1s ease-in-out infinite; }
+
   @media (prefers-reduced-motion: reduce) {
     #callStage[data-state="connecting"] .orb-ring,
     #callStage[data-state="connecting"] .orb-glow,
+    #callStage[data-state="connecting"] .sig-ring,
+    .conn-steps li.on i,
     #callStage .stage-tag i { animation: none !important; }
   }
 
@@ -1926,14 +1978,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="stage-tag"><i></i><b id="stageTag">Chloe</b></div>
         <div class="orb-wrap">
           <div class="orb-glow"></div>
+          <svg class="sig-ring" viewBox="0 0 252 252" aria-hidden="true">
+            <circle class="sr-track" cx="126" cy="126" r="120"/>
+            <circle class="sr-arc" cx="126" cy="126" r="120"/>
+          </svg>
           <div class="orb"></div>
           <div class="orb-ring r1"></div>
           <div class="orb-ring r2"></div>
         </div>
         <div class="stage-id">
-          <div class="nm">Chloe</div>
+          <div class="nm" id="stageWord">Chloe</div>
           <div class="rl">Sales Engineer<b id="stageState"></b></div>
-          <div class="conn-note" id="connNote" aria-live="polite"></div>
+          <ol class="conn-steps" id="connSteps" aria-live="polite">
+            <li><i></i><span>Finding a free line</span></li>
+            <li><i></i><span>Waking Chloe up</span></li>
+            <li><i></i><span>She is picking up</span></li>
+          </ol>
         </div>
       </div>
       <aside class="call-chat">
@@ -3020,7 +3080,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       /* One place that says what state the call is in. The dot colour, the label beside
          it and the line under her name all come from here, so they cannot disagree. */
       var stageTagEl = document.getElementById('stageTag');
-      var connNoteEl = document.getElementById('connNote');
+      var stageWordEl = document.getElementById('stageWord');
       var CALL_LABEL = { idle: 'Chloe', connecting: 'Connecting', live: 'Live', muted: 'Muted', ended: 'Call ended' };
       var connTimer = null;
       var CONN_NOTES = [
@@ -3028,19 +3088,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         'Waking Chloe up…',
         'Almost there — she is picking up…'
       ];
-      function connNotes(on) {
+      var stepBox = null, stepEls = null, connNoteNow = '', stepHideTimer = null;
+      function connSteps(state) {
         clearInterval(connTimer);
-        if (!connNoteEl) return;
-        if (!on) { connNoteEl.classList.remove('on'); connNoteEl.textContent = ''; return; }
+        if (!stepBox) {
+          stepBox = document.getElementById('connSteps');
+          if (stepBox) stepEls = [].slice.call(stepBox.querySelectorAll('li'));
+        }
+        if (!stepBox || !stepEls) return;
+        /* Once she has answered, all three are true — and they stay visible for a beat so
+           the jump from "picking up" to Live is not a disappearing act. */
+        if (state === 'live' || state === 'muted') {
+          stepBox.classList.add('on');
+          stepEls.forEach(function (li) { li.className = 'done'; });
+          /* All three tick, then they go: during the conversation itself they are history,
+             and a permanent checklist under her name is clutter. Held for a beat first so
+             the jump from "picking up" to Live is not a disappearing act. */
+          clearTimeout(stepHideTimer);
+          stepHideTimer = setTimeout(function () {
+            if (stepBox) stepBox.classList.remove('on');
+          }, 3600);
+          return;
+        }
+        if (state !== 'connecting') {
+          connNoteNow = '';
+          clearTimeout(stepHideTimer);
+          stepBox.classList.remove('on');
+          stepEls.forEach(function (li) { li.className = ''; });
+          return;
+        }
+        clearTimeout(stepHideTimer);
+        stepBox.classList.add('on');
         var i = 0;
         function step() {
-          connNoteEl.classList.remove('on');
-          setTimeout(function () {
-            connNoteEl.textContent = CONN_NOTES[Math.min(i, CONN_NOTES.length - 1)];
-            connNoteEl.classList.add('on');
-            capNote(connNoteEl.textContent);
-            i++;
-          }, 220);
+          stepEls.forEach(function (li, n) {
+            li.className = n < i ? 'done' : n === i ? 'on' : '';
+          });
+          /* The minimised dock caption mirrors whichever step is current, so putting her
+             away during a connect still shows movement. */
+          connNoteNow = CONN_NOTES[Math.min(i, CONN_NOTES.length - 1)];
+          capNote(connNoteNow);
+          if (i < CONN_NOTES.length - 1) i++;
         }
         step();
         connTimer = setInterval(step, 3200);
@@ -3048,11 +3136,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       /* Idle from the start: a green pulsing dot on a page where nothing is connected
          was the same class of lie as the old "Live call · Listening" labels. */
       setTimeout(function () { setCallState('idle'); }, 0);
+      var STAGE_WORD = { idle: 'Chloe', connecting: 'Connecting…', live: 'Live', muted: 'Muted', ended: 'Call ended' };
       function setCallState(st) {
         if (callStage) callStage.dataset.state = st;
         if (stageTagEl) stageTagEl.textContent = CALL_LABEL[st] || 'Chloe';
-        stageSay(st === 'live' ? 'Live' : st === 'muted' ? 'Muted' : st === 'connecting' ? 'Connecting…' : '');
-        connNotes(st === 'connecting');
+        /* The big line under the orb IS the state now, so the old " · Live" suffix after
+           her job title would say the same thing twice. */
+        if (stageWordEl) stageWordEl.textContent = STAGE_WORD[st] || 'Chloe';
+        stageSay('');
+        connSteps(st);
         /* She is on the line but has not spoken yet — back to the waiting dots, not a
            stale "almost there" that would now be a lie. */
         if (st === 'live') capNote(null);
@@ -3082,7 +3174,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function syncDockCap() {
         if (!capEls()) return;
         if (!capVisible()) { dockCap.hidden = true; return; }
-        if (!dockCapText.innerHTML) capWait();
+        /* Mid-connect the current step is better than three dots: the visitor put her away
+           two seconds ago and the next tick could be three seconds out. */
+        if (!dockCapText.innerHTML && connNoteNow) { dockCapText.textContent = connNoteNow; capWho = ''; }
+        else if (!dockCapText.innerHTML) capWait();
         dockCap.hidden = false;
       }
       /* The connecting line is mirrored here, so a visitor who minimises before she

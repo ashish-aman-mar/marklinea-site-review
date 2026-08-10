@@ -2624,6 +2624,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          8s is the ceiling for a visitor who ignores the bar entirely. */
       var CONSENT_PENDING = (window.__mlConsent == null);
       var popTimer = setTimeout(showPop, CONSENT_PENDING ? 8000 : 3000);
+      /* ---- She talks in the fold, not four seconds later ----
+         The greeting used to hang off popTimer, which exists to decide when the FLOATING
+         PANEL interrupts someone reading further down the page — a completely different
+         question from when she should say hello to someone looking straight at her. The
+         cost, measured on the live build: the hero caption was EMPTY for 4.2 seconds with
+         consent already answered, and 9.2 seconds with the consent bar still up. That is
+         what Ashish read as "she is not speaking on load at all, and there's no text".
+
+         The words are not the sound. If autoplay is refused the caption still fills and the
+         cue appears — that path is already built and tested — so a pending consent bar has
+         no business muting her writing for nine seconds either.
+
+         Two paths now want to greet — this timer and showPop() — so they go through one
+         one-shot gate. Guarding on VOICE.running / VOICE.done was NOT enough and I shipped
+         that mistake into my own test a moment ago: when autoplay is refused the greeting
+         finishes early, `running` clears before showPop() fires at 3s, and the second run
+         resets the caption lines — wiping the email ask clean off line 2. Same failure as
+         the two-lines-at-once bug, arrived at from the other direction.
+
+         The gate covers the AUTOMATIC greeting only. Replays that a person actually asked
+         for — answering the consent bar, un-muting her — still call speakGreeting() directly, and
+         must keep working. */
+      setTimeout(function () { autoGreet(false); }, 900);
       var idleTimer = null;
       var heroBigOrb = document.getElementById('heroBigOrb');
       var heroVisualEl = document.getElementById('heroVisual');
@@ -3523,6 +3546,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
       });
 
+      /* One automatic greeting per visit, whichever path gets there first. */
+      var autoGreetDone = false;
+      function autoGreet(fast) {
+        if (autoGreetDone) return;
+        autoGreetDone = true;
+        speakGreeting(fast);
+      }
       function speakGreeting(fast) {
         if (VOICE.running || VOICE.done) return;
         if (lkLive) return;                 /* never a recording over a live voice call */
@@ -3606,7 +3636,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (lkLive) return;
         popShown = true; chatStarted = true;
         /* fast = we're inside a real user gesture, so play() must happen in this tick */
-        if (fast) speakGreeting(true); else setTimeout(speakGreeting, 650);
+        if (fast) autoGreet(true); else setTimeout(function () { autoGreet(false); }, 650);
         /* if the visitor is reading below, don't interrupt — her message pops above the orb, then slips away */
         if (heroOut) {
           setUnread(1);
@@ -3620,8 +3650,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          Nothing here depends on which one they chose. */
       document.addEventListener('marklinea:consent', function () {
         clearTimeout(popTimer);
-        if (!popShown) { showPop(true); return; }
-        if (!VOICE.unlocked && !VOICE.done && VOICE.has(VOICE.a1)) {
+        /* Answering the bar is the gesture that makes sound possible at all, and for a
+           first-time visitor with autoplay refused it is the ONLY unlock. This branch used
+           to be able to lean on showPop(true) to do the replay; now the greeting has
+           already run silently at 900ms, so showPop's one-shot gate makes that a no-op and
+           the unlock has to be explicit. Measured before this: "consent -> replayed=false",
+           meaning she captioned and then never spoke, however you answered. */
+        var wasGreeted = autoGreetDone;
+        if (!popShown) showPop(true);
+        /* Replay only if the greeting had ALREADY fired before the answer. If showPop just
+           started it, sound was already allowed — a gesture is what got us here — and
+           replaying on top of it is the double-greeting bug again. */
+        if (wasGreeted && !VOICE.unlocked && !VOICE.done && VOICE.has(VOICE.a1)) {
           VOICE.disarm(); VOICE.hideCue();
           VOICE.running = false;
           speakGreeting(true);

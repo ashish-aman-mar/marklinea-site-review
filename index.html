@@ -1181,6 +1181,40 @@
      overflow:hidden, and .chat-body reported scrollHeight === clientHeight — a
      scroller that never scrolls. The visible cost was that "Talk to me now" sat
      underneath the message bar and could not be clicked at all. */
+  /* ---- Call state, said once and said clearly ----
+     The only signal used to be a text suffix under her name, so idle, connecting and
+     connected all looked the same. The dot now carries the state and the label names it. */
+  .stage-tag b { font-weight: 700; }
+  .stage-tag i { transition: background .25s ease, box-shadow .25s ease; }
+  #callStage[data-state="idle"] .stage-tag i     { background: var(--muted-light); animation: none; }
+  #callStage[data-state="connecting"] .stage-tag i { background: #E8985A; animation: dotBlink 1s ease-in-out infinite; }
+  #callStage[data-state="live"] .stage-tag i     { background: #46C06B; box-shadow: 0 0 0 4px rgba(70,192,107,.2); }
+  #callStage[data-state="muted"] .stage-tag i    { background: #C5443E; animation: none; }
+  #callStage[data-state="ended"] .stage-tag i    { background: var(--muted-light); animation: none; }
+  @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+  /* Connecting should look like progress, not like nothing happening. The rings travel
+     outward instead of sitting still, and a line of text changes so the wait has a pulse. */
+  #callStage[data-state="connecting"] .orb-ring { animation: connRing 1.9s ease-out infinite; opacity: 1; }
+  #callStage[data-state="connecting"] .orb-ring.r2 { animation-delay: .95s; }
+  @keyframes connRing {
+    0%   { transform: scale(.86); opacity: .6; }
+    100% { transform: scale(1.55); opacity: 0; }
+  }
+  #callStage[data-state="connecting"] .orb-glow { animation: connGlow 1.9s ease-in-out infinite; }
+  @keyframes connGlow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  .conn-note {
+    margin-top: 8px; font-family: var(--font-head); font-size: 12.5px; font-weight: 600;
+    color: var(--cream); opacity: 0; min-height: 1.3em;
+    transition: opacity .35s ease;
+  }
+  .conn-note.on { opacity: .72; }
+  @media (prefers-reduced-motion: reduce) {
+    #callStage[data-state="connecting"] .orb-ring,
+    #callStage[data-state="connecting"] .orb-glow,
+    #callStage .stage-tag i { animation: none !important; }
+  }
+
   /* ---- Minimised while the call is still running ----
      Closing the panel used to leave the room connected and the microphone open with
      nothing on screen saying so. The dock now says it, and is the way back in. */
@@ -1832,7 +1866,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="call-stage" id="callStage">
         <!-- Not a live call: the real voice session opens in its own modal. Saying
              "Live call" and "Listening" here claimed a microphone that is not open. -->
-        <div class="stage-tag"><i></i>Chloe</div>
+        <div class="stage-tag"><i></i><b id="stageTag">Chloe</b></div>
         <div class="orb-wrap">
           <div class="orb-glow"></div>
           <div class="orb"></div>
@@ -1842,6 +1876,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="stage-id">
           <div class="nm">Chloe</div>
           <div class="rl">Sales Engineer<b id="stageState"></b></div>
+          <div class="conn-note" id="connNote" aria-live="polite"></div>
         </div>
       </div>
       <aside class="call-chat">
@@ -2077,6 +2112,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (el && el.offsetParent) { try { el.focus({ preventScroll: true }); } catch (e) {} }
       }
       function voiceIntro(userText) {
+        /* She already knows this person. Re-introducing herself after a finished call is
+           what made the thread read out of order: "How did that go?" followed by "Hi,
+           I'm Chloe". Check before speaking, not after. */
+        if (IDENT.email && liveReady()) {
+          if (userText) addMsg('user', userText, .1);
+          offerLive(1.0, 'Want to pick that back up?');
+          return;
+        }
         addMsg('chloe', OPEN1, .2);
         if (userText) addMsg('user', userText, 1.0);
 
@@ -2085,6 +2128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           addMsg('chloe', 'I am much better out loud than I am in text. Book thirty minutes and I will run a real discovery call on your own website. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.9);
           return;
         }
+
         /* A real question gets acknowledged — she just cannot answer it here. But
            "I will answer it properly" already says she is here to help, so the full
            opener on top of it says the same thing twice. Shorter second half. */
@@ -2646,9 +2690,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (IDENT.nameAsks >= 1 || AWAIT_NAME) return;
         IDENT.nameAsks++; IDENT.pending = true;
         var wantCo = !IDENT.company;
+        /* Asked WHILE she connects now, so the wording cannot say "before I dial". */
+        var dialing = lkLive;
         addMsg('chloe', wantCo
-          ? 'Thanks. Two quick things before I dial — what should I call you, and who do you work for?'
-          : 'Thanks. One last thing before I dial — what should I call you?', .8);
+          ? (dialing ? 'While I get a line — what should I call you, and who do you work for?'
+                     : 'Two quick things first — what should I call you, and who do you work for?')
+          : (dialing ? 'While I get a line — what should I call you?'
+                     : 'One last thing — what should I call you?'), .8);
         setTimeout(function () {
           IDENT.pending = false;
           setNameMode(true, wantCo);
@@ -2666,6 +2714,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (n.company) IDENT.company = n.company;
         setNameMode(false);
         addMsg('user', t.replace(/</g, '&lt;'));
+        if (lkLive) {
+          /* Already dialling — she is not going to offer a call she is placing. */
+          liveBarMode(true);
+          addMsg('chloe', 'Good to meet you, ' + IDENT.first + '.', .5);
+          return true;
+        }
         offerLive(.8);
         return true;
       }
@@ -2730,8 +2784,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if (!IDENT.first) IDENT.first = d.first;
           if (!IDENT.last) IDENT.last = d.last;
           if (!IDENT.company) IDENT.company = d.company;
-          if (liveReady()) { askName(); }
-          else { addMsg('chloe', 'Got it, thank you.', .8); }
+          if (!liveReady()) { addMsg('chloe', 'Got it, thank you.', .8); return true; }
+          /* Dial immediately. Waiting for a name and then a button press put two steps
+             between "here is my email" and a ringing phone, and the whole promise is
+             thirty seconds. The name is only asked if the address could not supply one,
+             and it is asked WHILE she connects rather than before. */
+          addMsg('chloe', IDENT.first
+            ? 'Thanks ' + IDENT.first + ' — calling you now.'
+            : 'Thanks — calling you now.', .5);
+          setTimeout(function () { startLiveCall(); }, 900);
+          if (!IDENT.first) askName();
           return true;
         }
         if (t.indexOf('@') > -1) {
@@ -2836,6 +2898,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
 
       function stageSay(t) { if (stageState) stageState.textContent = t ? ' · ' + t : ''; }
+      /* One place that says what state the call is in. The dot colour, the label beside
+         it and the line under her name all come from here, so they cannot disagree. */
+      var stageTagEl = document.getElementById('stageTag');
+      var connNoteEl = document.getElementById('connNote');
+      var CALL_LABEL = { idle: 'Chloe', connecting: 'Connecting', live: 'Live', muted: 'Muted', ended: 'Call ended' };
+      var connTimer = null;
+      var CONN_NOTES = [
+        'Finding a free line…',
+        'Waking Chloe up…',
+        'Almost there — she is picking up…'
+      ];
+      function connNotes(on) {
+        clearInterval(connTimer);
+        if (!connNoteEl) return;
+        if (!on) { connNoteEl.classList.remove('on'); connNoteEl.textContent = ''; return; }
+        var i = 0;
+        function step() {
+          connNoteEl.classList.remove('on');
+          setTimeout(function () {
+            connNoteEl.textContent = CONN_NOTES[Math.min(i, CONN_NOTES.length - 1)];
+            connNoteEl.classList.add('on');
+            i++;
+          }, 220);
+        }
+        step();
+        connTimer = setInterval(step, 3200);
+      }
+      /* Idle from the start: a green pulsing dot on a page where nothing is connected
+         was the same class of lie as the old "Live call · Listening" labels. */
+      setTimeout(function () { setCallState('idle'); }, 0);
+      function setCallState(st) {
+        if (callStage) callStage.dataset.state = st;
+        if (stageTagEl) stageTagEl.textContent = CALL_LABEL[st] || 'Chloe';
+        stageSay(st === 'live' ? 'Live' : st === 'muted' ? 'Muted' : st === 'connecting' ? 'Connecting…' : '');
+        connNotes(st === 'connecting');
+      }
 
       /* One bubble per transcript segment, rewritten in place as the words firm up —
          otherwise every correction arrives as a new message. */
@@ -2875,15 +2973,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (input) {
           if (on) {
             if (input.dataset.phWas === undefined) input.dataset.phWas = input.placeholder;
-            input.placeholder = 'Chloe is listening — just talk';
-            input.disabled = true;
+            /* Still waiting on a name? Then the bar has to stay typeable, or the
+               question she just asked cannot be answered. */
+            input.placeholder = AWAIT_NAME ? 'Your name' : 'Chloe is listening — just talk';
+            input.disabled = !AWAIT_NAME;
           } else {
             input.disabled = false;
             if (input.dataset.phWas !== undefined) { input.placeholder = input.dataset.phWas; delete input.dataset.phWas; }
           }
         }
         var send = document.getElementById('chatSend');
-        if (send) send.disabled = on;
+        if (send) send.disabled = on && !AWAIT_NAME;
         var mic = document.getElementById('cbMic');
         if (mic) { mic.classList.toggle('on', on); mic.classList.toggle('muted', on && lkMuted); }
       }
@@ -2904,7 +3004,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         clearTimeout(lkJoinTimer);
         lkLive = false; lkMuted = false;
         liveBarMode(false);
-        stageSay('');
+        setCallState('ended');
         if (callStage) callStage.classList.remove('speaking');
         if (lkAudioEl) { try { lkAudioEl.pause(); } catch (e) {} lkAudioEl.remove(); lkAudioEl = null; }
         if (lkRoom) { try { lkRoom.disconnect(); } catch (e) {} lkRoom = null; }
@@ -2933,7 +3033,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if (joined) return;
           joined = true;
           clearTimeout(lkJoinTimer);
-          stageSay('Live');
+          setCallState('live');
           if (callStage) callStage.classList.add('speaking');
         }
         room.on(LK.RoomEvent.TrackSubscribed, function (track) {
@@ -2977,7 +3077,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function startLiveCall() {
         if (lkLive) return;
         lkLive = true; lkSegs = {}; lkMuted = false;
-        stageSay('Connecting…');
+        setCallState('connecting');
         liveBarMode(true);
 
         loadLiveKit().then(function (LK) {
@@ -3669,7 +3769,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try { lkRoom.localParticipant.setMicrophoneEnabled(!lkMuted); } catch (e) {}
         cbMicBtn.classList.toggle('muted', lkMuted);
         cbMicBtn.setAttribute('aria-label', lkMuted ? 'Unmute microphone' : 'Mute microphone');
-        stageSay(lkMuted ? 'Muted' : 'Live');
+        setCallState(lkMuted ? 'muted' : 'live');
       });
       function userSend() {
         var t = input.value.trim();

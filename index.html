@@ -1181,6 +1181,24 @@
      overflow:hidden, and .chat-body reported scrollHeight === clientHeight — a
      scroller that never scrolls. The visible cost was that "Talk to me now" sat
      underneath the message bar and could not be clicked at all. */
+  /* ---- Minimised while the call is still running ----
+     Closing the panel used to leave the room connected and the microphone open with
+     nothing on screen saying so. The dock now says it, and is the way back in. */
+  .dock-oncall { display: none; }
+  .dock.on-call .dock-oncall {
+    display: inline-flex; align-items: center; font-family: var(--font-head);
+    font-size: 12.5px; font-weight: 700; color: var(--terracotta-deep);
+    padding: 0 14px 0 10px; white-space: nowrap;
+  }
+  .dock.on-call .dock-expand { display: none; }
+  .dock.on-call .dock-pill { box-shadow: 0 18px 50px rgba(42, 42, 42, .18), 0 0 0 3px rgba(232, 152, 90, .38); }
+  .dock.on-call .d-orb::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--terracotta); animation: ripple 1.6s ease-out infinite;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) { .dock.on-call .d-orb::after { animation: none; } }
+
   /* ---- "email only, for now" ----
      A shake plus red on the bar itself, instead of a chat message. Rejecting a typo
      is interface feedback, not conversation — she should not say a sentence about it. */
@@ -1763,6 +1781,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="dock-pill" id="dockPill">
       <span class="d-orb" id="dockOrb" role="button" tabindex="0" aria-label="Talk to Chloe"><span class="morb"></span></span>
+      <span class="dock-oncall" id="dockOnCall" aria-live="polite">On a call · tap to return</span>
       <span class="dock-expand">
         <button class="ci-ic ci-mic" id="dkMic" aria-label="Enable microphone" aria-pressed="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
@@ -2109,6 +2128,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var heroOut = false, dockShown = false, popVisible = false, popShown = false;
       var morphDone = false, dockNoAnim = false;
       function updateDock() {
+        /* A live call outranks the scroll rules: she must remain reachable even at the
+           top of the page, where morphDone is false and the dock would be hidden. */
+        if (lkLive && !chat.classList.contains('open')) {
+          dock.classList.add('show'); dockShown = true; return;
+        }
         var shouldShow = morphDone && !chat.classList.contains('open') && !popVisible;
         if (shouldShow === dockShown) return;
         dockShown = shouldShow;
@@ -2864,7 +2888,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (mic) { mic.classList.toggle('on', on); mic.classList.toggle('muted', on && lkMuted); }
       }
 
+      /* Minimising keeps the room and the microphone. So the dock has to say so — a call
+         running behind a closed panel with no indicator is the worst version of this. */
+      function setDockOnCall(on) {
+        if (!dock) return;
+        dock.classList.toggle('on-call', on);
+        if (on) { dock.classList.add('show'); dockShown = true; }
+      }
+      function minimiseCall() {
+        closeChat();
+        setDockOnCall(true);
+      }
       function teardownLive() {
+        setDockOnCall(false);
         clearTimeout(lkJoinTimer);
         lkLive = false; lkMuted = false;
         liveBarMode(false);
@@ -3037,6 +3073,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       function speakGreeting(fast) {
         if (VOICE.running || VOICE.done) return;
+        if (lkLive) return;                 /* never a recording over a live voice call */
         if (document.hidden && !fast) { VOICE.deferred = true; return; }
         VOICE.running = true;
         /* Beat 1: she leans back to make room — nothing else moves */
@@ -3106,6 +3143,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       function showPop(fast) {
         if (popShown) return;
+        /* She is already talking. A proactive "nice to meet you" on top of a live call
+           is the double-greeting bug at its worst. */
+        if (lkLive) return;
         popShown = true; chatStarted = true;
         /* fast = we're inside a real user gesture, so play() must happen in this tick */
         if (fast) speakGreeting(true); else setTimeout(speakGreeting, 650);
@@ -3418,14 +3458,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       /* Clicking the backdrop or pressing Escape must hang up first, not silently
          leave a call running behind a closed window with the microphone open. */
+      /* Backdrop and Escape minimise rather than hang up. Escape ending a live call was
+         too destructive for a key people press to dismiss things. */
       chat.addEventListener('click', function (e) {
         if (e.target !== chat) return;
-        if (lkLive) { endLiveCall('ended'); return; }
+        if (lkLive) { minimiseCall(); return; }
         closeChat();
       });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          if (lkLive) { endLiveCall('ended'); return; }
+          if (lkLive) { minimiseCall(); return; }
           if (chat.classList.contains('open')) closeChat();
           else if (popVisible) hidePop();
         }
@@ -3604,13 +3646,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           dockCall.classList.add('invalid');
         });
       });
-      document.getElementById('chatClose').addEventListener('click', closeChat);
+      /* The red phone button is labelled "End call" and now actually ends it. It used to
+         just close the panel, leaving the room connected and the mic open. */
+      document.getElementById('chatClose').addEventListener('click', function () {
+        if (lkLive) { endLiveCall('ended'); return; }
+        closeChat();
+      });
       var closeX = document.getElementById('callCloseX');
       /* Two buttons in the bar were decorative. During a live call they become real:
          the mic mutes, and the red one hangs up instead of closing the window. No new
          controls, and nothing overlaying the transcript. */
+      /* The × minimises. Mid-call you should be able to put her away and keep reading the
+         site while you talk — that is the whole point of her being in the page. */
       if (closeX) closeX.addEventListener('click', function () {
-        if (lkLive) { endLiveCall('ended'); return; }
+        if (lkLive) { minimiseCall(); return; }
         closeChat();
       });
       var cbMicBtn = document.getElementById('cbMic');

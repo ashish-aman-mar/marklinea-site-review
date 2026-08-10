@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Live call with the real QA Chloe. Uncomment and fill in clientid to switch it on.
-       base/clientname/clientid follow the same iframe contract RocketPay uses.
+  <!-- Live call with the real QA Chloe. SWITCHED ON.
+       The root path is the entry point RocketPay uses: the QA frontend takes the lead
+       params, calls create-discovery-call itself, mints the LiveKit room and token, and
+       redirects to /home. We must never hardcode a token — the one in a /home URL is a
+       JWT that expires in hours.
+       clientname=marklinea is confirmed to route to the Marklinea agent, not RocketPay's.
+       To switch off again, comment this block out. Nothing else changes. -->
   <script>
     window.MARKLINEA_LIVE = {
       base: 'https://qa.marklinea.com/',
-      clientname: 'marklinea',
-      clientid: ''            // <-- Marklinea's own client id goes here
+      clientname: 'marklinea'
+      // clientid / firstName / lastName / company are optional and only sent if set
     };
   </script>
-  -->
   <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -2402,14 +2406,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function liveCfg() { return window.MARKLINEA_LIVE || null; }
       function liveReady() {
         var c = liveCfg();
-        return !!(c && c.base && c.clientid);
+        return !!(c && c.base);            /* clientid is optional */
       }
       function liveUrl() {
         var c = liveCfg(), q = [];
         if (IDENT.email) q.push('email=' + encodeURIComponent(IDENT.email));
         q.push('autostart=true');
         q.push('clientname=' + encodeURIComponent(c.clientname || 'marklinea'));
-        q.push('clientid=' + encodeURIComponent(c.clientid));
+        if (c.clientid) q.push('clientid=' + encodeURIComponent(c.clientid));
+        if (c.firstName) q.push('firstName=' + encodeURIComponent(c.firstName));
+        if (c.lastName) q.push('lastName=' + encodeURIComponent(c.lastName));
+        if (c.company) q.push('company=' + encodeURIComponent(c.company));
         return c.base + (c.base.indexOf('?') > -1 ? '&' : '?') + q.join('&');
       }
       var liveWrap = document.getElementById('liveWrap');
@@ -2429,8 +2436,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         requestAnimationFrame(function () { liveWrap.classList.add('in'); });
         try { document.getElementById('liveX').focus({ preventScroll: true }); } catch (e) {}
       }
+      /* There is no reliable way to tell whether a cross-origin iframe actually
+         connected — a blocked frame still fires its load event. So rather than guess,
+         she always leaves a way forward once the call window closes. */
       function closeLive() {
         if (!liveWrap || !liveFrame) return;
+        /* Works whether the call went well or never connected at all */
+        addMsg('chloe', 'How did that go? If it did not connect, or you want a longer session, book thirty minutes and I will run it properly. <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', 1.0);
         liveWrap.classList.remove('in');
         /* tear the iframe down only after the animation, otherwise the card flashes white */
         setTimeout(function () {

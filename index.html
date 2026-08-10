@@ -16,9 +16,12 @@
          * rollback is commenting this block out again. Nothing else changes. -->
   <script>
     window.MARKLINEA_LIVE = {
-      base: 'https://qa.marklinea.com/',
+      // 'native' = the call happens in our own panel. 'iframe' = the old modal,
+      // kept as a one-word rollback until native has taken real calls.
+      mode: 'native',
+      api: 'https://qa-api.marklinea.com',   // create-discovery-call lives here
+      base: 'https://qa.marklinea.com/',     // only used by mode:'iframe'
       clientname: 'marklinea'
-      // clientid / firstName / lastName / company are optional and only sent if set
     };
   </script>
   <!-- Consent Mode v2 — must run BEFORE the GTM snippet so tags start denied -->
@@ -1178,6 +1181,20 @@
      overflow:hidden, and .chat-body reported scrollHeight === clientHeight — a
      scroller that never scrolls. The visible cost was that "Talk to me now" sat
      underneath the message bar and could not be clicked at all. */
+  /* ---- Live transcript bubbles ----
+     .msg starts at opacity:0 by design; popIn() reveals it. liveSay() builds bubbles
+     directly and never calls popIn(), so .interim's opacity was the ONLY thing making
+     them visible — and the instant a segment went final and .interim was removed the
+     message dropped to opacity 0. It was still 42px tall, so her finished sentences
+     became invisible gaps in the thread. Spell the visible state out. */
+  .msg.live { opacity: 1; transform: none; }
+  /* Provisional text is dimmed by COLOUR, not opacity. Fading the whole bubble washed
+     its cream background into the white panel and took the words with it. */
+  .msg.chloe.interim { color: var(--muted); }
+  .msg.user.interim { color: rgba(245, 240, 232, .74); }
+  .cb-ic.on { border-color: var(--terracotta-deep); color: var(--terracotta-deep); }
+  .cb-ic.on.muted { border-color: var(--line); color: var(--muted-light); }
+  .cb-ic:disabled { opacity: .45; cursor: default; }
   .chat-body { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 18px 108px; display: flex; flex-direction: column; gap: 10px; }
     /* floating control bar */
     .call-bar {
@@ -2299,7 +2316,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         stepFor: function (dur, text) {
           var n = (text || '').split(' ').length;
           if (!dur || !n) return 0.13;
-          return Math.min(0.30, Math.max(0.06, (dur - 0.35) / n));
+          /* Ceiling raised from 0.30 to 0.42 when the second greeting line was retired.
+       GREET1 is 8 words over 3.13s, which wants 0.35s a word; clamped at 0.30 the
+       words finished 0.7s before her voice did, so the sentence sat there complete
+       while she was still speaking. */
+    return Math.min(0.42, Math.max(0.06, (dur - 0.35) / n));
         },
         /* the greeting has two surfaces — hero while she's in the fold, floating panel once
            the visitor scrolls away. The cue has to live on both or it shows up on neither. */
@@ -2628,6 +2649,225 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var liveWrap = document.getElementById('liveWrap');
       var liveCard = document.getElementById('liveCard');
       var liveFrame = null, liveScrollY = 0;
+      /* ---------- Native voice: the call happens in this panel ----------
+         The iframe worked, but it was a second Chloe inside a second product: her own
+         greeting on top of ours, her own panel over our page, and no way to carry what
+         was said in text into the call. This joins the LiveKit room from this page, so
+         there is one thread and one Chloe.
+
+         mode:'iframe' still runs openLive() below and is the rollback. */
+      /* jsdelivr, not cdnjs. Two mistakes were in the first URL: cdnjs was never
+         confirmed to carry this package, and the file is livekit-client.umd.js — there
+         is no .umd.min.js in the tarball. jsdelivr maps /npm/pkg@ver/path straight to
+         package contents, and this page already loads motion from it, so it is a CDN
+         the browser has proven it can reach. Two sources, because this is the one
+         button the whole funnel runs through. */
+      var LK_CDNS = [
+        'https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.js',
+        'https://unpkg.com/livekit-client@2.21.0/dist/livekit-client.umd.js'
+      ];
+      var LIVE_JOIN_WAIT = 15000;
+      var lkRoom = null, lkAudioEl = null, lkJoinTimer = null, lkSegs = {}, lkMuted = false, lkLive = false;
+
+      function liveMode() { var c = liveCfg(); return (c && c.mode) || 'iframe'; }
+      function liveApiBase() { var c = liveCfg(); return (c && c.api) || ''; }
+      function nativeReady() { return liveMode() === 'native' && !!liveApiBase(); }
+
+      function loadLiveKit() {
+        if (window.LivekitClient) return Promise.resolve(window.LivekitClient);
+        if (loadLiveKit._p) return loadLiveKit._p;
+        loadLiveKit._p = new Promise(function (resolve, reject) {
+          var i = 0;
+          (function attempt() {
+            if (i >= LK_CDNS.length) { reject(new Error('sdk_load_failed')); return; }
+            var url = LK_CDNS[i++];
+            var t = document.createElement('script');
+            t.src = url; t.async = true;
+            t.onload = function () {
+              if (window.LivekitClient) { resolve(window.LivekitClient); return; }
+              /* loaded but no global: wrong file for this URL, try the next source */
+              if (window.console && console.warn) console.warn('[chloe] sdk loaded without a global from', url);
+              attempt();
+            };
+            t.onerror = function () {
+              if (window.console && console.warn) console.warn('[chloe] sdk failed to load from', url);
+              attempt();
+            };
+            document.head.appendChild(t);
+          })();
+        });
+        return loadLiveKit._p;
+      }
+
+      function stageSay(t) { if (stageState) stageState.textContent = t ? ' · ' + t : ''; }
+
+      /* One bubble per transcript segment, rewritten in place as the words firm up —
+         otherwise every correction arrives as a new message. */
+      function liveSay(who, id, text, isFinal) {
+        var key = who + '|' + id, d = lkSegs[key];
+        if (!d) {
+          d = document.createElement('div');
+          d.className = 'msg ' + who + ' live interim';
+          body.appendChild(d);
+          lkSegs[key] = d;
+        }
+        d.textContent = text;
+        if (isFinal) d.classList.remove('interim');
+        body.scrollTop = body.scrollHeight;
+      }
+
+      /* The API's real field names. firstName/lastName/email/company are the IFRAME's
+         query params, which that app translates. Sending those here 422s every request
+         — which is exactly the bug that made the call hang all of 10 Aug.
+         No `source` field yet: if the model forbids extras it would 422 too. Add it the
+         day the API declares it. */
+      function callPayload() {
+        var c = liveCfg() || {};
+        var p = {
+          user_email: IDENT.email || '',
+          user_first_name: IDENT.first || c.firstName || '',
+          user_last_name: IDENT.last || c.lastName || '',
+          clientname: c.clientname || 'marklinea'
+        };
+        var co = IDENT.company || c.company;
+        if (co) p.company_name = co;
+        if (c.clientid) p.clientid = c.clientid;
+        return p;
+      }
+
+      function liveBarMode(on) {
+        if (input) {
+          if (on) {
+            if (input.dataset.phWas === undefined) input.dataset.phWas = input.placeholder;
+            input.placeholder = 'Chloe is listening — just talk';
+            input.disabled = true;
+          } else {
+            input.disabled = false;
+            if (input.dataset.phWas !== undefined) { input.placeholder = input.dataset.phWas; delete input.dataset.phWas; }
+          }
+        }
+        var send = document.getElementById('chatSend');
+        if (send) send.disabled = on;
+        var mic = document.getElementById('cbMic');
+        if (mic) { mic.classList.toggle('on', on); mic.classList.toggle('muted', on && lkMuted); }
+      }
+
+      function teardownLive() {
+        clearTimeout(lkJoinTimer);
+        lkLive = false; lkMuted = false;
+        liveBarMode(false);
+        stageSay('');
+        if (callStage) callStage.classList.remove('speaking');
+        if (lkAudioEl) { try { lkAudioEl.pause(); } catch (e) {} lkAudioEl.remove(); lkAudioEl = null; }
+        if (lkRoom) { try { lkRoom.disconnect(); } catch (e) {} lkRoom = null; }
+        lkSegs = {};
+      }
+
+      function liveFail(code, human) {
+        teardownLive();
+        addMsg('chloe', human + ' <a href="' + MAILTO + '" style="font-weight:700">Book a demo</a>', .4);
+        if (window.console && console.warn) console.warn('[chloe] live call failed:', code);
+      }
+
+      function endLiveCall(reason) {
+        if (!lkLive && !lkRoom) return;
+        teardownLive();
+        addMsg('chloe', reason === 'dropped'
+          ? 'That call dropped on us. Tap below and I will pick up again, or <a href="' + MAILTO + '" style="font-weight:700">book a demo</a>.'
+          : 'How did that go? If you want a longer session, <a href="' + MAILTO + '" style="font-weight:700">book a demo</a>.', .6);
+      }
+
+      function joinLiveRoom(LK, j) {
+        var room = new LK.Room({ adaptiveStream: true, dynacast: true });
+        lkRoom = room;
+        var joined = false;
+        function markJoined() {
+          if (joined) return;
+          joined = true;
+          clearTimeout(lkJoinTimer);
+          stageSay('Live');
+          if (callStage) callStage.classList.add('speaking');
+        }
+        room.on(LK.RoomEvent.TrackSubscribed, function (track) {
+          if (track.kind !== LK.Track.Kind.Audio) return;
+          markJoined();
+          /* If the agent republishes, or we reconnect, attach() hands back a NEW
+             element — dropping the old reference would leave it playing off-screen. */
+          if (lkAudioEl) { try { lkAudioEl.pause(); } catch (e) {} lkAudioEl.remove(); }
+          lkAudioEl = track.attach();
+          lkAudioEl.autoplay = true;
+          document.body.appendChild(lkAudioEl);
+          var pr = lkAudioEl.play && lkAudioEl.play();
+          if (pr && pr.catch) pr.catch(function () { try { room.startAudio(); } catch (e) {} });
+        });
+        room.on(LK.RoomEvent.ParticipantConnected, markJoined);
+        room.on(LK.RoomEvent.TranscriptionReceived, function (segments, participant) {
+          markJoined();
+          var lp = room.localParticipant;
+          var mine = !!(participant && lp && participant.identity === lp.identity);
+          (segments || []).forEach(function (sg) { liveSay(mine ? 'user' : 'chloe', sg.id, sg.text, sg.final); });
+        });
+        room.on(LK.RoomEvent.Disconnected, function () { if (lkLive) endLiveCall('dropped'); });
+
+        /* A 200 from create-discovery-call does NOT mean anyone will answer.
+           create_dispatch registers a dispatch and returns without waiting for a worker
+           to accept it, so with the fleet full the room is real and permanently empty.
+           That is the "Connecting you to Chloe…" spinner, and it is why this waits a
+           bounded time and then says so. Never an unbounded spinner again. */
+        lkJoinTimer = setTimeout(function () {
+          if (joined) return;
+          liveFail('no_agent', 'Nobody is free to take the call this second — that is our side, not yours.');
+        }, LIVE_JOIN_WAIT);
+
+        return room.connect(j.livekit_url, j.token).then(function () {
+          return room.localParticipant.setMicrophoneEnabled(true);
+        }).then(function () {
+          if (room.remoteParticipants && room.remoteParticipants.size > 0) markJoined();
+        });
+      }
+
+      function startLiveCall() {
+        if (lkLive) return;
+        lkLive = true; lkSegs = {}; lkMuted = false;
+        stageSay('Connecting…');
+        liveBarMode(true);
+
+        loadLiveKit().then(function (LK) {
+          /* Ask for the microphone before anything else: a refusal is the visitor's
+             choice and should not read as our failure. */
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('mic_unsupported');
+          return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
+            st.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
+            return LK;
+          }, function () { throw new Error('mic_denied'); });
+        }).then(function (LK) {
+          return fetch(liveApiBase().replace(/\/+$/, '') + '/create-discovery-call', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(callPayload())
+          }).then(function (r) {
+            if (r.status === 422) throw new Error('bad_fields');
+            if (r.status === 429) throw new Error('rate_limited');
+            if (!r.ok) throw new Error('api_' + r.status);
+            return r.json();
+          }).then(function (j) {
+            if (!j || !j.token || !j.livekit_url) throw new Error('bad_response');
+            return joinLiveRoom(LK, j);
+          });
+        }).catch(function (e) {
+          var m = String((e && e.message) || e);
+          if (m === 'mic_denied' || m === 'mic_unsupported')
+            return liveFail(m, 'I need your microphone to talk. Allow it in your browser and tap again, or');
+          if (m === 'bad_fields')
+            return liveFail(m, 'Something is wrong in what I sent about you — that one is ours, not yours.');
+          if (m === 'rate_limited')
+            return liveFail(m, 'A lot of people are talking to me right now. Give it a minute, or');
+          if (m.indexOf('sdk_') === 0)
+            return liveFail(m, 'I could not load the call. Check your connection and tap again, or');
+          return liveFail(m, 'I could not get a line out just now.');
+        });
+      }
+
       function openLive() {
         if (!liveReady() || !liveWrap || liveFrame) return;
         liveScrollY = window.scrollY;
@@ -2673,7 +2913,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            was the greeting non-sequitur again, one step further along. */
         var open = lead || (IDENT.first ? 'Good to meet you, ' + IDENT.first + '.' : 'Perfect.');
         addMsg('chloe', open + ' Tap below and I will pick up — your browser will ask to use the microphone.', d);
-        addQuick([{ label: 'Talk to me now', action: openLive }], d + 0.9);
+        addQuick([{ label: 'Talk to me now', action: function () { (nativeReady() ? startLiveCall : openLive)(); } }], d + 0.9);
       }
 
       /* opened in a background tab: don't talk into an empty room — wait until they look */
@@ -2894,6 +3134,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (micHintX) micHintX.addEventListener('click', function () { micHintEl.classList.remove('show'); });
       function paintMic() {
         document.querySelectorAll('.ci-mic, #cbMic').forEach(function (m) {
+          /* #cbMic belongs to the call while one is running. */
+          if (lkLive && m.id === 'cbMic') return;
           m.classList.toggle('on', MIC.state === 'on');
           m.classList.toggle('blocked', MIC.state === 'denied' || MIC.state === 'unsupported');
           m.setAttribute('aria-pressed', MIC.state === 'on' ? 'true' : 'false');
@@ -3012,10 +3254,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       /* She is composing a message, not talking. The label has to say that. */
       function speak(ms) {
         if (!callStage) return;
+        /* During a live call the stage line and the speaking ring belong to the call,
+           not to a typing animation. Without this, a message queued before the call
+           starts wipes " · Live" a second later. (lkLive is hoisted; undefined is
+           falsy, so this is safe before it is assigned.) */
+        if (lkLive) return;
         callStage.classList.add('speaking');
         if (stageState) stageState.textContent = ' \u00b7 Typing\u2026';
         clearTimeout(speak._t);
         speak._t = setTimeout(function () {
+          /* A timeout queued before the call began must not clear the call's own state
+             a few seconds into it. Guarding speak() on entry is not enough. */
+          if (lkLive) return;
           callStage.classList.remove('speaking');
           if (stageState) stageState.textContent = '';
         }, ms || 2000);
@@ -3053,13 +3303,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           M.animate(chat, { opacity: 0 }, { duration: .25, ease: 'easeIn' }).finished.then(done);
         } else { done(); }
       }
-      chat.addEventListener('click', function (e) { if (e.target === chat) closeChat(); });
+      /* Clicking the backdrop or pressing Escape must hang up first, not silently
+         leave a call running behind a closed window with the microphone open. */
+      chat.addEventListener('click', function (e) {
+        if (e.target !== chat) return;
+        if (lkLive) { endLiveCall('ended'); return; }
+        closeChat();
+      });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
+          if (lkLive) { endLiveCall('ended'); return; }
           if (chat.classList.contains('open')) closeChat();
           else if (popVisible) hidePop();
         }
       });
+      /* Closing the tab mid-call should release the room and the microphone. */
+      window.addEventListener('pagehide', function () { if (lkLive) teardownLive(); });
       if (heroCta) heroCta.addEventListener('click', openChat);
       var heroOrbBtn = document.getElementById('heroOrb');
       if (heroOrbBtn) heroOrbBtn.addEventListener('click', openChat);
@@ -3234,7 +3493,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       document.getElementById('chatClose').addEventListener('click', closeChat);
       var closeX = document.getElementById('callCloseX');
-      if (closeX) closeX.addEventListener('click', closeChat);
+      /* Two buttons in the bar were decorative. During a live call they become real:
+         the mic mutes, and the red one hangs up instead of closing the window. No new
+         controls, and nothing overlaying the transcript. */
+      if (closeX) closeX.addEventListener('click', function () {
+        if (lkLive) { endLiveCall('ended'); return; }
+        closeChat();
+      });
+      var cbMicBtn = document.getElementById('cbMic');
+      if (cbMicBtn) cbMicBtn.addEventListener('click', function () {
+        if (!lkLive || !lkRoom) return;
+        lkMuted = !lkMuted;
+        try { lkRoom.localParticipant.setMicrophoneEnabled(!lkMuted); } catch (e) {}
+        cbMicBtn.classList.toggle('muted', lkMuted);
+        cbMicBtn.setAttribute('aria-label', lkMuted ? 'Unmute microphone' : 'Mute microphone');
+        stageSay(lkMuted ? 'Muted' : 'Live');
+      });
       function userSend() {
         var t = input.value.trim();
         if (!t) return;
@@ -3246,10 +3520,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') userSend(); });
       var micBtn = document.getElementById('cbMic'), micSaid = false;
       if (micBtn) micBtn.addEventListener('click', function () {
+        /* During a live call this button is the mute toggle, handled above. This older
+           handler owns a separate MIC state machine and would fight it over the same
+           .on class. Two things driving one button is how four bugs happened today. */
+        if (lkLive) return;
         requestMic();
         if (!micSaid) {
           micSaid = true;
-          addMsg('chloe', 'On the live product this is a real voice call — I talk, you talk back. If your browser blocks the mic, type to me instead. Nothing is lost.');
+          /* Was "on the live product this is a real voice call", which implied it was
+             not one here. It is one here now. */
+          addMsg('chloe', nativeReady()
+            ? 'Give me your work email and I will call you right here — real voice, in this window. If your browser blocks the mic, type to me instead. Nothing is lost.'
+            : 'On the live product this is a real voice call — I talk, you talk back. If your browser blocks the mic, type to me instead. Nothing is lost.');
         }
       });
 

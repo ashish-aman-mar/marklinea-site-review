@@ -2199,6 +2199,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         heroAsked = true;              /* and the email ask must not land on top of this */
         var l1 = IDENT.first ? 'Good to see you again, ' + IDENT.first + '.' : 'Good to see you again.';
         var l2 = 'Ask me anything and I will pick up.';
+        /* .hero-msg is `max-height: 0; overflow: hidden` and only opens on
+           `.hero-visual.compact`, which speakGreeting() gets for free through
+           setTalking(true). This function did not, so the caption sat in the DOM with the
+           right words and zero height — Ashish's console read both lines correctly off a box
+           nobody could see. EIGHTH time in this file that text present has not meant text
+           visible, after .msg starting at opacity 0, the live transcript, and the restored
+           thread. Writing words is never enough; something has to open the space. */
+        if (heroVisualEl) heroVisualEl.classList.add('compact');
+        sizeOrbFor(l1);
         SURFACES.forEach(function (pr) {
           if (!pr[0] || !pr[1]) return;
           pr[0].className = 'cp-line active'; pr[1].className = 'cp-line'; pr[1].innerHTML = '';

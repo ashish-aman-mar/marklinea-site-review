@@ -53,7 +53,6 @@
   <!-- End Google Tag Manager -->
   <title>AI Agents for Sales Teams | Marklinea</title>
   <link rel="canonical" href="https://marklinea.com/">
-  <link rel="icon" type="image/png" href="logo-badge-64.png">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Marklinea">
   <meta property="og:title" content="AI Agents for Sales Teams | Marklinea">
@@ -74,7 +73,7 @@
         "@type": "Organization",
         "name": "Marklinea",
         "url": "https://marklinea.com/",
-        "logo": "https://marklinea.com/logo-badge-64.png",
+        "logo": "https://marklinea.com/favicon-192.png",
         "description": "AI agents for sales teams. Live voice discovery, qualification, and CRM handover the moment a lead arrives."
       },
       {
@@ -92,8 +91,12 @@
   <meta name="keywords" content="AI sales agents, voice AI, discovery calls, sales research, call summary, lead qualification, sales AI, inbound leads">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#F5F0E8">
+  <!-- Icons: one universal badge (orange ellipse + cream mark). No charcoal
+       outline and no drop shadow, so it holds up on light and dark browser UI. -->
+  <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="icon" type="image/svg+xml" href="logo-badge.svg">
-  <link rel="icon" type="image/png" sizes="64x64" href="logo-badge-64.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1863,7 +1866,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <footer>
     <div class="wrap foot-inner">
-      <img src="logo-badge-dark.svg" alt="Marklinea">
+      <img src="logo-badge.svg" alt="Marklinea">
       <p>© 2026 Marklinea Software Pvt. Ltd.</p>
       <div class="foot-links">
         <a href="#agents">Agents</a>
@@ -1906,6 +1909,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- Beat 2 is the email ask, not the retired second greeting line. Same element, so the
        mute button and the pause-on-unmute machinery keep working untouched; new file. -->
   <audio id="cgA2" preload="auto" playsinline crossorigin="anonymous"><source src="/audio/chloe-ask-email.mp3" type="audio/mpeg"></audio>
+  <!-- The returning-visitor pair. preload="none" on purpose: most visits are first visits,
+       and pulling two more mp3s on every one of them to serve a minority is bandwidth spent
+       on nothing. restoreSession() flips these to auto the moment it knows she has met this
+       person, which is ~700ms before heroWelcomeBack() needs them. -->
+  <audio id="cgB1" preload="none" playsinline crossorigin="anonymous"><source src="/audio/chloe-back-1.mp3" type="audio/mpeg"></audio>
+  <audio id="cgB2" preload="none" playsinline crossorigin="anonymous"><source src="/audio/chloe-back-2.mp3" type="audio/mpeg"></audio>
 
   <!-- Chloe dock: now-playing pill that expands into a chat -->
   <div class="dock" id="dock">
@@ -2200,6 +2209,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          the ask, and the bar underneath becomes the email field straight away. */
       var HERO_ASK = "Before we get started \u2014 what's your work email?";
       var heroAsked = false;
+      /* ---- Speaking a caption line, in one place ----
+         Two callers now need the same four things: play a take, pace the word reveal to its
+         real length, survive the take being blocked or missing, and never let the words wait
+         on the sound. Writing that twice is how this file has produced most of its bugs.
+
+         The 350ms ceiling is not decoration. A 404 leaves Chrome's play() promise UNSETTLED
+         rather than rejected — measured — so `.catch()` protects against nothing and a plain
+         .then() would leave the line blank forever. Whichever resolves first wins; the words
+         always land. */
+      function speakCaption(text, audioEl, slot, done) {
+        var wrote = false, settled = false;
+        function write(dur) {
+          if (wrote) return;
+          wrote = true;
+          var step = dur ? VOICE.stepFor(dur, text) : 0.13;
+          SURFACES.forEach(function (pr) {
+            if (!pr[0] || !pr[1]) return;
+            if (slot === 0) { pr[0].className = 'cp-line active'; pr[1].className = 'cp-line'; pr[1].innerHTML = ''; }
+            else { pr[0].className = 'cp-line done'; pr[1].className = 'cp-line active'; }
+            fillWords(pr[slot], text, slot === 0 ? 0.05 : 0.15, step);
+          });
+          var t = Math.max((slot === 0 ? 0.05 : 0.15) + text.split(' ').length * step, dur || 0);
+          if (done) setTimeout(function () { done(); }, (t + 0.35) * 1000);
+        }
+        VOICE.play(audioEl).then(function (r) { settled = true; write(r.ok ? r.dur : 0); });
+        setTimeout(function () { if (!settled) write(0); }, 350);
+      }
+
       /* ---- She has met this person already ----
          "Hi, I'm Chloe — nice to meet you!" is a first-meeting recording, and playing it at
          someone she spoke to five minutes ago is the same mistake as greeting over a live
@@ -2211,7 +2248,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       function heroWelcomeBack() {
         if (heroAsked) return;
         heroAsked = true;              /* and the email ask must not land on top of this */
-        var l1 = IDENT.first ? 'Good to see you again, ' + IDENT.first + '.' : 'Good to see you again.';
+        /* No name. A recording cannot say one, and a caption that reads "Ashish" over a
+           take that does not is a mismatch on a single line — that reads as broken rather
+           than deliberate. She still uses his name on the call itself, where she can. */
+        var l1 = 'Good to see you again.';
         var l2 = 'Ask me anything and I will pick up.';
         /* .hero-msg is `max-height: 0; overflow: hidden` and only opens on
            `.hero-visual.compact`, which speakGreeting() gets for free through
@@ -2222,15 +2262,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            thread. Writing words is never enough; something has to open the space. */
         if (heroVisualEl) heroVisualEl.classList.add('compact');
         sizeOrbFor(l1);
-        SURFACES.forEach(function (pr) {
-          if (!pr[0] || !pr[1]) return;
-          pr[0].className = 'cp-line active'; pr[1].className = 'cp-line'; pr[1].innerHTML = '';
-          var t = fillWords(pr[0], l1, 0.05, 0.13);
-          setTimeout(function () {
-            pr[0].className = 'cp-line done';
-            pr[1].className = 'cp-line active';
-            fillWords(pr[1], l2, 0.15, 0.13);
-          }, (t + 0.35) * 1000);
+        setTalking(true);
+        speakCaption(l1, VOICE.b1, 0, function () {
+          speakCaption(l2, VOICE.b2, 1, function () {
+            if (!lkLive) setTalking(false);
+          });
         });
       }
       function heroAskEmail() {
@@ -2248,38 +2284,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            purpose: two functions writing the same caption line is the bug that has already
            cost this file a deploy, so the ask owns its words AND its sound, alone. */
         setTalking(true);
-        /* The words must NEVER wait on the audio, and "wait" includes waiting forever. I
-           wrote this as a plain .then() first and measured a 404 on the mp3: Chrome leaves
-           the play() promise UNSETTLED, so the ask simply never appeared — the entire email
-           gate silent and blank because one file was missing. `.catch()` does not save you
-           from a promise that never settles.
-           So it is a race with a hard ceiling. If the audio starts normally play() resolves
-           in a few milliseconds and the paced reveal wins; if it hangs, the words land
-           350ms later at the fixed step. Either way they land. */
-        var wroteAsk = false, playSettled = false;
-        function writeAsk(dur) {
-          if (wroteAsk) return;
-          wroteAsk = true;
-          /* Pace the reveal to the real length of the take, so the sentence and her voice
-             finish together; fall back to the fixed step with no usable duration. */
-          var step = dur ? VOICE.stepFor(dur, HERO_ASK) : 0.13;
-          SURFACES.forEach(function (pr) {
-            if (!pr[0] || !pr[1]) return;
-            pr[0].className = 'cp-line done';
-            pr[1].className = 'cp-line active';
-            fillWords(pr[1], HERO_ASK, 0.15, step);
-          });
-          var t = Math.max(0.15 + HERO_ASK.split(' ').length * step, dur || 0);
-          setTimeout(function () {
-            if (lkLive) return;              /* a call started meanwhile — leave its state alone */
-            setTalking(false);
-          }, (t + 0.4) * 1000);
-        }
-        VOICE.play(VOICE.a2).then(function (r) {
-          playSettled = true;
-          writeAsk(r.ok ? r.dur : 0);
+        speakCaption(HERO_ASK, VOICE.a2, 1, function () {
+          if (lkLive) return;                /* a call started meanwhile — leave its state alone */
+          setTalking(false);
         });
-        setTimeout(function () { if (!playSettled) writeAsk(0); }, 350);
       }
       /* Belt and braces, for the case where the greeting never runs at all — muted,
          blocked, or a 404 on the audio. It must NOT fire while she is mid-sentence:
@@ -2738,6 +2746,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var VOICE = {
         a1: document.getElementById('cgA1'),
         a2: document.getElementById('cgA2'),
+        b1: document.getElementById('cgB1'),
+        b2: document.getElementById('cgB2'),
         cues: [document.getElementById('cgCueH'), document.getElementById('cgCue')].filter(Boolean),
         unlocked: false, muted: false, armed: false, armedAt: 0, running: false, done: false,
         has: function (el) { return !!(el && !el.error); },
@@ -2823,7 +2833,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           e.preventDefault(); e.stopPropagation();
           VOICE.muted = !VOICE.muted;
           if (VOICE.muted) {
-            [VOICE.a1, VOICE.a2].forEach(function (a) { if (a) { try { a.pause(); } catch (err) {} } });
+            [VOICE.a1, VOICE.a2, VOICE.b1, VOICE.b2].forEach(function (a) { if (a) { try { a.pause(); } catch (err) {} } });
             VOICE.hideCue();
           } else {
             /* unmuting IS a gesture — replay her greeting so the tap has an audible result */
@@ -4467,6 +4477,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (d.email) {
           callEnded = true; gateOpen = false; setEmailMode(false);
           returning = true;
+          /* Flip the returning pair off preload="none" now — heroWelcomeBack() wants them in
+             about 700ms, and a first-time visitor never pays for them. */
+          ['cgB1', 'cgB2'].forEach(function (id) {
+            var a = document.getElementById(id);
+            if (a) { a.preload = 'auto'; try { a.load(); } catch (e) {} }
+          });
           setTimeout(heroWelcomeBack, 700);
         }
         thread.forEach(function (m) {

@@ -635,10 +635,16 @@
     }
     .lane.fast .lane-status { color: var(--cream); }
     .verdict-tile { background: var(--terracotta); color: var(--charcoal); padding: 34px 30px 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    /* "faster" used to start the paragraph BELOW the number, so the unit was orphaned
+       from the figure it modifies — read as "5,040x" then a new sentence beginning
+       "faster.". It is now part of the same line box, at 0.4em, so the tile reads as
+       one measurement. Baseline-aligned rather than centred, or it floats. */
     .verdict-tile .rv-num {
-      font-family: var(--font-head); font-size: clamp(44px, 5vw, 64px); font-weight: 800;
-      line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums;
+      font-family: var(--font-head); font-size: clamp(40px, 4.5vw, 58px); font-weight: 800;
+      line-height: 1.05; margin-bottom: 10px; font-variant-numeric: tabular-nums;
+      display: flex; align-items: baseline; justify-content: center; gap: 8px; flex-wrap: wrap;
     }
+    .verdict-tile .rv-unit { font-size: .4em; font-weight: 700; letter-spacing: -.01em; }
     .verdict-tile .rv-txt { font-family: var(--font-head); font-size: 15.5px; font-weight: 600; line-height: 1.45; }
     .miss-line {
       margin-top: 24px; border: 1.5px solid var(--terracotta); padding: 18px 24px;
@@ -1628,8 +1634,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div>
           <p class="eyebrow reveal">AI Agents for Sales</p>
           <h1 class="reveal">Talk To Your Customers. <span class="accent">The Moment They Want.</span></h1>
-          <p class="lede reveal">Your best sales engineer, on every inbound lead, in thirty seconds. At 2am. On a Sunday. On the hundredth one that day.</p>
-          <p class="hero-ps reveal"><b>P.S.</b> Booking a meeting for next week is how you lose the deal this week.</p>
+          <p class="lede reveal">At 2am. On a Sunday. On the hundredth lead that day. Your best sales engineer, on every one of them, in thirty seconds.</p>
+          <p class="hero-ps reveal"><b>P.S.</b> Booking a meeting for tomorrow is how you lose the deal today.</p>
         </div>
 
         <div class="hero-visual reveal" id="heroVisual">
@@ -1683,7 +1689,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <section class="dark" id="problem">
       <div class="wrap">
         <p class="eyebrow reveal">The problem</p>
-        <h2 class="h2 reveal">Speed wins deals. Silence kills them.</h2>
+        <h2 class="h2 reveal">Delay kills deals. Speed wins them.</h2>
         <p class="lede reveal">Your best leads decide in minutes. Most teams answer in days. That gap is where revenue leaks.</p>
         <div class="stats">
           <div class="stat reveal">
@@ -1762,7 +1768,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
             <p class="as-quote swap-el" id="asQuote">"I know your prospect before the phone rings."</p>
             <p class="as-desc swap-el" id="asDesc">Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.</p>
-            <div class="ac-tags swap-el" id="asTags"><span class="ac-tag">Before the call</span><span class="ac-tag">Web + CRM</span><span class="ac-tag hot">A brief</span></div>
+            <div class="ac-tags swap-el" id="asTags"><span class="ac-tag">Before the call</span><span class="ac-tag">Web + CRM</span><span class="ac-tag hot">→ A brief</span></div>
             <ul class="ac-list swap-el" id="asList"><li>Company news and funding rounds</li><li>Role, seniority, and org size</li><li>CRM history and past interactions</li></ul>
             <a class="ac-link swap-el" id="asLink" href="/researcher">See how it works <span>→</span></a>
           </div>
@@ -1775,7 +1781,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="wrap">
         <p class="eyebrow reveal">Why now</p>
         <h2 class="h2 reveal">Right now, a lead on your site is deciding.</h2>
-        <p class="lede reveal">They filled your form. They are still on the page. The next few minutes decide whether they buy from you or from the vendor who answered first.</p>
+        <p class="lede reveal">They are still on the page. The next few minutes decide whether they buy from you or from the competitor who answered first.</p>
         <div class="race reveal" id="raceBoard">
           <div class="race-grid">
             <div class="lane slow" id="laneSlow">
@@ -1791,8 +1797,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <p class="lane-status" id="fastStatus"><span class="fd"></span><span id="fastMsg">Chloe picked up. The lead is talking.</span></p>
             </div>
             <div class="verdict-tile" id="raceVerdict">
-              <div class="rv-num" id="rvNum">5,040x</div>
-              <p class="rv-txt">faster. The deal rarely waits for the slower one.</p>
+              <div class="rv-num" id="rvNum">5,040&times;<span class="rv-unit">faster</span></div>
+              <p class="rv-txt">The deal does not wait.</p>
             </div>
           </div>
           <div class="miss-line">
@@ -4369,7 +4375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           raceVerdict.style.opacity = ''; raceVerdict.style.transform = '';
           lastSlowTxt = ''; lastFastTxt = '';
           setTime(slowTime, fmtDur(0), 'slow'); setTime(fastTime, fmtDur(0), 'fast');
-          slowMsg.textContent = 'A lead just filled your form.';
+          slowMsg.textContent = 'A lead just reached out.';
           fastMsg.textContent = 'Calling the lead…';
         }
         function runRace() {
@@ -4660,7 +4666,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           asOrb.innerHTML = a.ico;
           asName.textContent = a.name;
           asDesc.textContent = a.desc;
-          asTags.innerHTML = a.tags.map(function (t) { return '<span class="ac-tag' + (t[1] ? ' hot' : '') + '">' + t[0] + '</span>'; }).join('');
+          asTags.innerHTML = a.tags.map(function (t) { return '<span class="ac-tag' + (t[1] ? ' hot' : '') + '">' + (t[1] ? '→ ' : '') + t[0] + '</span>'; }).join('');
           asList.innerHTML = a.points.map(function (p) { return '<li>' + p + '</li>'; }).join('');
           if (a.link) {
             asLink.href = a.link;
@@ -4699,18 +4705,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             finally { agStage.classList.remove('swapping'); }
           }, 360);
         }
-        function queueNextAgent() {
+        /* Half of this was already here: the CSS pauses the progress bar on
+           .agent-show.paused and the click handler removed that class — but NOTHING
+           ever added it. Wired at both ends and never in the middle.
+
+           The bar is an 8s CSS animation with animation-play-state: paused, so it
+           genuinely resumes where it stopped. The JS timer therefore has to resume
+           too, not restart, or the bar and the switch drift apart on every hover.
+           One owner for both, so they cannot disagree. */
+        var ROT_MS = 8000, rotAt = 0, rotLeft = ROT_MS, agPaused = false, agHover = false;
+        function queueNextAgent(ms) {
           clearTimeout(rotT);
+          rotLeft = (ms === undefined ? ROT_MS : ms);
+          rotAt = Date.now();
+          if (agPaused) return;              /* armed, but not counting down */
           rotT = setTimeout(function () {
             setAgent((curAgent + 1) % AGENTS_DATA.length, true);
             queueNextAgent();
-          }, 8000);
+          }, rotLeft);
         }
+        function pauseAgents(on) {
+          if (on === agPaused) return;
+          agPaused = on;
+          showEl.classList.toggle('paused', on);
+          if (on) {
+            clearTimeout(rotT);
+            /* keep at least a beat, so a flick across the box cannot switch instantly */
+            rotLeft = Math.max(400, rotLeft - (Date.now() - rotAt));
+          } else if (showStarted) {
+            queueNextAgent(rotLeft);
+          }
+        }
+        showEl.addEventListener('mouseenter', function () { agHover = true; pauseAgents(true); });
+        showEl.addEventListener('mouseleave', function () { agHover = false; pauseAgents(false); });
+        /* Touch has no hover to leave, so scrolling away is the resume — which is
+           exactly what was asked for. agHover is forced false because a tap fires a
+           synthetic mouseenter that would otherwise never be cleared on a phone. */
+        showEl.addEventListener('touchstart', function () { agHover = false; pauseAgents(true); }, { passive: true });
+        window.addEventListener('scroll', function () { if (!agHover) pauseAgents(false); }, { passive: true });
         /* clicking picks an agent and the relay keeps running from there —
            it used to freeze because the pointer was still inside the paused zone */
         railBtns.forEach(function (b) {
           b.addEventListener('click', function () {
-            showEl.classList.remove('paused');
+            /* No longer force-resumes. Picking an agent while the pointer is inside
+               the box should hold that agent — that IS the hover pause. It resumes
+               when they move away. */
             setAgent(+b.dataset.i, true);
             queueNextAgent();
           });

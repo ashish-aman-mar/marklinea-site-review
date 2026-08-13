@@ -2269,8 +2269,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           });
         });
       }
-      function heroAskEmail() {
-        if (heroAsked || IDENT.email || !EMAIL_GATE_ON || !liveReady()) return;
+      /* `again` = this is the greeting REPLAYING, so say the ask again too.
+         Three paths replay the fold after a gesture — VOICE.onGesture, the consent answer,
+         and un-muting — and every one of them called speakGreeting(), whose beat-1 write
+         does `slot1.innerHTML = ''`. So the ask's caption was ERASED by the visitor's first
+         click, and heroAsked being true meant it never came back and its take never played.
+         Measured: L1 ink with a1.currentTime=3.13, L2 h=0 w=0, bar still reading "Enter your
+         email". That is a caption line with two owners — NINTH instance in this file — and
+         the fix is not to stop beat 1 clearing the slot (it must, it is starting over) but
+         to let the owner of the ask put it back. She replays both beats, which is also the
+         better behaviour: a reminder about the email rather than a bare hello. */
+      function heroAskEmail(again) {
+        if (IDENT.email || !EMAIL_GATE_ON || !liveReady()) return;
+        if (heroAsked && !again) return;
         heroAsked = true;
         /* The gate opens SYNCHRONOUSLY, before any audio is attempted. The words and the
            sound can be late; the field must not be. A visitor who types the instant the
@@ -2547,7 +2558,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            she narrates her message there — reliably, on every load */
         if (docked && popShown && !callStarted && !toastOnce) {
           toastOnce = true;
-          setTimeout(function () { showDockToast(GREET1 + ' ' + GREET2); }, 500);
+          setTimeout(function () { showDockToast(GREET); }, 500);
         }
       }
       function animateMorph(toDock) {
@@ -3696,7 +3707,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (r1.ok) VOICE.done = true;
                 setTalking(false);
                 if (!heroOut) setBtnState('resume', GREET1);
-                heroAskEmail();                  /* she asks as she finishes saying hello */
+                /* `true`: the greeting finishing is exactly when the ask belongs, first time
+                   AND on every replay. heroAsked still stops the 6s fallback and the
+                   returning-visitor path from asking twice — and a returning visitor never
+                   reaches here, because speakGreeting() returns early for them. */
+                heroAskEmail(true);              /* she asks as she finishes saying hello */
               }, (t1 + 0.5) * 1000);
               return;
             }
@@ -3749,10 +3764,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         /* if the visitor is reading below, don't interrupt — her message pops above the orb, then slips away */
         if (heroOut) {
           setUnread(1);
-          setBtnState('msg', GREET2);
+          setBtnState('msg', GREET);
           updateDock();
           toastOnce = true;
-          showDockToast(GREET1 + ' ' + GREET2);
+          showDockToast(GREET);
         }
       }
       /* Accept or Decline — either answer is a gesture, and either unlocks her voice.

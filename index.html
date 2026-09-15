@@ -19,7 +19,7 @@
       // 'native' = the call happens in our own panel. 'iframe' = the old modal,
       // kept as a one-word rollback until native has taken real calls.
       mode: 'native',
-      api: 'https://qa-api.marklinea.com',   // create-discovery-call lives here
+      api: 'https://api.marklinea.com',      // create-discovery-call lives here
       base: 'https://qa.marklinea.com/',     // only used by mode:'iframe'
       clientname: 'marklinea'
     };
@@ -89,7 +89,6 @@
   </script>
   <meta name="description" content="Your best sales engineer on every inbound lead, in 30 seconds. At 2am. On a Sunday. Five AI agents research, call, qualify, and update your CRM.">
   <meta name="keywords" content="AI sales agents, voice AI, discovery calls, sales research, call summary, lead qualification, sales AI, inbound leads">
-  <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#F5F0E8">
   <!-- Icons: one universal badge (orange ellipse + cream mark). No charcoal
        outline and no drop shadow, so it holds up on light and dark browser UI. -->
@@ -1440,6 +1439,9 @@
     .slide-nav button { font-family: var(--font-head); font-weight: 800; font-size: 14px; background: none; border: 1.5px solid var(--charcoal); width: 28px; height: 28px; cursor: pointer; }
     .slide-nav button:hover { background: var(--terracotta); }
     .slide-nav .s-count { font-size: 11px; font-weight: 700; color: var(--muted); font-family: var(--font-head); }
+    .slide-card img { width: 100%; display: block; border-radius: 12px 12px 0 0; }
+    .slide-card.lk-slide { width: 92%; }
+    .slide-card.lk-slide .slide-view { padding: 0; min-height: 0; }
     .chat-input { display: flex; border-top: 2px solid var(--charcoal); }
     .chat-input input { flex: 1; border: none; background: #fff; padding: 13px 14px; font-family: var(--font-body); font-size: 13.5px; outline: none; }
     .chat-input button { font-family: var(--font-head); font-weight: 700; font-size: 13px; border: none; border-left: 2px solid var(--charcoal); background: var(--terracotta); padding: 0 20px; cursor: pointer; }
@@ -1769,7 +1771,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p class="as-quote swap-el" id="asQuote">"I know your prospect before the phone rings."</p>
             <p class="as-desc swap-el" id="asDesc">Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.</p>
             <div class="ac-tags swap-el" id="asTags"><span class="ac-tag">Before the call</span><span class="ac-tag">Web + CRM</span><span class="ac-tag hot">→ A brief</span></div>
-            <ul class="ac-list swap-el" id="asList"><li>Company news and funding rounds</li><li>Role, seniority, and org size</li><li>CRM history and past interactions</li></ul>
+            <!-- T006: all five agents' bullets live in the HTML, not in a script.
+                 renderAgent() toggles which list is shown; it no longer authors them,
+                 and `points` is gone from AGENTS_DATA so there is exactly one owner. -->
+            <ul class="ac-list swap-el" data-ag="0"><li>Company news and funding rounds</li><li>Role, seniority, and org size</li><li>CRM history and past interactions</li></ul>
+            <ul class="ac-list swap-el" data-ag="1" hidden><li>Live voice call, no downloads</li><li>Process, pain, and BANT discovery</li><li>Lead score from 0 to 100</li></ul>
+            <ul class="ac-list swap-el" data-ag="2" hidden><li>Sentiment and tone, moment by moment</li><li>Buying intent scored 0 to 100</li><li>The objection they never said out loud</li></ul>
+            <ul class="ac-list swap-el" data-ag="3" hidden><li>Deal-ready summary and scorecard</li><li>Full transcript in your CRM</li><li>Next steps and meeting booked</li></ul>
+            <ul class="ac-list swap-el" data-ag="4" hidden><li>Recap of what they told you</li><li>Answers to the questions they asked</li><li>The next step, with a booking link</li></ul>
             <a class="ac-link swap-el" id="asLink" href="/researcher">See how it works <span>→</span></a>
           </div>
         </div>
@@ -1878,7 +1887,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a href="#agents">Agents</a>
         <a href="mailto:ashish.aman@marklinea.com">Contact</a>
         <a href="/privacy">Privacy</a>
-        <a href="https://www.marklinea.com">marklinea.com</a>
+        <a href="/">marklinea.com</a>
       </div>
     </div>
   </footer>
@@ -1907,7 +1916,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- The call has five serial steps and three of them are network. Warm DNS + TLS for all
        of them now, while the visitor is still reading the fold, so none of it lands on the
        critical path between "here is my email" and her first sentence. -->
-  <link rel="preconnect" href="https://qa-api.marklinea.com" crossorigin>
+  <link rel="preconnect" href="https://api.marklinea.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="https://unpkg.com">
 
@@ -2136,16 +2145,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         setTimeout(function () { popIn(q); }, (delay || 0) * 1000);
       }
       var SLIDES = [
-        { k: 'Slide 1 of 3', t: 'The 30 second rule', d: '78% of buyers choose the first vendor to respond. Marklinea responds while the lead is still on your site.' },
-        { k: 'Slide 2 of 3', t: 'The relay', d: 'The Researcher briefs. I run the live call. The Intent Analyser reads the room. The Summariser writes it all to your CRM.' },
-        { k: 'Slide 3 of 3', t: 'What your AE gets', d: 'Score 92, full transcript, BANT breakdown, and a meeting already on the calendar.' }
+        { k: 'Slide 1 of 4', t: 'Marklinea', d: 'AI-powered discovery calls — live in your browser, in under 30 seconds.', img: 'slides/slide-1.png' },
+        { k: 'Slide 2 of 4', t: 'Our journey', d: 'Built to close the gap between a form fill and a meaningful conversation.', img: 'slides/slide-2.png' },
+        { k: 'Slide 3 of 4', t: 'The agents', d: 'Five AI agents working in a relay — from research to CRM update in one live call.', img: 'slides/slide-3.png' },
+        { k: 'Slide 4 of 4', t: 'The value proposition', d: 'Response time from 42 hours to 30 seconds. Qualification cost cut to near zero.', img: 'slides/slide-4.png' }
       ];
-      function addSlides(delay) {
+      function addSlides(delay, startIdx, extraClass) {
         var card = document.createElement('div');
-        card.className = 'slide-card';
-        var i = 0;
+        card.className = 'slide-card' + (extraClass ? ' ' + extraClass : '');
+        var i = startIdx || 0;
         function view() {
-          return '<div class="slide-view"><div class="s-k">' + SLIDES[i].k + '</div><div class="s-t">' + SLIDES[i].t + '</div><div class="s-d">' + SLIDES[i].d + '</div></div>';
+          var s = SLIDES[i];
+          var imgHtml = s.img ? '<img src="' + s.img + '" alt="' + s.t + '" onerror="this.style.display=\'none\'">' : '';
+          return imgHtml + '<div class="slide-view"><div class="s-k">' + s.k + '</div><div class="s-t">' + s.t + '</div><div class="s-d">' + s.d + '</div></div>';
         }
         function render() {
           card.innerHTML = view() +
@@ -2161,7 +2173,94 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         render();
         body.appendChild(card);
         setTimeout(function () { popIn(card); }, (delay || 0) * 1000);
+        return card;
       }
+
+      // LiveKit slide state machine
+      var SLIDE_STATE = 'idle'; // idle | awaiting_confirmation | armed | done
+      var slidesFired = [false, false, false, false];
+      var lkSlideCard = null;
+      var confirmGraceTimer = null;
+      var CONFIRM_GRACE_MS = 8000;
+
+      var SLIDE_AFFIRM = /\b(yes|yeah|yep|yup|can see|i see|got it|see it|visible|shows?|there|looks good|perfect|great|sure|uh.?huh|mm.?hmm)\b/i;
+      var SLIDE_DENY = /\b(no|nope|can'?t see|don'?t see|nothing|blank|not (showing|visible|there)|not (seeing|loading)|not showing)\b/i;
+
+      var SLIDE_CUE_1 = /let me (pull|bring|show|get|grab|load).{0,20}slide|pull.{0,10}slide|show.{0,10}slide|show.{0,10}deck|bring.{0,10}deck/i;
+      var SLIDE_CUES = [
+        [1, /our journey|how we got here|how we built|when we started|story of|how it started|built this/i],
+        [2, /the agents|the orchestration|six agents|five agents|agent relay|agent pipeline|each agent/i],
+        [3, /the results|before and after|the value|value prop|four weeks to ten days|ten days|40.{0,5}days|the outcome/i]
+      ];
+
+      function armConfirmGrace() {
+        clearTimeout(confirmGraceTimer);
+        confirmGraceTimer = setTimeout(function () {
+          if (SLIDE_STATE === 'awaiting_confirmation') {
+            SLIDE_STATE = 'armed';
+          }
+        }, CONFIRM_GRACE_MS);
+      }
+
+      function showSlideForCall(idx) {
+        if (!lkSlideCard) {
+          lkSlideCard = addSlides(0, idx, 'lk-slide');
+        } else {
+          // update in place: re-render without creating a new card
+          var s = SLIDES[idx];
+          var imgHtml = s.img ? '<img src="' + s.img + '" alt="' + s.t + '" onerror="this.style.display=\'none\'">' : '';
+          lkSlideCard.innerHTML = imgHtml +
+            '<div class="slide-view"><div class="s-k">' + s.k + '</div><div class="s-t">' + s.t + '</div><div class="s-d">' + s.d + '</div></div>';
+          lkSlideCard.style.opacity = 1; lkSlideCard.style.transform = 'none';
+          body.scrollTop = body.scrollHeight;
+        }
+      }
+
+      function checkSlideKeywords(who, text) {
+        if (who !== 'chloe') return;
+        if (SLIDE_STATE === 'idle') {
+          if (SLIDE_CUE_1.test(text)) {
+            SLIDE_STATE = 'awaiting_confirmation';
+            slidesFired[0] = true;
+            showSlideForCall(0);
+            armConfirmGrace();
+          }
+          return;
+        }
+        if (SLIDE_STATE === 'awaiting_confirmation') return; // waiting for visitor to confirm
+        if (SLIDE_STATE === 'armed') {
+          for (var ci = 0; ci < SLIDE_CUES.length; ci++) {
+            var idx = SLIDE_CUES[ci][0];
+            var re = SLIDE_CUES[ci][1];
+            if (!slidesFired[idx] && re.test(text)) {
+              slidesFired[idx] = true;
+              showSlideForCall(idx);
+              if (idx === 3) SLIDE_STATE = 'done';
+              break;
+            }
+          }
+        }
+      }
+
+      function checkVisitorSlideResponse(text) {
+        if (SLIDE_STATE !== 'awaiting_confirmation') return;
+        if (SLIDE_AFFIRM.test(text)) {
+          clearTimeout(confirmGraceTimer);
+          SLIDE_STATE = 'armed';
+        } else if (SLIDE_DENY.test(text)) {
+          clearTimeout(confirmGraceTimer);
+          // Stay in awaiting_confirmation — Chloe will ask them to check their screen
+        }
+      }
+
+      function resetSlides() {
+        SLIDE_STATE = 'idle';
+        slidesFired = [false, false, false, false];
+        lkSlideCard = null;
+        clearTimeout(confirmGraceTimer);
+        confirmGraceTimer = null;
+      }
+
       function introQuicks(delay) {
         addQuick([
           { label: 'Doing great! What do you do?', action: function () {
@@ -3387,6 +3486,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (isFinal) d.classList.remove('interim');
         body.scrollTop = body.scrollHeight;
         capSay(who, text);
+        if (isFinal) {
+          checkSlideKeywords(who, text);
+          if (who === 'visitor') checkVisitorSlideResponse(text);
+        }
       }
 
       /* The API's real field names. firstName/lastName/email/company are the IFRAME's
@@ -3442,6 +3545,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (lkAudioEl) { try { lkAudioEl.pause(); } catch (e) {} lkAudioEl.remove(); lkAudioEl = null; }
         if (lkRoom) { try { lkRoom.disconnect(); } catch (e) {} lkRoom = null; }
         lkSegs = {};
+        resetSlides();
       }
 
       function liveFail(code, human) {
@@ -4616,7 +4720,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           quote: '"I know your prospect before the phone rings."',
           desc: 'Searches the web, social, and your CRM to research everything about the contact and the company. The call starts with context, not questions.',
           tags: [['Before the call', 0], ['Web + CRM', 0], ['A brief', 1]],
-          points: ['Company news and funding rounds', 'Role, seniority, and org size', 'CRM history and past interactions'],
           link: 'researcher.html'
         },
         {
@@ -4624,7 +4727,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           quote: '"I run the conversation your best AE would."',
           desc: 'Takes the calls and speaks to your customers. A live voice call in the browser, uncovering process, pain, and the full BANT picture as you talk.',
           tags: [['On the call', 0], ['Live voice', 0], ['BANT', 1]],
-          points: ['Live voice call, no downloads', 'Process, pain, and BANT discovery', 'Lead score from 0 to 100'],
           link: 'discovery.html'
         },
         {
@@ -4632,7 +4734,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           quote: '"I hear what they meant, not just what they said."',
           desc: 'Reads tone, hesitation, and urgency across the whole call, then scores how ready this buyer really is. Your team knows who is warm before they pick up the phone.',
           tags: [['On the call', 0], ['Tone + hesitation', 0], ['Buying intent', 1]],
-          points: ['Sentiment and tone, moment by moment', 'Buying intent scored 0 to 100', 'The objection they never said out loud'],
           link: 'analyser.html'
         },
         {
@@ -4640,7 +4741,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           quote: '"The call ends. Your CRM is already updated."',
           desc: 'Turns the conversation into a deal-ready handover. Summary, scorecard, transcript, and next steps land in your CRM before your AE opens their laptop.',
           tags: [['After the call', 0], ['Full transcript', 0], ['CRM handover', 1]],
-          points: ['Deal-ready summary and scorecard', 'Full transcript in your CRM', 'Next steps and meeting booked'],
           link: 'summariser.html'
         },
         {
@@ -4648,7 +4748,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           quote: '"They hear from us before they\'ve closed the tab."',
           desc: 'Drafts and sends the follow-up the moment the call ends — a recap, answers to what they actually asked, and the next step. In their inbox before your AE has opened the transcript.',
           tags: [['After the call', 0], ['What they asked', 0], ['Email in their inbox', 1]],
-          points: ['Recap of what they told you', 'Answers to the questions they asked', 'The next step, with a booking link'],
           link: null
         }
       ];
@@ -4658,7 +4757,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var agStage = document.getElementById('agentStage');
         var asOrb = document.getElementById('asOrb'), asName = document.getElementById('asName');
         var asQuote = document.getElementById('asQuote'), asDesc = document.getElementById('asDesc');
-        var asTags = document.getElementById('asTags'), asList = document.getElementById('asList');
+        var asTags = document.getElementById('asTags');
+        var asLists = agStage ? agStage.querySelectorAll('.ac-list') : [];
         var asLink = document.getElementById('asLink');
         var curAgent = 0, rotT = null, showStarted = false;
         function renderAgent(i, narrate) {
@@ -4667,7 +4767,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           asName.textContent = a.name;
           asDesc.textContent = a.desc;
           asTags.innerHTML = a.tags.map(function (t) { return '<span class="ac-tag' + (t[1] ? ' hot' : '') + '">' + (t[1] ? '→ ' : '') + t[0] + '</span>'; }).join('');
-          asList.innerHTML = a.points.map(function (p) { return '<li>' + p + '</li>'; }).join('');
+          Array.prototype.forEach.call(asLists, function (ul, j) { ul.hidden = (j !== i); });
           if (a.link) {
             asLink.href = a.link;
             asLink.innerHTML = 'See how it works <span>→</span>';

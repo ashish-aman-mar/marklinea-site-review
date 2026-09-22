@@ -1448,7 +1448,7 @@
     .call-stage.slide-active .orb-wrap { width: 72px; height: 72px; flex: none; }
     .call-stage.slide-active .stage-id { display: none; }
     #stageSlide { display: none; width: 100%; box-sizing: border-box; }
-    .call-stage.slide-active #stageSlide { display: flex; flex-direction: column; flex: 1; order: -1; padding: 56px 16px 0; }
+    .call-stage.slide-active #stageSlide { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; order: -1; padding: 56px 16px 0; }
     .call-stage.slide-active .slide-card.lk-slide { width: 100%; }
     .lk-slide .slide-nav { display: none; }
     @media (max-width: 900px) {
@@ -3536,7 +3536,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            source of truth — teardownLive() clears lkLive before calling this. */
         refreshBars();
         var send = document.getElementById('chatSend');
-        if (send) send.disabled = on && !AWAIT_NAME;
+        if (send) { send.disabled = on && !AWAIT_NAME; send.style.display = on ? 'none' : ''; }
+        var chatText = document.getElementById('chatText');
+        if (chatText) chatText.style.display = on ? 'none' : '';
         var mic = document.getElementById('cbMic');
         if (mic) { mic.classList.toggle('on', on); mic.classList.toggle('muted', on && lkMuted); }
       }

@@ -2200,7 +2200,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var SLIDE_AFFIRM = /\b(yes|yeah|yep|yup|can see|i see|got it|see it|visible|shows?|there|looks good|perfect|great|sure|uh.?huh|mm.?hmm)\b/i;
       var SLIDE_DENY = /\b(no|nope|can'?t see|don'?t see|nothing|blank|not (showing|visible|there)|not (seeing|loading)|not showing)\b/i;
 
-      var SLIDE_CUE_1 = /let me (pull|bring|show|get|grab|load).{0,20}slide|pull.{0,10}slide|show.{0,10}slide|show.{0,10}deck|bring.{0,10}deck/i;
+      var SLIDE_CUE_1 = /\b(let'?s?\s*(me\s+)?|i'?ll\s+|i\s+can\s+)?(pull|bring|show|get|grab|load|share)\b[^.!?]{0,60}\b(slide|deck|screen)\b|\bcan you see the (slide|deck|screen)\b/i;
       var SLIDE_CUES = [
         [1, /our journey|how we got here|how we built|when we started|story of|how it started|built this/i],
         [2, /the agents|the orchestration|six agents|five agents|agent relay|agent pipeline|each agent/i],
